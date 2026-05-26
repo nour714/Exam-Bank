@@ -2,10 +2,60 @@
    Exam Bank - Application logic (SPA & Exam)
    ========================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-    // Auth Check
-    if (localStorage.getItem('isLoggedIn') !== 'true') {
-        window.location.href = 'login.html';
+document.addEventListener("DOMContentLoaded", async () => {
+    function clearPersistedAuthState() {
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("userName");
+        localStorage.removeItem("userPhoto");
+    }
+
+    async function ensureAuthenticatedSession() {
+        try {
+            const firebaseBackend = await getFirebaseBackend();
+            if (!firebaseBackend || !firebaseBackend.auth) {
+                clearPersistedAuthState();
+                window.location.replace("login.html");
+                return false;
+            }
+
+            if (typeof firebaseBackend.waitForAuthState === "function") {
+                await firebaseBackend.waitForAuthState();
+            }
+
+            const currentUser = firebaseBackend.auth.currentUser;
+            if (!currentUser) {
+                clearPersistedAuthState();
+                window.location.replace("login.html");
+                return false;
+            }
+
+            const email = currentUser.email || localStorage.getItem("userEmail") || "";
+            const resolvedName =
+                (currentUser.displayName || "").trim() ||
+                (email ? email.split("@")[0] : "") ||
+                localStorage.getItem("userName") ||
+                "Student";
+
+            localStorage.setItem("isLoggedIn", "true");
+            localStorage.setItem("userName", resolvedName);
+            if (email) localStorage.setItem("userEmail", email);
+
+            if (currentUser.photoURL) {
+                localStorage.setItem("userPhoto", currentUser.photoURL);
+            } else {
+                localStorage.removeItem("userPhoto");
+            }
+
+            return true;
+        } catch (error) {
+            console.warn("تعذر التحقق من جلسة المستخدم:", error);
+            clearPersistedAuthState();
+            window.location.replace("login.html");
+            return false;
+        }
+    }
+
+    if (!(await ensureAuthenticatedSession())) {
         return;
     }
 
@@ -202,6 +252,68 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     // State Management
     // ==========================================
+    const DEFAULT_STUDY_GROUPS = [
+        {
+            id: "group-calc",
+            name: "عباقرة التفاضل",
+            description: "مجموعة لمناقشة مسائل التفاضل والتكامل والاستعداد لاختبارات نهاية العام.",
+            members: 124,
+            subject: "رياضيات متقدمة",
+            category: "math",
+            joined: false,
+            icon: "binary",
+            avatars: [
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=128&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=128&auto=format&fit=crop"
+            ]
+        },
+        {
+            id: "group-quantum",
+            name: "ميكانيكا الكم المبسطة",
+            description: "حلول وتمارين فيزياء صعبة مع ملخصات سريعة ومناقشات أسبوعية للطلاب.",
+            members: 89,
+            subject: "فيزياء",
+            category: "physics",
+            joined: false,
+            icon: "atom",
+            avatars: [
+                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=128&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=128&auto=format&fit=crop"
+            ]
+        },
+        {
+            id: "group-python",
+            name: "أساسيات بايثون",
+            description: "مجتمع تعاوني للمبتدئين لمشاركة الأكواد والمشاريع الصغيرة وحل الأخطاء البرمجية.",
+            members: 210,
+            subject: "برمجة",
+            category: "programming",
+            joined: false,
+            icon: "code",
+            avatars: [
+                "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=128&auto=format&fit=crop"
+            ]
+        },
+        {
+            id: "group-carbon",
+            name: "تفاعلات الكربون",
+            description: "مراجعة الكيمياء العضوية لثالثة ثانوي مع تدريبات واختبارات قصيرة قبل الامتحان.",
+            members: 4,
+            subject: "كيمياء عضوية",
+            category: "chemistry",
+            joined: true,
+            icon: "flask-conical",
+            avatars: []
+        }
+    ];
+
+    function cloneDefaultStudyGroups() {
+        return DEFAULT_STUDY_GROUPS.map((group) => ({
+            ...group,
+            avatars: [...group.avatars]
+        }));
+    }
+
     const appState = {
         currentView: "home-view",
         darkMode: true,
@@ -215,7 +327,7 @@ document.addEventListener("DOMContentLoaded", () => {
             accuracy: 0,
             avatar: ""
         },
-        studyGroups: [],
+        studyGroups: cloneDefaultStudyGroups(),
         exam: {
             subject: "الفيزياء",
             title: "الفيزياء – الثانوية العامة (ثالثة ثانوي)",
@@ -244,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
             accuracy: 0,
             avatar: ""
         };
-        appState.studyGroups = [];
+        appState.studyGroups = cloneDefaultStudyGroups();
         appState.customQuestions = [];
         appState.notes = [];
     }
@@ -617,6 +729,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (savedGroups) {
             appState.studyGroups = savedGroups;
         }
+        if (!Array.isArray(appState.studyGroups) || appState.studyGroups.length === 0) {
+            appState.studyGroups = cloneDefaultStudyGroups();
+        }
 
         const savedNotes = safeParseJSON("studyNotes", null);
         if (savedNotes) {
@@ -645,6 +760,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (Array.isArray(savedState.studyGroups)) {
             appState.studyGroups = savedState.studyGroups;
+        }
+        if (!Array.isArray(appState.studyGroups) || appState.studyGroups.length === 0) {
+            appState.studyGroups = cloneDefaultStudyGroups();
         }
 
         if (Array.isArray(savedState.notes)) {
@@ -1009,9 +1127,52 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    function resolveSubjectNameFromCard(card) {
+        if (!card) return "";
+        const directSubject = card.querySelector("[data-subject]")?.getAttribute("data-subject");
+        if (directSubject) return directSubject;
+
+        const subjectId = card.getAttribute("data-subject-id") || card.getAttribute("data-subject");
+        const subjectMap = {
+            physics: "الفيزياء",
+            chemistry: "الكيمياء",
+            biology: "الأحياء",
+            math: "الرياضيات",
+            arabic: "اللغة العربية",
+            english: "اللغة الإنجليزية",
+            geology: "الجيولوجيا",
+            history: "التاريخ",
+            geography: "الجغرافيا"
+        };
+
+        return subjectMap[subjectId] || "";
+    }
+
+    function bindSubjectCardNavigation() {
+        document.querySelectorAll(".subject-minimal-card, .subject-large-card:not(.exam-card)").forEach((card) => {
+            card.setAttribute("role", "button");
+            card.setAttribute("tabindex", "0");
+
+            const activateCard = (event) => {
+                if (event.target.closest("button")) return;
+                const subjectName = resolveSubjectNameFromCard(card);
+                if (!subjectName) return;
+                startExam(subjectName);
+            };
+
+            card.addEventListener("click", activateCard);
+            card.addEventListener("keydown", (event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                activateCard(event);
+            });
+        });
+    }
+
     if (startStudyBtn) startStudyBtn.addEventListener("click", () => switchView("qbank-view"));
     if (viewAllSubjectsBtn) viewAllSubjectsBtn.addEventListener("click", () => switchView("qbank-view"));
     if (startTestQuickBtn) startTestQuickBtn.addEventListener("click", () => startExam("الفيزياء"));
+    bindSubjectCardNavigation();
 
     // ==========================================
     // Sidebar open/close helpers (mobile)
@@ -2571,12 +2732,17 @@ document.addEventListener("DOMContentLoaded", () => {
             try {
                 const firebaseBackend = await getFirebaseBackend();
                 if (firebaseBackend && firebaseBackend.auth) {
+                    if (typeof firebaseBackend.waitForAuthState === "function") {
+                        await firebaseBackend.waitForAuthState();
+                    }
                     await firebaseBackend.auth.signOut();
                 }
             } catch (err) {
                 console.error("Firebase signout error:", err);
             }
             localStorage.removeItem("isLoggedIn");
+            localStorage.removeItem("userName");
+            localStorage.removeItem("userPhoto");
             window.location.replace('login.html');
         });
     }

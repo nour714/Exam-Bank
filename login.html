@@ -245,7 +245,7 @@
 </div>
 
 <script type="module">
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import firebaseObj from "./assets/js/firebase-init.js";
 
 const auth = getAuth(firebaseObj.app);
@@ -360,6 +360,32 @@ function persistSessionUser(name, email, photoUrl = '') {
     }
 }
 
+function clearPersistedSession({ preserveEmail = true } = {}) {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userPhoto');
+
+    if (!preserveEmail) {
+        localStorage.removeItem('userEmail');
+    }
+}
+
+function syncPersistedSession(user) {
+    if (!user) {
+        clearPersistedSession();
+        return;
+    }
+
+    const email = user.email || localStorage.getItem('userEmail') || '';
+    const name = (user.displayName || '').trim() || (email ? email.split('@')[0] : 'Student');
+    persistSessionUser(name, email, user.photoURL || '');
+}
+
+if (typeof firebaseObj.waitForAuthState === 'function') {
+    await firebaseObj.waitForAuthState();
+}
+syncPersistedSession(auth.currentUser);
+
 // ── LOGIN ─────────────────────────────────────────
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -379,6 +405,11 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
     setLoading('btn-login', true);
     try {
+        clearPersistedSession();
+        if (auth.currentUser) {
+            await signOut(auth);
+        }
+
         const credential = await signInWithEmailAndPassword(auth, email, pass);
         const user = credential.user;
         const resolvedName = (user.displayName || '').trim() || email.split('@')[0];
@@ -393,9 +424,12 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     } catch (error) {
         setLoading('btn-login', false);
         console.error("Login Error:", error);
+        clearPersistedSession();
         if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+            setError('err-login-password', 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
             toast('البريد الإلكتروني أو كلمة المرور غير صحيحة');
         } else {
+            setError('err-login-password', 'تعذر تسجيل الدخول الآن. حاول مرة أخرى.');
             toast('حدث خطأ أثناء الدخول، يرجى المحاولة مرة أخرى');
         }
     }

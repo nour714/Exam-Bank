@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAnalytics, isSupported, logEvent } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
     doc,
     getDoc,
@@ -51,6 +51,24 @@ function getUserStateRef() {
     return doc(db, "examBankUsers", getUserId());
 }
 
+async function waitForAuthState() {
+    if (typeof auth.authStateReady === "function") {
+        await auth.authStateReady();
+        return auth.currentUser;
+    }
+
+    return await new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(
+            auth,
+            (user) => {
+                unsubscribe();
+                resolve(user);
+            },
+            () => resolve(auth.currentUser)
+        );
+    });
+}
+
 async function loadUserState() {
     const snapshot = await getDoc(getUserStateRef());
     return snapshot.exists() ? snapshot.data() : null;
@@ -78,6 +96,7 @@ window.examBankFirebase = {
     analytics,
     getDeviceId,
     getUserId,
+    waitForAuthState,
     loadUserState,
     saveUserState
 };
