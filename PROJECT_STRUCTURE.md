@@ -24,6 +24,12 @@
   - `badge-72.svg`: notification badge.
 
 ## Backend
+- `api/`
+  - `ai-mentor.js`: Vercel serverless endpoint for AI mentor.
+  - `extract-question-image.js`: Vercel serverless endpoint for OCR/extraction flow.
+  - `generate-similar-questions.js`: Vercel serverless endpoint for similar question generation.
+- `lib/`
+  - `ai-api.js`: shared AI handlers used by local server and Vercel functions.
 - `functions/`
   - `index.js`: Firebase Functions endpoints for AI features.
   - `package.json`: Functions runtime dependencies.
@@ -31,6 +37,7 @@
 ## Notes
 - Frontend static files are organized under `assets/`.
 - `service-worker.js` remains at the root so its scope covers the whole app.
+- Vercel uses `api/` for serverless functions.
 - Firebase deploy depends on the rewrites in `firebase.json` for:
   - `/api/ai-mentor`
   - `/api/extract-question-image`

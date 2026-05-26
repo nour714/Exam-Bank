@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "vercel-build": "echo Vercel build ready",
     "firebase:emulators": "firebase emulators:start --only hosting,functions,firestore",
     "firebase:deploy": "firebase deploy --only hosting,functions,firestore:rules"
   }
