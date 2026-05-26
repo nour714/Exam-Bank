@@ -2638,7 +2638,7 @@ body.dark-theme .subject-indicator {
 /* Exam Grid Layout */
 .exam-body-grid {
     display: grid;
-    grid-template-columns: 0.75fr 1.25fr;
+    grid-template-columns: 320px 1fr;
     gap: 24px;
     align-items: start;
     width: 100%;
