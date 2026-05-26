@@ -2,7 +2,7 @@
    Service Worker - PWA Offline Support
    ========================================== */
 
-const CACHE_NAME = 'exam-bank-v5';
+const CACHE_NAME = 'exam-bank-v6';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -15,6 +15,8 @@ const STATIC_ASSETS = [
     '/assets/js/sound-effects.js',
     '/assets/images/icon-192.svg',
     '/assets/images/icon-512.svg',
+    '/assets/images/app-logo-192.svg',
+    '/assets/images/app-logo-512.svg',
     '/assets/images/badge-72.svg',
     '/assets/images/pwa-screenshot-mobile.svg',
     '/assets/images/pwa-screenshot-desktop.svg',
