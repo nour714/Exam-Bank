@@ -10,10 +10,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Initialize Lucide Icons
+    let lucideRefreshPending = false;
     function refreshIcons() {
-        if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") {
-            lucide.createIcons();
-        }
+        if (lucideRefreshPending) return;
+        lucideRefreshPending = true;
+
+        requestAnimationFrame(() => {
+            lucideRefreshPending = false;
+            if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") {
+                lucide.createIcons();
+            }
+        });
     }
 
     function setLucideIcon(buttonEl, iconName) {
@@ -594,11 +601,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function loadStateFromLocalStorage() {
         const savedDarkMode = localStorage.getItem("darkMode");
         if (savedDarkMode !== null) {
-            appState.darkMode = true;
+            appState.darkMode = savedDarkMode === "true";
         }
 
-        if (darkToggle) darkToggle.checked = true;
-        document.body.classList.add("dark-theme");
+        if (darkToggle) darkToggle.checked = appState.darkMode;
+        document.body.classList.toggle("dark-theme", appState.darkMode);
 
         const savedUser = safeParseJSON("userStats", null);
         if (savedUser) {
@@ -627,9 +634,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!savedState || typeof savedState !== "object") return;
 
         if (typeof savedState.darkMode === "boolean") {
-            appState.darkMode = true;
-            if (darkToggle) darkToggle.checked = true;
-            document.body.classList.add("dark-theme");
+            appState.darkMode = savedState.darkMode;
+            if (darkToggle) darkToggle.checked = appState.darkMode;
+            document.body.classList.toggle("dark-theme", appState.darkMode);
         }
 
         if (savedState.user && typeof savedState.user === "object") {
@@ -669,6 +676,12 @@ document.addEventListener("DOMContentLoaded", () => {
     async function getFirebaseBackend() {
         try {
             if (window.examBankFirebase) return window.examBankFirebase;
+            if (!window.examBankFirebaseReady) {
+                window.examBankFirebaseReady = import("./firebase-init.js").catch((error) => {
+                    console.warn("تعذر تحميل Firebase:", error);
+                    return null;
+                });
+            }
             if (window.examBankFirebaseReady) return await window.examBankFirebaseReady;
         } catch (error) {
             console.warn("تعذر الاتصال بـ Firebase:", error);
@@ -703,11 +716,11 @@ document.addEventListener("DOMContentLoaded", () => {
             } catch (error) {
                 console.warn("تعذر حفظ البيانات في Firebase:", error);
             }
-        }, 600);
+        }, 900);
     }
 
     function saveStateToLocalStorage(syncFirebase = true) {
-        localStorage.setItem("darkMode", "true");
+        localStorage.setItem("darkMode", String(appState.darkMode));
         localStorage.setItem("userStats", JSON.stringify(appState.user));
         localStorage.setItem("studyGroups", JSON.stringify(appState.studyGroups));
         localStorage.setItem("studyNotes", JSON.stringify(appState.notes));
@@ -845,7 +858,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Load state after DOM selectors
     loadStateFromLocalStorage();
-    loadStateFromFirebase();
+    const scheduleBackgroundTask = (task) => {
+        if (typeof window.requestIdleCallback === "function") {
+            window.requestIdleCallback(task, { timeout: 1200 });
+        } else {
+            setTimeout(task, 350);
+        }
+    };
+    scheduleBackgroundTask(() => loadStateFromFirebase());
 
     // تحميل اسم المستخدم من صفحة اللوجن إذا لم يكن محفوظاً في الحالة
     (function syncLoginName() {
@@ -1627,9 +1647,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (darkToggle) {
         darkToggle.addEventListener("change", () => {
-            appState.darkMode = true;
-            darkToggle.checked = true;
-            document.body.classList.add("dark-theme");
+            appState.darkMode = darkToggle.checked;
+            document.body.classList.toggle("dark-theme", appState.darkMode);
             saveStateToLocalStorage();
         });
     }

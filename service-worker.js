@@ -2,7 +2,7 @@
    Service Worker - PWA Offline Support
    ========================================== */
 
-const CACHE_NAME = 'exam-bank-v7';
+const CACHE_NAME = 'exam-bank-v8';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -17,13 +17,7 @@ const STATIC_ASSETS = [
     '/assets/images/icon-512.svg',
     '/assets/images/badge-72.svg',
     '/assets/images/pwa-screenshot-mobile.svg',
-    '/assets/images/pwa-screenshot-desktop.svg',
-    'https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap',
-    'https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js',
-    'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js',
-    'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js',
-    'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js',
-    'https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js'
+    '/assets/images/pwa-screenshot-desktop.svg'
 ];
 
 // Install event - cache static assets

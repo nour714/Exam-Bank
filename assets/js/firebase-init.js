@@ -22,7 +22,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
-const analytics = await isSupported().then((supported) => supported ? getAnalytics(app) : null);
+let analytics = null;
+isSupported()
+    .then((supported) => {
+        if (supported) analytics = getAnalytics(app);
+    })
+    .catch(() => {
+        analytics = null;
+    });
 
 // ── Device ID fallback (no anonymous auth) ────────────────────
 function getDeviceId() {

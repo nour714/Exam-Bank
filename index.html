@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#6366f1">
@@ -20,15 +20,20 @@
     <meta name="apple-mobile-web-app-title" content="Exam Bank">
     <link rel="apple-touch-icon" href="/assets/images/icon-192.svg">
     <script>
-        document.documentElement.classList.add("dark-theme");
+        const savedDarkMode = localStorage.getItem("darkMode");
+        if (savedDarkMode !== "false") {
+            document.documentElement.classList.add("dark-theme");
+        }
         document.addEventListener("DOMContentLoaded", () => {
-            document.body.classList.add("dark-theme");
+            if (savedDarkMode !== "false") {
+                document.body.classList.add("dark-theme");
+            }
         });
     </script>
     <!-- Stylesheet -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body class="dark-theme">
+<body>
     <!-- Animated background -->
     <div class="animated-bg" aria-hidden="true">
         <div class="animated-bg__mesh"></div>
@@ -1596,15 +1601,25 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script>
-        window.examBankFirebaseReady = import("./assets/js/firebase-init.js").catch((error) => {
-            console.warn("Firebase لم يبدأ، سيتم استخدام التخزين المحلي فقط:", error);
-            return null;
-        });
+        const warmFirebase = () => {
+            if (window.examBankFirebaseReady) return window.examBankFirebaseReady;
+            window.examBankFirebaseReady = import("./assets/js/firebase-init.js").catch((error) => {
+                console.warn("Firebase لم يبدأ، سيتم استخدام التخزين المحلي فقط:", error);
+                return null;
+            });
+            return window.examBankFirebaseReady;
+        };
+
+        if (typeof window.requestIdleCallback === "function") {
+            window.requestIdleCallback(() => warmFirebase(), { timeout: 2000 });
+        } else {
+            window.addEventListener("load", () => setTimeout(warmFirebase, 500), { once: true });
+        }
     </script>
     <!-- Sound Effects Module -->
-    <script src="assets/js/sound-effects.js"></script>
+    <script defer src="assets/js/sound-effects.js"></script>
     <!-- Main Application Logic -->
-    <script src="assets/js/app.js"></script>
+    <script defer src="assets/js/app.js"></script>
     
     <!-- Service Worker Registration for PWA -->
     <script>
