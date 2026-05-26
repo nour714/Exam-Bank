@@ -1,9 +1,9 @@
 {
-  "name": "Exam Bank | بنك أسئلة الثانوية العامة",
+  "name": "Exam Bank",
   "short_name": "Exam Bank",
-  "description": "منصة تعليمية شاملة لطلاب الثانوية العامة تضم بنك أسئلة تفاعلي وامتحانات محاكاة ومجموعات دراسة.",
-  "lang": "ar",
-  "dir": "rtl",
+  "description": "Comprehensive e-learning platform with interactive question banks, mock exams, and study groups.",
+  "lang": "en",
+  "dir": "ltr",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
@@ -40,14 +40,14 @@
       "sizes": "720x1280",
       "type": "image/svg+xml",
       "form_factor": "narrow",
-      "label": "واجهة Exam Bank على الهاتف"
+      "label": "Exam Bank mobile preview"
     },
     {
       "src": "/assets/images/pwa-screenshot-desktop.svg",
       "sizes": "1280x720",
       "type": "image/svg+xml",
       "form_factor": "wide",
-      "label": "لوحة Exam Bank على سطح المكتب"
+      "label": "Exam Bank desktop preview"
     }
   ],
   "shortcuts": [

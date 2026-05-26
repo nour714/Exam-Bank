@@ -2,7 +2,7 @@
    Service Worker - PWA Offline Support
    ========================================== */
 
-const CACHE_NAME = 'exam-bank-v4';
+const CACHE_NAME = 'exam-bank-v5';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
