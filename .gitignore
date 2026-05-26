@@ -1,0 +1,10 @@
+.env
+.cursor/
+functions/.env
+functions/.secret.local
+node_modules/
+functions/node_modules/
+*.log
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

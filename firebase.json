@@ -1,0 +1,48 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "**/.*",
+      "**/node_modules/**",
+      "functions/**",
+      "server.js",
+      "package.json",
+      "package-lock.json"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/ai-mentor",
+        "function": {
+          "functionId": "aiMentor",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "/api/extract-question-image",
+        "function": {
+          "functionId": "extractQuestionImage",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "/api/generate-similar-questions",
+        "function": {
+          "functionId": "generateSimilarQuestions",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}
