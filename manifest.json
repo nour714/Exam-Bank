@@ -1,30 +1,33 @@
 {
-  "name": "إيجزام بنك - Exam Bank | الثانوية العامة",
-  "short_name": "إيجزام بنك",
-  "description": "منصة تعليمية شاملة لطلاب الثانوية العامة مع بنك أسئلة تفاعلي، امتحانات محاكاة، ومجموعات دراسة. Comprehensive e-learning platform for Egyptian secondary students.",
+  "name": "Exam Bank | بنك أسئلة الثانوية العامة",
+  "short_name": "Exam Bank",
+  "description": "منصة تعليمية شاملة لطلاب الثانوية العامة تضم بنك أسئلة تفاعلي وامتحانات محاكاة ومجموعات دراسة.",
+  "lang": "ar",
+  "dir": "rtl",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#ffffff",
+  "background_color": "#0f172a",
   "theme_color": "#6366f1",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230f172a' width='192' height='192'/><g transform='translate(48, 48) scale(4)' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10v6M2 10l10-5 10 5-10 5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></g></svg>",
+      "src": "/assets/images/icon-192.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230f172a' width='192' height='192'/><g transform='translate(48, 48) scale(4)' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10v6M2 10l10-5 10 5-10 5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></g></svg>",
+      "src": "/assets/images/icon-192.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "maskable"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%230f172a' width='512' height='512'/><g transform='translate(128, 128) scale(10.666)' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10v6M2 10l10-5 10 5-10 5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></g></svg>",
+      "src": "/assets/images/icon-512.svg",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ],
   "categories": [
@@ -33,28 +36,30 @@
   ],
   "screenshots": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect fill='%23f5f5f5' width='540' height='720'/><text x='20' y='50' font-size='24' font-weight='bold' fill='%23333'>إيجزام بنك</text></svg>",
-      "sizes": "540x720",
+      "src": "/assets/images/pwa-screenshot-mobile.svg",
+      "sizes": "720x1280",
       "type": "image/svg+xml",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "واجهة Exam Bank على الهاتف"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1280 720'><rect fill='%23f5f5f5' width='1280' height='720'/><text x='50' y='80' font-size='36' font-weight='bold' fill='%23333'>إيجزام بنك</text></svg>",
+      "src": "/assets/images/pwa-screenshot-desktop.svg",
       "sizes": "1280x720",
       "type": "image/svg+xml",
-      "form_factor": "wide"
+      "form_factor": "wide",
+      "label": "لوحة Exam Bank على سطح المكتب"
     }
   ],
   "shortcuts": [
     {
       "name": "بنك الأسئلة",
-      "short_name": "أسئلة",
-      "description": "الوصول السريع إلى بنك الأسئلة",
+      "short_name": "الأسئلة",
+      "description": "افتح بنك الأسئلة مباشرة",
       "url": "/index.html?view=qbank",
       "icons": [
         {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%236366f1' width='96' height='96' rx='20'/><text x='48' y='60' font-size='40' text-anchor='middle' fill='white' font-family='system-ui'>Q</text></svg>",
-          "sizes": "96x96",
+          "src": "/assets/images/icon-192.svg",
+          "sizes": "192x192",
           "type": "image/svg+xml"
         }
       ]
@@ -66,8 +71,8 @@
       "url": "/index.html?view=exams",
       "icons": [
         {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%2308b4d4' width='96' height='96' rx='20'/><text x='48' y='60' font-size='40' text-anchor='middle' fill='white' font-family='system-ui'>📝</text></svg>",
-          "sizes": "96x96",
+          "src": "/assets/images/icon-192.svg",
+          "sizes": "192x192",
           "type": "image/svg+xml"
         }
       ]
@@ -75,26 +80,16 @@
     {
       "name": "لوحة التقدم",
       "short_name": "تقدم",
-      "description": "عرض تقدمك الدراسي",
+      "description": "راجع تقدمك الدراسي بسرعة",
       "url": "/index.html?view=dashboard",
       "icons": [
         {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect fill='%23ec4899' width='96' height='96' rx='20'/><text x='48' y='60' font-size='40' text-anchor='middle' fill='white' font-family='system-ui'>📊</text></svg>",
-          "sizes": "96x96",
+          "src": "/assets/images/icon-192.svg",
+          "sizes": "192x192",
           "type": "image/svg+xml"
         }
       ]
     }
   ],
-  "share_target": {
-    "action": "/share",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  },
   "prefer_related_applications": false
 }

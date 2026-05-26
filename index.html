@@ -19,10 +19,16 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Exam Bank">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%230f172a' width='180' height='180' rx='40'/><g transform='translate(45, 45) scale(3.75)' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10v6M2 10l10-5 10 5-10 5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></g></svg>">
+    <script>
+        document.documentElement.classList.add("dark-theme");
+        document.addEventListener("DOMContentLoaded", () => {
+            document.body.classList.add("dark-theme");
+        });
+    </script>
     <!-- Stylesheet -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
+<body class="dark-theme">
     <!-- Animated background -->
     <div class="animated-bg" aria-hidden="true">
         <div class="animated-bg__mesh"></div>
@@ -1649,6 +1655,5 @@
 
 </body>
 </html>
-
 
 

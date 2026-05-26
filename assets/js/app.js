@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     const appState = {
         currentView: "home-view",
-        darkMode: false,
+        darkMode: true,
         user: {
             name: "",
             email: "",
@@ -592,14 +592,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function loadStateFromLocalStorage() {
         const savedDarkMode = localStorage.getItem("darkMode");
         if (savedDarkMode !== null) {
-            appState.darkMode = savedDarkMode === "true";
-            if (darkToggle) darkToggle.checked = appState.darkMode;
-            if (appState.darkMode) {
-                document.body.classList.add("dark-theme");
-            } else {
-                document.body.classList.remove("dark-theme");
-            }
+            appState.darkMode = true;
         }
+
+        if (darkToggle) darkToggle.checked = true;
+        document.body.classList.add("dark-theme");
 
         const savedUser = safeParseJSON("userStats", null);
         if (savedUser) {
@@ -628,9 +625,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!savedState || typeof savedState !== "object") return;
 
         if (typeof savedState.darkMode === "boolean") {
-            appState.darkMode = savedState.darkMode;
-            if (darkToggle) darkToggle.checked = appState.darkMode;
-            document.body.classList.toggle("dark-theme", appState.darkMode);
+            appState.darkMode = true;
+            if (darkToggle) darkToggle.checked = true;
+            document.body.classList.add("dark-theme");
         }
 
         if (savedState.user && typeof savedState.user === "object") {
@@ -708,7 +705,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function saveStateToLocalStorage(syncFirebase = true) {
-        localStorage.setItem("darkMode", appState.darkMode);
+        localStorage.setItem("darkMode", "true");
         localStorage.setItem("userStats", JSON.stringify(appState.user));
         localStorage.setItem("studyGroups", JSON.stringify(appState.studyGroups));
         localStorage.setItem("studyNotes", JSON.stringify(appState.notes));
@@ -1571,8 +1568,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (darkToggle) {
         darkToggle.addEventListener("change", () => {
-            appState.darkMode = darkToggle.checked;
-            document.body.classList.toggle("dark-theme", appState.darkMode);
+            appState.darkMode = true;
+            darkToggle.checked = true;
+            document.body.classList.add("dark-theme");
             saveStateToLocalStorage();
         });
     }
