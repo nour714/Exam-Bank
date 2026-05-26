@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Bank</title>
-    <link rel="icon" type="image/svg+xml" href="/assets/images/app-logo-192.svg">
+    <link rel="icon" type="image/svg+xml" href="/assets/images/icon-192.svg">
                             <!-- Google Fonts: Tajawal -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Exam Bank">
-    <link rel="apple-touch-icon" href="/assets/images/app-logo-192.svg">
+    <link rel="apple-touch-icon" href="/assets/images/icon-192.svg">
     <script>
         document.documentElement.classList.add("dark-theme");
         document.addEventListener("DOMContentLoaded", () => {
@@ -1023,6 +1023,17 @@
                     <div class="card settings-card">
                         <div class="settings-section-block">
                             <h3>الملف الشخصي</h3>
+                            <div class="profile-avatar-settings">
+                                <div class="profile-avatar-preview-wrap">
+                                    <img id="settings-avatar-preview" src="" alt="معاينة صورة الملف الشخصي" class="profile-avatar-preview">
+                                </div>
+                                <div class="profile-avatar-actions">
+                                    <label for="settings-avatar-input" class="btn btn-secondary profile-avatar-upload-btn">اختيار صورة</label>
+                                    <input type="file" id="settings-avatar-input" accept="image/*" hidden>
+                                    <button type="button" class="btn btn-outline profile-avatar-remove-btn" id="btn-remove-avatar">حذف الصورة</button>
+                                    <p class="profile-avatar-help">ارفع صورة واضحة بصيغة JPG أو PNG أو WebP.</p>
+                                </div>
+                            </div>
                             <div class="settings-row">
                                 <div class="setting-field">
                                     <label>الاسم الكامل</label>

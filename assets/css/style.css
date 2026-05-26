@@ -703,6 +703,51 @@ body.dark-theme .sidebar {
     box-shadow: var(--shadow-md);
 }
 
+.profile-avatar-settings {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 20px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: var(--card-bg);
+}
+
+.profile-avatar-preview-wrap {
+    flex-shrink: 0;
+}
+
+.profile-avatar-preview {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+    background-color: var(--input-bg);
+}
+
+.profile-avatar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-avatar-upload-btn,
+.profile-avatar-remove-btn {
+    min-width: 120px;
+    justify-content: center;
+}
+
+.profile-avatar-help {
+    width: 100%;
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
 .status-indicator {
     position: absolute;
     bottom: 2px;
@@ -2485,6 +2530,17 @@ input:checked + .slider:before {
     display: flex;
     justify-content: flex-end;
     margin-top: 24px;
+}
+
+@media (max-width: 640px) {
+    .profile-avatar-settings {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-avatar-actions {
+        width: 100%;
+    }
 }
 
 /* ==========================================

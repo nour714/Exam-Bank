@@ -111,6 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     function updateUserProfileUI() {
         const userName = localStorage.getItem('userName') || 'Student';
+        const savedUser = safeParseJSON("userStats", null);
+        const savedAvatar = savedUser?.avatar || "";
 
         // Update name in sidebar
         const usernameEl = document.querySelector('.user-profile-widget .username');
@@ -124,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Update Avatar
         const avatarImg = document.getElementById('user-avatar-img');
-        if (avatarImg) avatarImg.src = generateInitialAvatar(userName);
+        if (avatarImg) avatarImg.src = savedAvatar || generateInitialAvatar(userName);
     }
     updateUserProfileUI();
 
@@ -718,23 +720,30 @@ document.addEventListener("DOMContentLoaded", () => {
         const userAvatarImg = document.getElementById("user-avatar-img");
         if (!userAvatarImg) return;
         
-        // استخدام DiceBear API لتوليد avatar فريد لكل مستخدم
-        if (appState.user.name) {
+        if (appState.user.avatar) {
+            userAvatarImg.src = appState.user.avatar;
+            userAvatarImg.alt = appState.user.name || "Student";
+        } else if (appState.user.name) {
             const avatarUrl = generateInitialAvatar(appState.user.name);
-            appState.user.avatar = avatarUrl;
             userAvatarImg.src = avatarUrl;
             userAvatarImg.alt = appState.user.name;
         } else {
-            // صورة افتراضية عند عدم وجود اسم
             const defaultAvatar = generateInitialAvatar("Student");
-            appState.user.avatar = defaultAvatar;
             userAvatarImg.src = defaultAvatar;
             userAvatarImg.alt = "Student";
         }
     }
 
+    function updateSettingsAvatarPreview() {
+        const settingsAvatarPreview = document.getElementById("settings-avatar-preview");
+        if (!settingsAvatarPreview) return;
+
+        settingsAvatarPreview.src = appState.user.avatar || generateInitialAvatar(appState.user.name || "Student");
+    }
+
     function updateUserStatsUI() {
         updateUserAvatar(); // تحديث الصورة أولاً
+        updateSettingsAvatarPreview();
         if (usernameHeader) usernameHeader.textContent = appState.user.name || "Ø·Ø§Ù„Ø¨";
         if (settingsNameInput) settingsNameInput.value = appState.user.name || "";
         
@@ -801,6 +810,8 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const darkToggle = document.getElementById("dark-mode-toggle");
     const settingsNameInput = document.getElementById("settings-name");
+    const settingsAvatarInput = document.getElementById("settings-avatar-input");
+    const removeAvatarBtn = document.getElementById("btn-remove-avatar");
     const saveSettingsBtn = document.getElementById("btn-save-settings");
     const usernameHeader = document.querySelector(".username");
     
@@ -860,6 +871,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
         updateUserStatsUI();
     })();
+
+    if (settingsAvatarInput) {
+        settingsAvatarInput.addEventListener("change", () => {
+            const file = settingsAvatarInput.files?.[0];
+            if (!file) return;
+
+            if (!file.type.startsWith("image/")) {
+                showToast("اختر ملف صورة صالح.", "error");
+                settingsAvatarInput.value = "";
+                return;
+            }
+
+            if (file.size > 2 * 1024 * 1024) {
+                showToast("حجم الصورة يجب أن يكون أقل من 2MB.", "warning");
+                settingsAvatarInput.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                const result = typeof reader.result === "string" ? reader.result : "";
+                if (!result) {
+                    showToast("تعذر تحميل الصورة.", "error");
+                    return;
+                }
+
+                appState.user.avatar = result;
+                updateUserStatsUI();
+                saveStateToLocalStorage();
+                showToast("تم تحديث صورة الملف الشخصي.", "success");
+                settingsAvatarInput.value = "";
+            };
+            reader.onerror = () => {
+                showToast("تعذر تحميل الصورة.", "error");
+                settingsAvatarInput.value = "";
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    if (removeAvatarBtn) {
+        removeAvatarBtn.addEventListener("click", () => {
+            appState.user.avatar = "";
+            updateUserStatsUI();
+            saveStateToLocalStorage();
+            showToast("تم حذف صورة الملف الشخصي.", "info");
+        });
+    }
 
     // ==========================================
     // Core SPA View Switcher
