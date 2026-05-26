@@ -2706,7 +2706,8 @@ body.dark-theme .progress-stat-percent {
 
 .questions-grid-map {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(5, 42px);
+    justify-content: center;
     gap: 8px;
     max-height: 380px;
     overflow-y: auto;
