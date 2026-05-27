@@ -1630,27 +1630,34 @@
                     .then(registration => {
                         console.log('✅ Service Worker registered successfully:', registration);
                         
-                        // Check for updates periodically
+                        // Check for updates every 5 minutes (not every hour)
                         setInterval(() => {
                             registration.update();
-                        }, 1000 * 60 * 60); // Check every hour
+                        }, 1000 * 60 * 5);
                     })
                     .catch(error => {
                         console.warn('⚠️  Service Worker registration failed:', error);
                     });
 
-                // Listen for service worker updates
+                // Auto-reload the page when a new SW takes control
+                let swRefreshing = false;
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    console.log('🔄 Service Worker updated');
+                    if (!swRefreshing) {
+                        swRefreshing = true;
+                        console.log('🔄 New version detected — reloading...');
+                        window.location.reload();
+                    }
                 });
-            });
 
-            // Check for updates periodically
-            navigator.serviceWorker.addEventListener('message', event => {
-                if (event.data && event.data.type === 'SW_UPDATE_AVAILABLE') {
-                    console.log('🔔 New version available');
-                    // Optional: Show update notification to user
-                }
+                // Listen for the SW_ACTIVATED message and reload
+                navigator.serviceWorker.addEventListener('message', event => {
+                    if (event.data && event.data.type === 'SW_ACTIVATED') {
+                        if (!swRefreshing) {
+                            swRefreshing = true;
+                            window.location.reload();
+                        }
+                    }
+                });
             });
         } else {
             console.warn('⚠️  Service Workers not supported in this browser');

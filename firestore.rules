@@ -9,7 +9,7 @@ service cloud.firestore {
 
     // exam bank user state (anonymous auth or device id)
     match /examBankUsers/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if (request.auth != null && request.auth.uid == userId) || userId.matches('^device-.*');
     }
 
     // tasks
