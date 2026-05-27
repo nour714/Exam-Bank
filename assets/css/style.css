@@ -5418,7 +5418,7 @@ body.dark-theme .sq-hint {
 }
 
 /* ==========================================
-   Mobile Performance Overrides (Fix Lag)
+   Mobile Performance Overrides (Fix Lag & Add Lightweight Animation)
    ========================================== */
 @media (max-width: 768px) {
     /* Disable heavy background animations on mobile */
@@ -5434,6 +5434,24 @@ body.dark-theme .sq-hint {
         display: none !important;
     }
     
+    /* Add a lightweight mobile-friendly animated background */
+    .animated-bg::before {
+        content: '';
+        position: absolute;
+        inset: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 60%);
+        animation: mobileBgBreathe 12s ease-in-out infinite alternate;
+        will-change: transform, opacity;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    body.dark-theme .animated-bg::before {
+        background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.18) 0%, transparent 60%);
+    }
+
     /* Remove expensive backdrop-filters */
     .sidebar, .glass-panel, .card {
         backdrop-filter: none !important;
@@ -5447,3 +5465,7 @@ body.dark-theme .sq-hint {
     }
 }
 
+@keyframes mobileBgBreathe {
+    0% { transform: scale(0.9) translate(0, 0); opacity: 0.5; }
+    100% { transform: scale(1.1) translate(-2%, 2%); opacity: 1; }
+}
