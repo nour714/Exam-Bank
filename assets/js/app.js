@@ -3,16 +3,31 @@
    ========================================== */
 
 document.addEventListener("DOMContentLoaded", async () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const launchSource = queryParams.get("source") || "";
+
     function clearPersistedAuthState() {
         localStorage.removeItem("isLoggedIn");
         localStorage.removeItem("userName");
         localStorage.removeItem("userPhoto");
     }
 
+    function hasLocalOfflineSession() {
+        return localStorage.getItem("isLoggedIn") === "true" && (
+            localStorage.getItem("authMode") === "demo" ||
+            localStorage.getItem("allowOfflineAccess") === "true"
+        );
+    }
+
     async function ensureAuthenticatedSession() {
+        if (hasLocalOfflineSession() && (launchSource === "demo" || launchSource === "offline" || !navigator.onLine)) {
+            return true;
+        }
+
         try {
             const firebaseBackend = await getFirebaseBackend();
             if (!firebaseBackend || !firebaseBackend.auth) {
+                if (hasLocalOfflineSession()) return true;
                 clearPersistedAuthState();
                 window.location.replace("login.html");
                 return false;
@@ -24,6 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const currentUser = firebaseBackend.auth.currentUser;
             if (!currentUser) {
+                if (hasLocalOfflineSession()) return true;
                 clearPersistedAuthState();
                 window.location.replace("login.html");
                 return false;
@@ -39,6 +55,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             localStorage.setItem("isLoggedIn", "true");
             localStorage.setItem("userName", resolvedName);
             if (email) localStorage.setItem("userEmail", email);
+            localStorage.setItem("authMode", "firebase");
+            localStorage.setItem("allowOfflineAccess", "true");
 
             if (currentUser.photoURL) {
                 localStorage.setItem("userPhoto", currentUser.photoURL);
@@ -49,6 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             return true;
         } catch (error) {
             console.warn("تعذر التحقق من جلسة المستخدم:", error);
+            if (hasLocalOfflineSession()) return true;
             clearPersistedAuthState();
             window.location.replace("login.html");
             return false;
@@ -1248,6 +1267,29 @@ document.addEventListener("DOMContentLoaded", async () => {
             content.classList.remove("modal-pop");
             void content.offsetWidth;
             content.classList.add("modal-pop");
+        }
+    }
+
+    function applyLaunchRoute() {
+        const requestedView = queryParams.get("view");
+        const routeMap = {
+            dashboard: "dashboard-view",
+            qbank: "qbank-view",
+            groups: "groups-view",
+            settings: "settings-view",
+            home: "home-view",
+            exams: "qbank-view"
+        };
+
+        const targetView = routeMap[requestedView];
+        if (targetView) {
+            switchView(targetView);
+        }
+
+        if (launchSource === "offline") {
+            showToast("أنت تستخدم النسخة المحلية المخزنة للعمل دون اتصال.", "info");
+        } else if (launchSource === "demo") {
+            showToast("تم فتح التطبيق بالحساب التجريبي بنجاح.", "success");
         }
     }
 
@@ -2743,12 +2785,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("userName");
             localStorage.removeItem("userPhoto");
+            localStorage.removeItem("userEmail");
+            localStorage.removeItem("authMode");
+            localStorage.removeItem("allowOfflineAccess");
             window.location.replace('login.html');
         });
     }
 
     // Initial stats update
     updateUserStatsUI();
+    applyLaunchRoute();
 
     // Bind "ابدأ الحل" after exam engine is fully defined
     function bindStartSolvingButtons() {

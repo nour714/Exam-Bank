@@ -229,6 +229,44 @@ body {
 }
 .tab-btn.active { color: #fff; }
 
+.access-note,
+.pwa-panel {
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    background: linear-gradient(180deg, rgba(99,102,241,0.09), rgba(56,189,248,0.06));
+    border: 1px solid rgba(129,140,248,0.2);
+    border-radius: 16px;
+}
+
+.access-note {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.access-note p {
+    color: var(--text2);
+    font-size: 0.92rem;
+    line-height: 1.55;
+}
+
+.access-note strong {
+    color: #fff;
+}
+
+.access-note-badge {
+    flex-shrink: 0;
+    min-width: 42px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(99,102,241,0.18);
+    color: var(--primary2);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-align: center;
+    letter-spacing: 0.08em;
+}
+
 /* ── Auth Forms ──────────────────────────────── */
 .auth-form { display: flex; flex-direction: column; gap: 18px; }
 
@@ -404,6 +442,54 @@ body {
 .forgot-header h3 { font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
 .forgot-header p  { font-size: 0.9rem; color: var(--text2); }
 
+.pwa-panel {
+    margin-top: 20px;
+}
+
+.pwa-panel-head h3 {
+    font-size: 1rem;
+    color: #fff;
+    margin-bottom: 6px;
+}
+
+.pwa-panel-head p {
+    color: var(--text2);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.pwa-panel-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.secondary-action-btn {
+    flex: 1;
+    min-height: 46px;
+    padding: 12px 14px;
+    background: rgba(15,23,42,0.55);
+    color: #fff;
+    border: 1px solid rgba(148,163,184,0.24);
+    border-radius: 12px;
+    font-family: var(--font);
+    font-size: 0.93rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.2s, background 0.2s;
+}
+
+.secondary-action-btn:hover {
+    transform: translateY(-1px);
+    border-color: var(--primary2);
+    background: rgba(30,41,59,0.72);
+}
+
+.secondary-action-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
 /* ── Password Strength ───────────────────────── */
 .password-strength {
     display: flex; align-items: center; gap: 8px; margin-top: 4px;
@@ -464,4 +550,6 @@ body {
 @media (max-width: 480px) {
     .form-card { padding: 24px 18px; border-radius: 18px; }
     .social-row { flex-direction: column; }
+    .access-note { align-items: flex-start; }
+    .pwa-panel-actions { flex-direction: column; }
 }

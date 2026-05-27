@@ -2,7 +2,7 @@
    Service Worker - PWA Offline Support
    ========================================== */
 
-const CACHE_NAME = 'exam-bank-v12';
+const CACHE_NAME = 'exam-bank-v13';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -17,7 +17,16 @@ const STATIC_ASSETS = [
     '/assets/images/icon-512.svg',
     '/assets/images/badge-72.svg',
     '/assets/images/pwa-screenshot-mobile.svg',
-    '/assets/images/pwa-screenshot-desktop.svg'
+    '/assets/images/pwa-screenshot-desktop.svg',
+    '/assets/images/subjects/physics.jpg',
+    '/assets/images/subjects/chemistry.jpg',
+    '/assets/images/subjects/biology.jpg',
+    '/assets/images/subjects/math.jpg',
+    '/assets/images/subjects/arabic.jpg',
+    '/assets/images/subjects/english.jpg',
+    '/assets/images/subjects/geology.jpg',
+    '/assets/images/subjects/history.jpg',
+    '/assets/images/subjects/geography.jpg'
 ];
 
 // Install event - cache static assets

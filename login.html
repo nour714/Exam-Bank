@@ -112,6 +112,11 @@
                 <div class="tab-slider"></div>
             </div>
 
+            <div class="access-note">
+                <span class="access-note-badge">QA</span>
+                <p>للاختبارات الآلية استخدم: <strong>test@gmail.com</strong> / <strong>test123</strong></p>
+            </div>
+
             <!-- LOGIN FORM -->
             <form id="login-form" class="auth-form active-form" novalidate>
                 <div class="field-group">
@@ -240,6 +245,17 @@
                 </button>
             </form>
 
+            <section class="pwa-panel" aria-label="PWA install and offline access">
+                <div class="pwa-panel-head">
+                    <h3>ثبت التطبيق وافتحه دون اتصال</h3>
+                    <p id="pwa-status-text">يمكنك تثبيت التطبيق للوصول السريع ومتابعة المحتوى المخزن محليًا.</p>
+                </div>
+                <div class="pwa-panel-actions">
+                    <button type="button" class="secondary-action-btn" id="btn-install-app">تثبيت التطبيق</button>
+                    <button type="button" class="secondary-action-btn" id="btn-open-offline">فتح النسخة دون اتصال</button>
+                </div>
+            </section>
+
         </div>
     </main>
 </div>
@@ -249,6 +265,12 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, se
 import firebaseObj from "./assets/js/firebase-init.js";
 
 const auth = getAuth(firebaseObj.app);
+const QA_DEMO_EMAIL = 'test@gmail.com';
+const QA_DEMO_PASSWORD = 'test123';
+const btnInstallApp = document.getElementById('btn-install-app');
+const btnOpenOffline = document.getElementById('btn-open-offline');
+const pwaStatusText = document.getElementById('pwa-status-text');
+let deferredInstallPrompt = null;
 
 /* ======================================
    إيجزام بنك — Login / Register Logic
@@ -352,6 +374,7 @@ function persistSessionUser(name, email, photoUrl = '') {
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('userName', name);
     localStorage.setItem('userEmail', email);
+    localStorage.setItem('lastSuccessfulLoginAt', String(Date.now()));
 
     if (photoUrl) {
         localStorage.setItem('userPhoto', photoUrl);
@@ -364,6 +387,8 @@ function clearPersistedSession({ preserveEmail = true } = {}) {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userName');
     localStorage.removeItem('userPhoto');
+    localStorage.removeItem('authMode');
+    localStorage.removeItem('allowOfflineAccess');
 
     if (!preserveEmail) {
         localStorage.removeItem('userEmail');
@@ -379,12 +404,43 @@ function syncPersistedSession(user) {
     const email = user.email || localStorage.getItem('userEmail') || '';
     const name = (user.displayName || '').trim() || (email ? email.split('@')[0] : 'Student');
     persistSessionUser(name, email, user.photoURL || '');
+    localStorage.setItem('authMode', 'firebase');
+    localStorage.setItem('allowOfflineAccess', 'true');
+}
+
+function persistDemoSession() {
+    persistSessionUser('Test User', QA_DEMO_EMAIL);
+    localStorage.setItem('authMode', 'demo');
+    localStorage.setItem('allowOfflineAccess', 'true');
+}
+
+function isDemoCredential(email, password) {
+    return email.toLowerCase() === QA_DEMO_EMAIL && password === QA_DEMO_PASSWORD;
+}
+
+function updatePwaStatus(message) {
+    if (pwaStatusText) pwaStatusText.textContent = message;
+}
+
+function openOfflineExperience() {
+    if (!localStorage.getItem('isLoggedIn')) {
+        persistDemoSession();
+    }
+    window.location.href = 'index.html?source=offline';
 }
 
 if (typeof firebaseObj.waitForAuthState === 'function') {
     await firebaseObj.waitForAuthState();
 }
 syncPersistedSession(auth.currentUser);
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).catch((error) => {
+            console.warn('Service Worker registration failed on login page:', error);
+        });
+    }, { once: true });
+}
 
 // ── LOGIN ─────────────────────────────────────────
 document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -405,6 +461,18 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
     setLoading('btn-login', true);
     try {
+        if (isDemoCredential(email, pass)) {
+            clearPersistedSession();
+            persistDemoSession();
+            setLoading('btn-login', false);
+            const btn = document.getElementById('btn-login');
+            btn.classList.add('success');
+            btn.querySelector('.btn-label').textContent = 'تم الدخول ✓';
+            toast('تم تسجيل الدخول بالحساب التجريبي بنجاح', 'success');
+            setTimeout(() => { window.location.href = 'index.html?source=demo'; }, 500);
+            return;
+        }
+
         clearPersistedSession();
         if (auth.currentUser) {
             await signOut(auth);
@@ -419,6 +487,8 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         btn.querySelector('.btn-label').textContent = 'تم الدخول ✓';
 
         persistSessionUser(resolvedName, email);
+        localStorage.setItem('authMode', 'firebase');
+        localStorage.setItem('allowOfflineAccess', 'true');
 
         setTimeout(() => { window.location.href = 'index.html'; }, 900);
     } catch (error) {
@@ -463,6 +533,8 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
         toast('تم إنشاء الحساب بنجاح! جاري تسجيل الدخول...', 'success');
 
         persistSessionUser(name, email);
+        localStorage.setItem('authMode', 'firebase');
+        localStorage.setItem('allowOfflineAccess', 'true');
 
         setTimeout(() => { window.location.href = 'index.html'; }, 1500);
     } catch (error) {
@@ -503,6 +575,8 @@ document.getElementById('btn-google').addEventListener('click', async () => {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
         persistSessionUser(user.displayName || user.email.split('@')[0], user.email, user.photoURL || '');
+        localStorage.setItem('authMode', 'firebase');
+        localStorage.setItem('allowOfflineAccess', 'true');
         toast('تم تسجيل الدخول بنجاح! جاري التوجيه...', 'success');
         setTimeout(() => { window.location.href = 'index.html'; }, 1000);
     } catch (error) {
@@ -513,6 +587,55 @@ document.getElementById('btn-google').addEventListener('click', async () => {
 document.getElementById('btn-facebook').addEventListener('click', () => toast('تسجيل الدخول بـ Facebook قريباً!', 'info'));
 
 // ── Particles ─────────────────────────────────────
+window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    if (btnInstallApp) btnInstallApp.disabled = false;
+    updatePwaStatus('التطبيق جاهز للتثبيت الآن. اضغط زر "تثبيت التطبيق".');
+});
+
+window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    if (btnInstallApp) btnInstallApp.disabled = true;
+    updatePwaStatus('تم تثبيت التطبيق بنجاح. يمكنك فتحه والعمل دون اتصال بالمحتوى المخزن.');
+});
+
+if (btnInstallApp) {
+    btnInstallApp.disabled = true;
+    btnInstallApp.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) {
+            updatePwaStatus('إذا لم يظهر التثبيت التلقائي، استخدم خيار Add to Home Screen من قائمة المتصفح.');
+            toast('استخدم خيار التثبيت من قائمة المتصفح إذا لم يظهر الطلب التلقائي.', 'info');
+            return;
+        }
+
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice.catch(() => null);
+        deferredInstallPrompt = null;
+        btnInstallApp.disabled = true;
+
+        if (choice?.outcome === 'accepted') {
+            updatePwaStatus('رائع، اكتمل طلب تثبيت التطبيق.');
+        } else {
+            updatePwaStatus('يمكنك إعادة محاولة تثبيت التطبيق لاحقًا من هذا الزر أو من قائمة المتصفح.');
+        }
+    });
+}
+
+if (btnOpenOffline) {
+    btnOpenOffline.addEventListener('click', () => {
+        updatePwaStatus(
+            navigator.onLine
+                ? 'سيتم فتح النسخة المحلية الحالية. بعد أول دخول ستتمكن من متابعة المحتوى دون اتصال.'
+                : 'أنت الآن دون اتصال. سيتم فتح النسخة المحلية المخزنة.'
+        );
+        openOfflineExperience();
+    });
+}
+
+window.addEventListener('online', () => updatePwaStatus('أنت متصل الآن. يمكنك تسجيل الدخول أو تثبيت التطبيق.'));
+window.addEventListener('offline', () => updatePwaStatus('أنت تعمل دون اتصال. افتح النسخة المحلية المخزنة من الزر بالأسفل.'));
+
 (function() {
     const container = document.getElementById('particles');
     for (let i = 0; i < 30; i++) {
