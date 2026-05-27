@@ -271,60 +271,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ==========================================
     // State Management
     // ==========================================
-    const DEFAULT_STUDY_GROUPS = [
-        {
-            id: "group-calc",
-            name: "عباقرة التفاضل",
-            description: "مجموعة لمناقشة مسائل التفاضل والتكامل والاستعداد لاختبارات نهاية العام.",
-            members: 124,
-            subject: "رياضيات متقدمة",
-            category: "math",
-            joined: false,
-            icon: "binary",
-            avatars: [
-                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=128&auto=format&fit=crop",
-                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=128&auto=format&fit=crop"
-            ]
-        },
-        {
-            id: "group-quantum",
-            name: "ميكانيكا الكم المبسطة",
-            description: "حلول وتمارين فيزياء صعبة مع ملخصات سريعة ومناقشات أسبوعية للطلاب.",
-            members: 89,
-            subject: "فيزياء",
-            category: "physics",
-            joined: false,
-            icon: "atom",
-            avatars: [
-                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=128&auto=format&fit=crop",
-                "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=128&auto=format&fit=crop"
-            ]
-        },
-        {
-            id: "group-python",
-            name: "أساسيات بايثون",
-            description: "مجتمع تعاوني للمبتدئين لمشاركة الأكواد والمشاريع الصغيرة وحل الأخطاء البرمجية.",
-            members: 210,
-            subject: "برمجة",
-            category: "programming",
-            joined: false,
-            icon: "code",
-            avatars: [
-                "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=128&auto=format&fit=crop"
-            ]
-        },
-        {
-            id: "group-carbon",
-            name: "تفاعلات الكربون",
-            description: "مراجعة الكيمياء العضوية لثالثة ثانوي مع تدريبات واختبارات قصيرة قبل الامتحان.",
-            members: 4,
-            subject: "كيمياء عضوية",
-            category: "chemistry",
-            joined: true,
-            icon: "flask-conical",
-            avatars: []
-        }
-    ];
+    const DEFAULT_STUDY_GROUPS = [];
 
     function cloneDefaultStudyGroups() {
         return DEFAULT_STUDY_GROUPS.map((group) => ({
