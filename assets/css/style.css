@@ -5416,3 +5416,34 @@ body.dark-theme .sq-hint {
     color: #6366f1;
     margin-left: 4px;
 }
+
+/* ==========================================
+   Mobile Performance Overrides (Fix Lag)
+   ========================================== */
+@media (max-width: 768px) {
+    /* Disable heavy background animations on mobile */
+    .animated-bg__mesh,
+    .animated-bg__orb,
+    .animated-bg__grid,
+    .animated-bg__shine,
+    .animated-bg__pulse,
+    .animated-bg__particles,
+    .animated-bg__aurora,
+    .animated-bg__star {
+        animation: none !important;
+        display: none !important;
+    }
+    
+    /* Remove expensive backdrop-filters */
+    .sidebar, .glass-panel, .card {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    /* Ensure sidebar has a solid background without the blur */
+    .sidebar {
+        background-color: var(--bg-color) !important;
+        box-shadow: var(--shadow-lg) !important;
+    }
+}
+
