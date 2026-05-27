@@ -435,6 +435,12 @@ body {
     .form-panel  { padding: 30px 20px; }
     .form-card   { padding: 32px 24px; }
     .mobile-logo { display: flex; }
+    
+    /* Fix color overlap and lag on mobile by hiding heavy orbs */
+    .orb, .particles { 
+        display: none !important; 
+        animation: none !important;
+    }
 }
 @media (max-width: 480px) {
     .form-card { padding: 24px 18px; border-radius: 18px; }
