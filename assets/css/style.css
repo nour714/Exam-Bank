@@ -3826,9 +3826,11 @@ body.dark-theme .form-group input:focus, body.dark-theme .form-group textarea:fo
 
     /* Notification dropdown positioning */
     .notification-dropdown {
-        width: calc(100vw - 24px);
-        left: auto;
-        right: -40px;
+        position: fixed;
+        top: 64px;
+        left: 12px;
+        right: 12px;
+        width: auto;
     }
 
     /* Section header wraps */
