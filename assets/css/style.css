@@ -5421,6 +5421,15 @@ body.dark-theme .sq-hint {
    Mobile Performance Overrides (Fix Lag & Add Lightweight Animation)
    ========================================== */
 @media (max-width: 768px) {
+    /* Define solid backgrounds for mobile to prevent color overlap after removing blur */
+    :root {
+        --card-bg: #ffffff;
+    }
+    body.dark-theme {
+        --card-bg: #0d1423;
+        --bg-color: #05070c;
+    }
+
     /* Disable heavy background animations on mobile */
     .animated-bg__mesh,
     .animated-bg__orb,
@@ -5441,7 +5450,7 @@ body.dark-theme .sq-hint {
         inset: -50%;
         width: 200%;
         height: 200%;
-        background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 60%);
+        background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.05) 0%, transparent 60%);
         animation: mobileBgBreathe 12s ease-in-out infinite alternate;
         will-change: transform, opacity;
         pointer-events: none;
@@ -5449,13 +5458,14 @@ body.dark-theme .sq-hint {
     }
 
     body.dark-theme .animated-bg::before {
-        background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.18) 0%, transparent 60%);
+        background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.12) 0%, transparent 60%);
     }
 
     /* Remove expensive backdrop-filters */
-    .sidebar, .glass-panel, .card {
+    .sidebar, .glass-panel, .card, .app-header, .subject-large-card {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
+        background-color: var(--card-bg) !important;
     }
 
     /* Ensure sidebar has a solid background without the blur */
@@ -5463,9 +5473,13 @@ body.dark-theme .sq-hint {
         background-color: var(--bg-color) !important;
         box-shadow: var(--shadow-lg) !important;
     }
+    
+    .app-header {
+        background-color: var(--bg-color) !important;
+    }
 }
 
 @keyframes mobileBgBreathe {
-    0% { transform: scale(0.9) translate(0, 0); opacity: 0.5; }
-    100% { transform: scale(1.1) translate(-2%, 2%); opacity: 1; }
+    0% { transform: scale(0.9) translate(0, 0); opacity: 0.3; }
+    100% { transform: scale(1.1) translate(-2%, 2%); opacity: 0.8; }
 }
