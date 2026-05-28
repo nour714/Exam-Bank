@@ -2203,13 +2203,16 @@ body.dark-theme .tag-btn:hover {
 
 .tag-btn.active {
     background-color: var(--primary-color);
-    color: white;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
     border-color: var(--primary-color);
 }
 
 body.dark-theme .tag-btn.active {
     background-color: var(--info-color);
     border-color: var(--info-color);
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
 }
 
 .search-input-wrapper.group-search {
