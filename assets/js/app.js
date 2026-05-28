@@ -2975,6 +2975,29 @@ document.addEventListener("DOMContentLoaded", async () => {
         refreshIcons();
     }
 
+    // Notification Clear All Logic
+    const btnClearNotifications = document.getElementById("btn-clear-notifications");
+    const notificationBody = document.getElementById("notification-body");
+    const bellBadge = document.querySelector(".bell-badge");
+    
+    if (btnClearNotifications) {
+        btnClearNotifications.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (notificationBody) {
+                notificationBody.innerHTML = `
+                    <div class="notification-item" style="justify-content: center; opacity: 0.7; pointer-events: none;">
+                        <div class="item-content" style="text-align: center; width: 100%;">
+                            <p>لا توجد تنبيهات جديدة</p>
+                        </div>
+                    </div>
+                `;
+            }
+            if (bellBadge) {
+                bellBadge.style.display = "none";
+            }
+        });
+    }
+
     bindStartSolvingButtons();
     refreshIcons();
 });
