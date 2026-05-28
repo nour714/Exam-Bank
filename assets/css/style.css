@@ -2110,6 +2110,9 @@ body.dark-theme .subject-card-body {
 body.dark-theme .subject-large-card .btn-start-solving {
     color: var(--info-color);
 }
+body.dark-theme .subject-large-card .btn-start-solving:hover {
+    color: #fff;
+}
 
 .subject-large-card .btn-start-solving i {
     width: 16px;
