@@ -217,9 +217,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         toast.className = `toast-item toast-${type}`;
         
         let iconName = "check-circle";
-        if (type === "info") iconName = "info";
-        if (type === "warning") iconName = "alert-triangle";
-        if (type === "error") iconName = "x-circle";
+        let iconColor = "bg-green";
+        if (type === "info") { iconName = "info"; iconColor = "bg-blue"; }
+        if (type === "warning") { iconName = "alert-triangle"; iconColor = "bg-orange"; }
+        if (type === "error") { iconName = "x-circle"; iconColor = "bg-red"; }
 
         toast.innerHTML = `
             <div class="toast-icon"><i data-lucide="${iconName}"></i></div>
@@ -227,6 +228,33 @@ document.addEventListener("DOMContentLoaded", async () => {
         `;
 
         container.appendChild(toast);
+
+        // Add to notifications dropdown
+        const notificationBody = document.getElementById("notification-body");
+        const bellBadge = document.querySelector(".bell-badge");
+        if (notificationBody) {
+            // Remove the "No new notifications" message if it exists
+            const emptyMsg = notificationBody.querySelector("p");
+            if (emptyMsg && emptyMsg.textContent === "لا توجد تنبيهات جديدة") {
+                notificationBody.innerHTML = "";
+            }
+
+            const notifItem = document.createElement("div");
+            notifItem.className = "notification-item unread";
+            notifItem.innerHTML = `
+                <div class="item-icon ${iconColor}"><i data-lucide="${iconName}"></i></div>
+                <div class="item-content">
+                    <p>${message}</p>
+                    <span class="time">الآن</span>
+                </div>
+            `;
+            notificationBody.insertBefore(notifItem, notificationBody.firstChild);
+            
+            if (bellBadge) {
+                bellBadge.style.display = "block";
+            }
+        }
+
         refreshIcons();
 
         setTimeout(() => {
