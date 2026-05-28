@@ -920,8 +920,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const bellTrigger = document.getElementById("bell-trigger");
     const notificationDropdown = document.getElementById("notification-dropdown");
     
-    const proModalTrigger = document.getElementById("btn-pro-trigger");
-    const proModal = document.getElementById("pro-modal");
     
     const openCreateGroupBtn = document.getElementById("btn-open-create-group");
     const createGroupModal = document.getElementById("create-group-modal");
@@ -1280,7 +1278,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    if (proModalTrigger) proModalTrigger.addEventListener("click", () => openModal(proModal));
+
     if (openCreateGroupBtn) openCreateGroupBtn.addEventListener("click", () => openModal(createGroupModal));
 
     closeModalButtons.forEach(btn => {
@@ -1297,17 +1295,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     });
 
-    const btnSubscribePro = document.querySelector(".btn-subscribe-pro");
-    if (btnSubscribePro) {
-        btnSubscribePro.addEventListener("click", () => {
-            showToast("تم تفعيل اشتراك Pro التجريبي بنجاح! 💎", "success");
-            closeModal(proModal);
-            const proTriggerSpan = document.querySelector("#btn-pro-trigger span");
-            if (proTriggerSpan) proTriggerSpan.textContent = "عضو Pro 💎";
-            proModalTrigger.classList.remove("btn-gold");
-            proModalTrigger.classList.add("btn-secondary");
-        });
-    }
 
     // ==========================================
     // Dashboard Interactions
