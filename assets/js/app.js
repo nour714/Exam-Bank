@@ -249,10 +249,12 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </div>
             `;
             notificationBody.insertBefore(notifItem, notificationBody.firstChild);
-            
             if (bellBadge) {
                 bellBadge.style.display = "block";
             }
+            
+            localStorage.setItem("notificationsHTML", notificationBody.innerHTML);
+            localStorage.setItem("bellBadgeDisplay", bellBadge ? bellBadge.style.display : "block");
         }
 
         refreshIcons();
@@ -3007,7 +3009,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btnClearNotifications = document.getElementById("btn-clear-notifications");
     const notificationBody = document.getElementById("notification-body");
     const bellBadge = document.querySelector(".bell-badge");
+    // Load saved notifications
+    const savedNotificationsHTML = localStorage.getItem("notificationsHTML");
+    const savedBadgeDisplay = localStorage.getItem("bellBadgeDisplay");
     
+    if (savedNotificationsHTML !== null && notificationBody) {
+        notificationBody.innerHTML = savedNotificationsHTML;
+    }
+    if (savedBadgeDisplay !== null && bellBadge) {
+        bellBadge.style.display = savedBadgeDisplay;
+    }
+
     if (btnClearNotifications) {
         btnClearNotifications.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -3023,6 +3035,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (bellBadge) {
                 bellBadge.style.display = "none";
             }
+            localStorage.setItem("notificationsHTML", notificationBody ? notificationBody.innerHTML : "");
+            localStorage.setItem("bellBadgeDisplay", "none");
         });
     }
 
