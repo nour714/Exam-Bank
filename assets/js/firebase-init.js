@@ -42,9 +42,19 @@ function getDeviceId() {
 }
 
 function getUserId() {
-    // Use Firebase Auth UID if signed in, else fallback to device id
+    // Use Firebase Auth UID if signed in
     const currentUser = auth.currentUser;
-    return currentUser?.uid || getDeviceId();
+    if (currentUser?.uid) return currentUser.uid;
+    
+    // Fallback to local login email if available
+    const localEmail = localStorage.getItem('userEmail');
+    if (localEmail) {
+        // Use email as ID, replacing invalid characters if any
+        return localEmail.replace(/[^a-zA-Z0-9@.-]/g, '_');
+    }
+    
+    // Otherwise fallback to device id
+    return getDeviceId();
 }
 
 function getUserStateRef() {
