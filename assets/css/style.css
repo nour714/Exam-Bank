@@ -2502,7 +2502,7 @@ body.dark-theme .setting-field input:focus {
     content: "";
     height: 18px;
     width: 18px;
-    left: 3px;
+    right: 3px;
     bottom: 3px;
     background-color: white;
     transition: .4s;
@@ -2517,7 +2517,7 @@ body.dark-theme input:checked + .slider {
 }
 
 input:checked + .slider:before {
-    transform: translateX(24px);
+    transform: translateX(-24px);
 }
 
 .slider.round {
