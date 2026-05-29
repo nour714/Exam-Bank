@@ -2292,7 +2292,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (btnReviewAnswers) {
         btnReviewAnswers.addEventListener("click", () => {
             closeModal(examResultsModal);
-            switchView("qbank-view");
+            appState.exam.qbankMode = true; // تحويل لوضع المراجعة لإظهار الصح والخطأ
+            appState.exam.currentQuestionIndex = 0; // العودة للسؤال الأول
+            loadQuestion(0);
+            renderQuestionsMap();
+            switchView("exam-view");
         });
     }
 
