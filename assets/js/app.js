@@ -2292,7 +2292,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (btnReviewAnswers) {
         btnReviewAnswers.addEventListener("click", () => {
             closeModal(examResultsModal);
-            switchView("home-view");
+            switchView("qbank-view");
         });
     }
 
