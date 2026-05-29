@@ -416,39 +416,11 @@
                         <div class="card chart-card">
                             <div class="card-header">
                                 <h3>النشاط الأسبوعي</h3>
-                                <span class="chart-legend">4.5 ساعات اليوم</span>
+                                <span class="chart-legend" id="chart-legend-today">جارٍ التحميل...</span>
                             </div>
                             <div class="chart-container">
-                                <!-- Customized CSS/SVG bar chart -->
-                                <div class="weekly-bar-chart">
-                                    <div class="chart-bar-wrapper">
-                                        <div class="bar-fill" style="height: 40%"></div>
-                                        <span class="bar-label">السبت</span>
-                                    </div>
-                                    <div class="chart-bar-wrapper">
-                                        <div class="bar-fill" style="height: 60%"></div>
-                                        <span class="bar-label">الأحد</span>
-                                    </div>
-                                    <div class="chart-bar-wrapper active">
-                                        <div class="bar-fill" style="height: 90%"><span class="bar-tooltip">4.5h</span></div>
-                                        <span class="bar-label">الاثنين</span>
-                                    </div>
-                                    <div class="chart-bar-wrapper">
-                                        <div class="bar-fill" style="height: 30%"></div>
-                                        <span class="bar-label">الثلاثاء</span>
-                                    </div>
-                                    <div class="chart-bar-wrapper">
-                                        <div class="bar-fill" style="height: 50%"></div>
-                                        <span class="bar-label">الأربعاء</span>
-                                    </div>
-                                    <div class="chart-bar-wrapper">
-                                        <div class="bar-fill" style="height: 70%"></div>
-                                        <span class="bar-label">الخميس</span>
-                                    </div>
-                                    <div class="chart-bar-wrapper">
-                                        <div class="bar-fill" style="height: 20%"></div>
-                                        <span class="bar-label">الجمعة</span>
-                                    </div>
+                                <div class="weekly-bar-chart" id="weekly-bar-chart">
+                                    <!-- Populated dynamically by app.js -->
                                 </div>
                             </div>
                         </div>

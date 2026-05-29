@@ -339,8 +339,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             timerInterval: null
         },
         customQuestions: [],
-        notes: []
+        notes: [],
+        weeklyActivity: [0, 0, 0, 0, 0, 0, 0] // السبت -> الجمعة (7 أيام)
     };
+
+    function recordTodayActivity(questionsCount) {
+        const jsDay = new Date().getDay();
+        const todayIdx = (jsDay + 1) % 7;
+        if (!Array.isArray(appState.weeklyActivity) || appState.weeklyActivity.length !== 7) {
+            appState.weeklyActivity = [0,0,0,0,0,0,0];
+        }
+        appState.weeklyActivity[todayIdx] = (appState.weeklyActivity[todayIdx] || 0) + questionsCount;
+    }
 
     function resetUserScopedState(name = "", email = "") {
         appState.user = {
@@ -357,6 +367,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         appState.studyGroups = cloneDefaultStudyGroups();
         appState.customQuestions = [];
         appState.notes = [];
+        appState.weeklyActivity = [0,0,0,0,0,0,0];
     }
 
     // ==========================================
@@ -741,6 +752,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (Array.isArray(savedCustomQuestions)) {
             appState.customQuestions = savedCustomQuestions;
         }
+
+        const savedWeeklyActivity = safeParseJSON("weeklyActivity", null);
+        if (Array.isArray(savedWeeklyActivity) && savedWeeklyActivity.length === 7) {
+            appState.weeklyActivity = savedWeeklyActivity;
+        }
     }
 
     function applyPersistedState(savedState) {
@@ -771,6 +787,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             appState.customQuestions = savedState.customQuestions;
         }
 
+        if (Array.isArray(savedState.weeklyActivity) && savedState.weeklyActivity.length === 7) {
+            appState.weeklyActivity = savedState.weeklyActivity;
+        }
+
         updateUserStatsUI();
         if (typeof renderGroups === "function") renderGroups();
         if (typeof renderNotes === "function") renderNotes();
@@ -783,7 +803,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             user: appState.user,
             studyGroups: appState.studyGroups,
             notes: appState.notes,
-            customQuestions: appState.customQuestions
+            customQuestions: appState.customQuestions,
+            weeklyActivity: appState.weeklyActivity
         };
     }
 
@@ -844,6 +865,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         localStorage.setItem("studyGroups", JSON.stringify(appState.studyGroups));
         localStorage.setItem("studyNotes", JSON.stringify(appState.notes));
         localStorage.setItem("customQuestions", JSON.stringify(appState.customQuestions));
+        localStorage.setItem("weeklyActivity", JSON.stringify(appState.weeklyActivity));
         if (syncFirebase) queueFirebaseSave();
     }
 
@@ -910,6 +932,74 @@ document.addEventListener("DOMContentLoaded", async () => {
                 circleBar.style.strokeDashoffset = offset;
             }
         }
+        renderWeeklyChart();
+    }
+
+    function renderWeeklyChart() {
+        const chart = document.getElementById("weekly-bar-chart");
+        const legend = document.getElementById("chart-legend-today");
+        if (!chart) return;
+
+        const days = ["السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+        // اليوم الحالي من الأسبوع (0=السبت في الحساب العربي، نحول من JS)
+        const jsDay = new Date().getDay(); // 0=Sunday..6=Saturday
+        const todayIdx = (jsDay + 1) % 7;  // 0=Sat,1=Sun,...6=Fri
+
+        const data = [...(appState.weeklyActivity || [0,0,0,0,0,0,0])];
+        const maxVal = Math.max(...data, 1);
+        const todayCount = data[todayIdx];
+
+        if (legend) {
+            legend.textContent = todayCount > 0
+                ? `${todayCount} سؤال اليوم ✅`
+                : 'لا يوجد نشاط اليوم';
+        }
+
+        chart.innerHTML = "";
+        days.forEach((dayName, idx) => {
+            const val = data[idx] || 0;
+            const heightPct = Math.max(8, Math.round((val / maxVal) * 100));
+            const isToday = (idx === todayIdx);
+
+            const wrapper = document.createElement("div");
+            wrapper.className = "chart-bar-wrapper" + (isToday ? " active" : "");
+            wrapper.title = `${dayName}: ${val} سؤال`;
+
+            const fill = document.createElement("div");
+            fill.className = "bar-fill";
+            fill.style.height = "0%";
+            fill.style.transition = "height 0.6s cubic-bezier(0.34,1.56,0.64,1)";
+
+            const tooltip = document.createElement("span");
+            tooltip.className = "bar-tooltip";
+            tooltip.textContent = val > 0 ? `${val} سؤال` : "لا يوجد";
+            fill.appendChild(tooltip);
+
+            const label = document.createElement("span");
+            label.className = "bar-label";
+            label.textContent = dayName;
+
+            wrapper.appendChild(fill);
+            wrapper.appendChild(label);
+
+            // تأثير النقر: تبديل الـ active
+            wrapper.addEventListener("click", () => {
+                chart.querySelectorAll(".chart-bar-wrapper").forEach(w => w.classList.remove("active"));
+                wrapper.classList.add("active");
+                if (legend) {
+                    legend.textContent = val > 0 ? `${val} سؤال — ${dayName}` : `لا يوجد نشاط — ${dayName}`;
+                }
+            });
+
+            chart.appendChild(wrapper);
+
+            // Animation: تأخير ظهور العمود
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    fill.style.height = `${heightPct}%`;
+                }, idx * 60);
+            });
+        });
     }
 
     // ==========================================
@@ -2282,9 +2372,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const xpGained = (score * 10) + (scorePercentage >= 90 ? 100 : (scorePercentage >= 50 ? 50 : 0));
         appState.user.xp += xpGained;
-        appState.user.solvedCount += appState.exam.answers.filter(ans => ans !== null).length;
+        const answeredInExam = appState.exam.answers.filter(ans => ans !== null).length;
+        appState.user.solvedCount += answeredInExam;
         appState.user.accuracy = Math.round((appState.user.accuracy * 3 + scorePercentage) / 4);
-        
+
+        // تسجيل نشاط اليوم في الرسم البياني
+        recordTodayActivity(answeredInExam);
+
         saveStateToLocalStorage();
         updateUserStatsUI();
         
