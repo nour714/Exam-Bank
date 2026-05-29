@@ -39,7 +39,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             const currentUser = firebaseBackend.auth.currentUser;
             if (!currentUser) {
-                if (hasLocalOfflineSession()) return true;
+                if (localStorage.getItem("authMode") === "demo") return true;
+                if (hasLocalOfflineSession() && !navigator.onLine) return true;
+                
                 clearPersistedAuthState();
                 window.location.replace("login.html");
                 return false;
