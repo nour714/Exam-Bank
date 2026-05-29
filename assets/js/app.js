@@ -798,7 +798,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     return null;
                 });
             }
-            if (window.examBankFirebaseReady) return await window.examBankFirebaseReady;
+            if (window.examBankFirebaseReady) {
+                await window.examBankFirebaseReady;
+                return window.examBankFirebase;
+            }
         } catch (error) {
             console.warn("تعذر الاتصال بـ Firebase:", error);
         }
