@@ -2151,9 +2151,40 @@ document.addEventListener("DOMContentLoaded", async () => {
                 ${!isCorrect ? `<div class="feedback-correct-ans">✅ الإجابة الصحيحة: <strong>${correctLetterAr}. ${correctText}</strong></div>` : ''}
                 ${!isCorrect ? `<div class="feedback-wrong-ans">❌ إجابتك: <strong>${selectedLetterAr}. ${selectedText}</strong></div>` : ''}
                 <div class="feedback-explanation"><span class="feedback-why-label">💡 لماذا؟</span> ${explanation}</div>
+                <button type="button" class="wa-explain-btn" style="margin-top: 15px; width: fit-content; padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-color); cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                    <i data-lucide="sparkles" style="color: var(--primary-color);"></i>
+                    <span>اشرح + جرّب أسئلة شبيهة</span>
+                </button>
             </div>
         `;
         examOptionsContainer.insertAdjacentElement("afterend", banner);
+
+        const explainBtn = banner.querySelector(".wa-explain-btn");
+        if (explainBtn) {
+            explainBtn.addEventListener("click", async () => {
+                explainBtn.disabled = true;
+                explainBtn.innerHTML = '<i data-lucide="loader"></i><span>جارٍ التحليل...</span>';
+                refreshIcons();
+                try {
+                    await openAiReviewForQuestion({
+                        questionText: question.text || "",
+                        subject: detectSubjectFromExamQuestion(question),
+                        topic: question.topic || "",
+                        options: question.options || [],
+                        correctAnswer: question.correct || "",
+                        userAnswer: selectedKey || ""
+                    });
+                } catch (err) {
+                    console.error(err);
+                    showToast("تعذر الاتصال بالمعلم الذكي. حاول لاحقًا.", "error");
+                } finally {
+                    explainBtn.disabled = false;
+                    explainBtn.innerHTML = '<i data-lucide="sparkles" style="color: var(--primary-color);"></i><span>اشرح + جرّب أسئلة شبيهة</span>';
+                    refreshIcons();
+                }
+            });
+        }
+
     }
 
     function removeQbankFeedbackBanner() {
@@ -2285,7 +2316,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const seconds = secondsSpent % 60;
         if (resultTimeSpent) resultTimeSpent.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-        try { renderWrongAnswersList(); } catch (e) { console.error('renderWrongAnswersList failed', e); }
+
         openModal(examResultsModal);
     }
 
