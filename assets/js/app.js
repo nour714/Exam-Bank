@@ -3113,10 +3113,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             renderAiReviewResult(data, payload);
         } catch (err) {
             console.error(err);
-            const errorMessage = err?.message || "???? ??????? ??????? ?????.";
+            const errorMessage = err?.message || "تعذر الاتصال بالمعلم الذكي. حاول لاحقاً.";
             aiReviewBody.innerHTML = `
                 <div class="ai-review-error">
-                    <p>???? ??????? ??????? ?????.</p>
+                    <p>تعذر الاتصال بالمعلم الذكي. حاول لاحقاً.</p>
                     <p style="font-size:0.85rem;color:var(--text-muted);">${escapeHTML(errorMessage)}</p>
                 </div>
             `;
@@ -3222,7 +3222,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ==========================================
     // Gemini Direct API Integration
     // ==========================================
-    const GEMINI_API_KEY = "AIzaSyBlRKsqVq1bgQqIEITkCVMSU00k7WWcLvQ";
+    const GEMINI_API_KEY = "AQ.Ab8RN6ITcTRv8JAoW_J3wovLkUzspHrvhZrewpKSkqDoUd_clw";
     const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai";
     const GEMINI_MODEL = "gemini-2.5-flash";
 
