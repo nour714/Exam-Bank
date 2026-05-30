@@ -229,6 +229,7 @@
             <button class="btn btn-success" id="btn-add-all" disabled onclick="addAllQuestions()">✅ أضف كل الأسئلة للموقع</button>
             <button class="btn btn-outline" id="btn-export" disabled onclick="openExport()">📤 تصدير JSON</button>
             <div class="spacer"></div>
+            <button class="btn btn-danger" id="btn-clear-fb" onclick="clearFirebaseDB()" style="margin-left: 8px;">🔥 حذف كل أسئلة الخادم</button>
             <button class="btn btn-danger" id="btn-clear" disabled onclick="clearAll()">🗑️ مسح</button>
         </div>
 
@@ -339,6 +340,30 @@ window._saveQuestionsToFirebase = async function(newQuestions) {
     }
     
     return count;
+};
+
+// ── Clear all Firebase questions ────────────────────────────────
+window.clearFirebaseDB = async function() {
+    if (!window._fbReady || !window._fbUserId) {
+        alert("انتظر حتى يتم الاتصال بفايربيس...");
+        return;
+    }
+    if (!confirm("⚠️ هل أنت متأكد من حذف جميع الأسئلة من قاعدة البيانات للجميع؟ لا يمكن التراجع عن هذا!")) return;
+    
+    try {
+        const { collection, getDocs, deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+        const querySnapshot = await getDocs(collection(db, "globalQuestions"));
+        let count = 0;
+        for (let d of querySnapshot.docs) {
+            await deleteDoc(doc(db, "globalQuestions", d.id));
+            count++;
+        }
+        alert(`✅ تم حذف ${count} سؤال من قاعدة البيانات بنجاح.`);
+        showNotif(`تم تنظيف الخادم (${count} سؤال)`, false);
+    } catch (e) {
+        console.error("Firebase clear failed:", e);
+        alert(`❌ حدث خطأ أثناء الحذف: ${e.message}`);
+    }
 };
 </script>
 
