@@ -3,6 +3,9 @@
    ========================================== */
 
 document.addEventListener("DOMContentLoaded", async () => {
+    // قائمة الإيميلات التي يحق لها رؤية زر "لوحة المطور" (أضف إيميلك هنا)
+    const ADMIN_EMAILS = ["nour714@gmail.com"];
+
     const queryParams = new URLSearchParams(window.location.search);
     const launchSource = queryParams.get("source") || "";
 
@@ -907,6 +910,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         const settingsEmail = document.getElementById("settings-email");
         if (settingsEmail) settingsEmail.value = appState.user.email || "";
+        
+        const adminMenuLink = document.getElementById("admin-menu-link");
+        if (adminMenuLink) {
+            const currentEmail = appState.user.email || localStorage.getItem("userEmail") || "";
+            if (currentEmail && ADMIN_EMAILS.includes(currentEmail)) {
+                adminMenuLink.style.display = "flex";
+            } else {
+                adminMenuLink.style.display = "none";
+            }
+        }
         
         const settingsNotifications = document.getElementById("settings-notifications");
         if (settingsNotifications && appState.user.notifications !== undefined) {
