@@ -856,7 +856,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     const localQs = Array.isArray(appState.customQuestions) ? appState.customQuestions : [];
                     const allIds = new Set(localQs.map(q => q.id));
                     const merged = [...localQs, ...globalQs.filter(q => !allIds.has(q.id))];
-                    appState.customQuestions = merged;
+                    if (merged.length > localQs.length) {
+                        appState.customQuestions = merged;
+                        saveStateToLocalStorage(false);
+                        updateUserStatsUI();
+                    }
                 }
             }
         } catch (error) {
