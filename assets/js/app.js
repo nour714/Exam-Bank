@@ -428,24 +428,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
             appState.exam.questions = qList;
         } else {
-            // Fallback generic questions
-            const topicsMap = {
-                "الفيزياء": ["الكهرباء والمغناطيسية", "الفيزياء الحديثة", "الميكانيكا والكينماتيكا", "الضوء والأمواج", "الحرارة والديناميكا الحرارية"],
-                "الكيمياء": ["الكيمياء العضوية", "الكيمياء التحليلية", "الكيمياء الكهربية", "الكيمياء الفيزيائية", "العناصر الانتقالية"]
-            };
-            const topics = topicsMap[subjectName] || ["عام"];
-            const qList = [];
-            for (let i = 0; i < 50; i++) {
-                qList.push({
-                    index: i,
-                    topic: topics[i % topics.length],
-                    text: `سؤال رقم ${i + 1} في مادة ${subjectName} – الموضوع: ${topics[i % topics.length]}`,
-                    options: ["الخيار الأول", "الخيار الثاني", "الخيار الثالث", "الخيار الرابع"],
-                    correct: ['A', 'B', 'C', 'D'][Math.floor(Math.random() * 4)],
-                    hasDiagram: false
-                });
-            }
-            appState.exam.questions = qList;
+            // No questions available from Firebase yet
+            appState.exam.questions = [];
         }
     }
 
