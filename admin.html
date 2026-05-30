@@ -452,7 +452,7 @@ const ADMIN_PASS  = "nourwael2006"; // ← غيّر كلمة المرور هنا
 const API_KEY     = "AQ.Ab8RN6ITcTRv8JAoW_J3wovLkUzspHrvhZrewpKSkqDoUd_clw";
 const API_URL     = "https://generativelanguage.googleapis.com/v1beta/openai";
 const MODEL       = "gemini-2.5-flash";
-const CONCURRENCY = 2;
+const CONCURRENCY = 1;
 const MAX_PX      = 1400;
 const IMG_QUALITY = 0.85;
 
@@ -749,7 +749,12 @@ async function extractAllQuestions(dataUrl) {
                 try { data = JSON.parse(textResponse); } catch(e) {}
                 
                 if (!res.ok) {
-                    if (res.status === 429) throw new Error("تجاوز حد الطلبات (Rate Limit)، سيتم إعادة المحاولة...");
+                    if (res.status === 429) {
+                        let delay = 30000; // default 30s
+                        const match = textResponse.match(/"retryDelay":\s*"(\d+)s"/);
+                        if (match) delay = parseInt(match[1], 10) * 1000 + 2000;
+                        throw new Error(`RATELIMIT:${delay}`);
+                    }
                     throw new Error(data.error?.message || `خطأ HTTP ${res.status}`);
                 }
                 
@@ -776,12 +781,17 @@ async function extractAllQuestions(dataUrl) {
                 return [];
             } catch (e) {
                 if (retries > 0) {
-                    console.warn(`Extraction failed (attempt ${attempt}), retrying...`, e);
-                    const delay = Math.min(10000, 1000 * Math.pow(2, attempt)); // 2s, 4s, 8s...
+                    let delay = 5000;
+                    if (e.message.startsWith("RATELIMIT:")) {
+                        delay = parseInt(e.message.split(":")[1], 10) || 30000;
+                        console.warn(`Rate limit hit, waiting ${delay}ms before retry ${attempt}...`);
+                    } else {
+                        console.warn(`Extraction failed (attempt ${attempt}), retrying in ${delay}ms...`, e);
+                    }
                     await new Promise(r => setTimeout(r, delay));
                     return tryExtract(retries - 1, attempt + 1);
                 }
-                throw e;
+                throw new Error("تجاوز حد الطلبات، يرجى المحاولة لاحقاً أو التحقق من خطة Gemini API.");
             }
         };
 
