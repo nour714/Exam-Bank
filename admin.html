@@ -217,11 +217,11 @@
         </div>
 
         <div class="upload-zone" id="drop-zone">
-            <input type="file" id="file-input" accept="image/*" multiple>
+            <input type="file" id="file-input" accept="image/*,.pdf" multiple>
             <div class="upload-icon">📷</div>
-            <h2>ارفع صفحات الكتاب هنا</h2>
-            <p>كل صورة ممكن تحتوي على أسئلة متعددة — الذكاء الاصطناعي يستخرجهم كلهم</p>
-            <span class="upload-note">✅ ملفات كبيرة · PNG · JPG · WEBP · صفحات متعددة دفعة واحدة</span>
+            <h2>ارفع صفحات الكتاب هنا (صور أو PDF)</h2>
+            <p>يمكنك رفع ملف PDF كامل وسيقوم النظام باستخراج كافة صفحاته كأسئلة</p>
+            <span class="upload-note">✅ ملفات كبيرة · PDF · PNG · JPG · صفحات متعددة دفعة واحدة</span>
         </div>
 
         <div class="ctrl-bar">
@@ -262,6 +262,12 @@
         </div>
     </div>
 </div>
+
+<!-- PDF.js SDK -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+</script>
 
 <!-- Firebase SDK -->
 <script type="module">
@@ -365,26 +371,73 @@ dz.addEventListener("dragover",  e => { e.preventDefault(); dz.classList.add("dr
 dz.addEventListener("dragleave", () => dz.classList.remove("drag-over"));
 dz.addEventListener("drop", e => {
     e.preventDefault(); dz.classList.remove("drag-over");
-    handleFiles([...e.dataTransfer.files].filter(f => f.type.startsWith("image/")));
+    handleFiles([...e.dataTransfer.files].filter(f => f.type.startsWith("image/") || f.type === "application/pdf"));
 });
 
-function handleFiles(files) {
+async function handleFiles(files) {
     if (!files.length) return;
     const list = document.getElementById("pages-list");
     const emp = list.querySelector(".empty");
     if (emp) emp.remove();
 
-    files.forEach(file => {
-        const id   = Math.random().toString(36).slice(2);
-        const page = { id, file, dataUrl: null, status: "pending", questions: [], error: null };
-        pages.push(page);
-        compressImage(file).then(url => { page.dataUrl = url; refreshCard(page.id); });
-        const div = document.createElement("div");
-        div.id        = `page-${id}`;
-        div.className = "page-card status-pending";
-        list.appendChild(div);
-        refreshCard(id);
-    });
+    for (const file of files) {
+        if (file.type === "application/pdf") {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const id = Math.random().toString(36).slice(2);
+                    const pageObj = { 
+                        id, 
+                        file: { name: `${file.name} - صـ ${i}` },
+                        dataUrl: null, 
+                        status: "pending", 
+                        questions: [], 
+                        error: null 
+                    };
+                    pages.push(pageObj);
+                    const div = document.createElement("div");
+                    div.id = `page-${id}`;
+                    div.className = "page-card status-pending";
+                    list.appendChild(div);
+                    refreshCard(id);
+
+                    // Render PDF page to canvas async
+                    pdf.getPage(i).then(async (pageInfo) => {
+                        const viewport = pageInfo.getViewport({ scale: 2.0 });
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        await pageInfo.render({ canvasContext: ctx, viewport: viewport }).promise;
+                        
+                        // Convert to file then compress to limit size
+                        const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.95));
+                        const tempFile = new File([blob], `page.jpg`, { type: "image/jpeg" });
+                        pageObj.dataUrl = await compressImage(tempFile);
+                        refreshCard(id);
+                    }).catch(err => {
+                        pageObj.status = "error";
+                        pageObj.error = "تعذر قراءة الـ PDF";
+                        refreshCard(id);
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                alert("حدث خطأ أثناء فتح ملف الـ PDF");
+            }
+        } else if (file.type.startsWith("image/")) {
+            const id   = Math.random().toString(36).slice(2);
+            const page = { id, file, dataUrl: null, status: "pending", questions: [], error: null };
+            pages.push(page);
+            const div = document.createElement("div");
+            div.id        = `page-${id}`;
+            div.className = "page-card status-pending";
+            list.appendChild(div);
+            refreshCard(id);
+            compressImage(file).then(url => { page.dataUrl = url; refreshCard(page.id); });
+        }
+    }
     updateStats(); updateButtons();
 }
 
