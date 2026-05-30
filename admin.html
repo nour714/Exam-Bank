@@ -177,11 +177,61 @@
 
         @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
+        /* TABS */
+        .tabs-bar{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);
+            border-radius:14px;padding:5px;margin-bottom:24px}
+        .tab-btn{flex:1;padding:12px 10px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;
+            font-size:.88rem;font-weight:700;cursor:pointer;background:transparent;color:var(--text2);
+            transition:all .2s;text-align:center}
+        .tab-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
+            box-shadow:0 4px 15px rgba(59,130,246,.3)}
+        .tab-btn:hover:not(.active){background:rgba(99,179,237,.08);color:var(--text)}
+        .tab-content{display:none}
+        .tab-content.active{display:block}
+
+        /* SERVER MANAGER */
+        .mgr-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+        .mgr-select{background:var(--card);border:1px solid var(--border);border-radius:10px;
+            padding:11px 16px;font-family:'Cairo',sans-serif;font-size:.9rem;color:var(--text);
+            cursor:pointer;flex:1;min-width:200px}
+        .mgr-select:focus{outline:none;border-color:var(--accent)}
+        .subject-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px}
+        .subj-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+            padding:18px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+        .subj-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+        .subj-card.selected{border-color:var(--accent);background:rgba(59,130,246,.08)}
+        .subj-card .subj-name{font-weight:700;font-size:.92rem;margin-bottom:4px}
+        .subj-card .subj-count{font-size:1.3rem;font-weight:800;
+            background:linear-gradient(135deg,var(--accent),var(--accent2));
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .subj-card .subj-label{font-size:.7rem;color:var(--text2)}
+        .mgr-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+        .mgr-title{font-size:1rem;font-weight:700;flex:1}
+        .mgr-q-row{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:start;
+            padding:12px 16px;border-bottom:1px solid rgba(99,179,237,.07);
+            background:var(--card);animation:fadeIn .2s ease}
+        .mgr-q-row:last-child{border-bottom:none}
+        .mgr-q-row:hover{background:var(--card2)}
+        .mgr-q-num{font-weight:800;color:var(--accent);font-size:.85rem;padding-top:3px}
+        .mgr-q-text{font-size:.85rem;font-weight:600;line-height:1.5;margin-bottom:5px}
+        .mgr-q-opts{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
+        .mgr-q-opt{background:var(--bg2);border:1px solid var(--border);border-radius:5px;
+            padding:3px 8px;font-size:.72rem}
+        .mgr-q-opt.correct{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.4);color:#34d399}
+        .mgr-q-del{background:rgba(239,68,68,.15);color:var(--error);border:1px solid rgba(239,68,68,.3);
+            border-radius:8px;padding:6px 10px;cursor:pointer;font-size:.75rem;font-weight:700;
+            white-space:nowrap;transition:all .2s;flex-shrink:0}
+        .mgr-q-del:hover{background:rgba(239,68,68,.3)}
+        .mgr-list{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+        .mgr-empty{text-align:center;padding:56px;color:var(--text2)}
+        .mgr-loading{display:flex;align-items:center;gap:12px;padding:24px;color:var(--text2);font-size:.85rem}
+
         @media(max-width:700px){
             .stats-bar{grid-template-columns:repeat(3,1fr)}
             .q-opts{grid-template-columns:1fr}
             .q-row{grid-template-columns:20px 1fr}
             .q-side{flex-direction:row;grid-column:span 2}
+            .subject-cards{grid-template-columns:repeat(3,1fr)}
         }
     </style>
 </head>
@@ -203,47 +253,75 @@
 <div id="admin-app">
     <header>
         <div class="hdr-icon">⚡</div>
-        <h1>استخراج الأسئلة من صفحات الكتاب</h1>
+        <h1>لوحة تحكم المطور</h1>
         <span class="fb-status fb-loading" id="fb-status">⏳ جاري الاتصال بـ Firebase...</span>
         <span class="hdr-badge">ADMIN ONLY</span>
     </header>
     <main>
-        <div class="stats-bar">
-            <div class="s-card"><div class="s-num" id="s-pages">0</div><div class="s-label">صفحات</div></div>
-            <div class="s-card"><div class="s-num" id="s-found">0</div><div class="s-label">أسئلة مستخرجة</div></div>
-            <div class="s-card"><div class="s-num" id="s-diagrams">0</div><div class="s-label">معها رسومات</div></div>
-            <div class="s-card"><div class="s-num" id="s-added">0</div><div class="s-label">أُضيفت للموقع</div></div>
-            <div class="s-card"><div class="s-num" id="s-errors">0</div><div class="s-label">أخطاء</div></div>
+        <!-- TABS -->
+        <div class="tabs-bar">
+            <button class="tab-btn active" id="tab-extract-btn" onclick="switchTab('extract')">📷 استخراج الأسئلة</button>
+            <button class="tab-btn" id="tab-manage-btn" onclick="switchTab('manage')">🗄️ إدارة الخادم</button>
         </div>
 
-        <div class="upload-zone" id="drop-zone">
-            <input type="file" id="file-input" accept="image/*,.pdf" multiple>
-            <div class="upload-icon">📷</div>
-            <h2>ارفع صفحات الكتاب هنا (صور أو PDF)</h2>
-            <p>يمكنك رفع ملف PDF كامل وسيقوم النظام باستخراج كافة صفحاته كأسئلة</p>
-            <span class="upload-note">✅ ملفات كبيرة · PDF · PNG · JPG · صفحات متعددة دفعة واحدة</span>
-        </div>
-
-        <div class="ctrl-bar">
-            <button class="btn btn-primary" id="btn-start" disabled onclick="startAll()">🚀 ابدأ الاستخراج</button>
-            <button class="btn btn-success" id="btn-add-all" disabled onclick="addAllQuestions()">✅ أضف كل الأسئلة للموقع</button>
-            <button class="btn btn-outline" id="btn-export" disabled onclick="openExport()">📤 تصدير JSON</button>
-            <div class="spacer"></div>
-            <button class="btn btn-danger" id="btn-clear-fb" onclick="clearFirebaseDB()" style="margin-left: 8px;">🔥 حذف كل أسئلة الخادم</button>
-            <button class="btn btn-danger" id="btn-clear" disabled onclick="clearAll()">🗑️ مسح</button>
-        </div>
-
-        <div class="prog-wrap" id="prog-wrap">
-            <div class="prog-label">
-                <span id="prog-text">جاري الاستخراج...</span>
-                <span id="prog-pct">0%</span>
+        <!-- TAB 1: EXTRACT -->
+        <div class="tab-content active" id="tab-extract">
+            <div class="stats-bar">
+                <div class="s-card"><div class="s-num" id="s-pages">0</div><div class="s-label">صفحات</div></div>
+                <div class="s-card"><div class="s-num" id="s-found">0</div><div class="s-label">أسئلة مستخرجة</div></div>
+                <div class="s-card"><div class="s-num" id="s-diagrams">0</div><div class="s-label">معها رسومات</div></div>
+                <div class="s-card"><div class="s-num" id="s-added">0</div><div class="s-label">أُضيفت للموقع</div></div>
+                <div class="s-card"><div class="s-num" id="s-errors">0</div><div class="s-label">أخطاء</div></div>
             </div>
-            <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
-            <div class="prog-status" id="prog-status"></div>
+
+            <div class="upload-zone" id="drop-zone">
+                <input type="file" id="file-input" accept="image/*,.pdf" multiple>
+                <div class="upload-icon">📷</div>
+                <h2>ارفع صفحات الكتاب هنا (صور أو PDF)</h2>
+                <p>يمكنك رفع ملف PDF كامل وسيقوم النظام باستخراج كافة صفحاته كأسئلة</p>
+                <span class="upload-note">✅ ملفات كبيرة · PDF · PNG · JPG · صفحات متعددة دفعة واحدة</span>
+            </div>
+
+            <div class="ctrl-bar">
+                <button class="btn btn-primary" id="btn-start" disabled onclick="startAll()">🚀 ابدأ الاستخراج</button>
+                <button class="btn btn-success" id="btn-add-all" disabled onclick="addAllQuestions()">✅ أضف كل الأسئلة للموقع</button>
+                <button class="btn btn-outline" id="btn-export" disabled onclick="openExport()">📤 تصدير JSON</button>
+                <div class="spacer"></div>
+                <button class="btn btn-danger" id="btn-clear" disabled onclick="clearAll()">🗑️ مسح</button>
+            </div>
+
+            <div class="prog-wrap" id="prog-wrap">
+                <div class="prog-label">
+                    <span id="prog-text">جاري الاستخراج...</span>
+                    <span id="prog-pct">0%</span>
+                </div>
+                <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+                <div class="prog-status" id="prog-status"></div>
+            </div>
+
+            <div class="pages-list" id="pages-list">
+                <div class="empty"><div class="e-icon">📚</div><p>ارفع صور صفحات الكتاب لتبدأ</p></div>
+            </div>
         </div>
 
-        <div class="pages-list" id="pages-list">
-            <div class="empty"><div class="e-icon">📚</div><p>ارفع صور صفحات الكتاب لتبدأ</p></div>
+        <!-- TAB 2: MANAGE -->
+        <div class="tab-content" id="tab-manage">
+            <!-- Subject Cards -->
+            <div id="mgr-subject-cards" class="subject-cards">
+                <div class="mgr-loading"><div class="spinner"></div>جاري تحميل إحصائيات المواد...</div>
+            </div>
+
+            <!-- Selected Subject Panel -->
+            <div id="mgr-panel" style="display:none">
+                <div class="mgr-header">
+                    <div class="mgr-title" id="mgr-panel-title">اختر مادة</div>
+                    <button class="btn btn-outline btn-sm" onclick="loadSubjectStats()">🔄 تحديث</button>
+                    <button class="btn btn-danger" id="mgr-del-all-btn" onclick="deleteSubjectAll()">🗑️ حذف جميع أسئلة هذه المادة</button>
+                </div>
+                <div id="mgr-list" class="mgr-list">
+                    <div class="mgr-empty">اختر مادة من الأعلى لعرض أسئلتها</div>
+                </div>
+            </div>
         </div>
     </main>
 </div>
@@ -889,6 +967,194 @@ function showNotif(msg, warn = false) {
 }
 
 function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// ===== TABS =====
+function switchTab(tab) {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    document.getElementById(`tab-${tab}`).classList.add("active");
+    document.getElementById(`tab-${tab}-btn`).classList.add("active");
+    if (tab === "manage") loadSubjectStats();
+}
+
+// ===== SERVER MANAGER =====
+const SUBJECTS = [
+    { name: "الفيزياء",       icon: "⚡" },
+    { name: "الكيمياء",       icon: "🧪" },
+    { name: "الأحياء",        icon: "🌱" },
+    { name: "الرياضيات",      icon: "📐" },
+    { name: "اللغة العربية",  icon: "📖" },
+    { name: "اللغة الإنجليزية", icon: "🇬🇧" },
+    { name: "الجيولوجيا",     icon: "🪨" },
+    { name: "التاريخ",        icon: "🏛️" },
+    { name: "الجغرافيا",      icon: "🗺️" },
+];
+
+let mgrSelectedSubject = null;
+let mgrSubjectCounts = {};
+
+async function loadSubjectStats() {
+    if (!window._fbReady) {
+        showNotif("⚠️ انتظر حتى يتم الاتصال بفايربيس...", true);
+        return;
+    }
+    const cardsEl = document.getElementById("mgr-subject-cards");
+    cardsEl.innerHTML = `<div class="mgr-loading"><div class="spinner"></div>جاري تحميل الإحصائيات...</div>`;
+
+    try {
+        const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+        const snap = await getDocs(collection(db, "globalQuestions"));
+        
+        // Count per subject
+        mgrSubjectCounts = {};
+        snap.forEach(d => {
+            const subj = d.data().subject || "غير محدد";
+            mgrSubjectCounts[subj] = (mgrSubjectCounts[subj] || 0) + 1;
+        });
+
+        // Also include known subjects with 0 count
+        SUBJECTS.forEach(s => {
+            if (!(s.name in mgrSubjectCounts)) mgrSubjectCounts[s.name] = 0;
+        });
+
+        // Render cards
+        const entries = Object.entries(mgrSubjectCounts).sort((a,b) => b[1] - a[1]);
+        cardsEl.innerHTML = "";
+        entries.forEach(([name, count]) => {
+            const subj = SUBJECTS.find(s => s.name === name);
+            const icon = subj ? subj.icon : "📚";
+            const card = document.createElement("div");
+            card.className = `subj-card${mgrSelectedSubject === name ? " selected" : ""}`;
+            card.innerHTML = `
+                <div style="font-size:1.6rem;margin-bottom:8px">${icon}</div>
+                <div class="subj-name">${esc(name)}</div>
+                <div class="subj-count">${count}</div>
+                <div class="subj-label">سؤال</div>`;
+            card.onclick = () => selectSubject(name);
+            cardsEl.appendChild(card);
+        });
+
+        if (mgrSelectedSubject) selectSubject(mgrSelectedSubject);
+
+    } catch (e) {
+        cardsEl.innerHTML = `<div class="mgr-loading" style="color:var(--error)">❌ فشل التحميل: ${esc(e.message)}</div>`;
+    }
+}
+
+async function selectSubject(name) {
+    mgrSelectedSubject = name;
+    // Highlight selected card
+    document.querySelectorAll(".subj-card").forEach(c => {
+        c.classList.toggle("selected", c.querySelector(".subj-name")?.textContent === name);
+    });
+
+    const panel = document.getElementById("mgr-panel");
+    const list = document.getElementById("mgr-list");
+    const title = document.getElementById("mgr-panel-title");
+    
+    panel.style.display = "block";
+    title.textContent = `أسئلة مادة: ${name} (${mgrSubjectCounts[name] || 0} سؤال)`;
+    list.innerHTML = `<div class="mgr-loading"><div class="spinner"></div>جاري تحميل الأسئلة...</div>`;
+
+    try {
+        const { collection, getDocs, query, where } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+        const q = query(collection(db, "globalQuestions"), where("subject", "==", name));
+        const snap = await getDocs(q);
+        
+        if (snap.empty) {
+            list.innerHTML = `<div class="mgr-empty">📭 لا توجد أسئلة لهذه المادة على الخادم</div>`;
+            return;
+        }
+
+        const letters = ["أ","ب","ج","د"];
+        const lettersE = ["A","B","C","D"];
+        let html = "";
+        let idx = 0;
+        snap.forEach(docSnap => {
+            idx++;
+            const q = docSnap.data();
+            const docId = docSnap.id;
+            const opts = Array.isArray(q.options) ? q.options : [];
+            const cIdx = lettersE.indexOf(String(q.correct||"").toUpperCase());
+            const optsHtml = opts.map((o,j) =>
+                `<span class="mgr-q-opt${j===cIdx?" correct":""}">${letters[j]}: ${esc(o)}</span>`
+            ).join("");
+            html += `
+            <div class="mgr-q-row" id="mgr-row-${docId}">
+                <div class="mgr-q-num">${idx}</div>
+                <div>
+                    <div class="mgr-q-text">${esc(q.text||"")}</div>
+                    <div class="mgr-q-opts">${optsHtml}</div>
+                    ${q.topic ? `<span style="font-size:.72rem;color:var(--text2)">📌 ${esc(q.topic)}</span>` : ""}
+                </div>
+                <button class="mgr-q-del" onclick="deleteSingleQuestion('${docId}', '${name}')">🗑️ حذف</button>
+            </div>`;
+        });
+        list.innerHTML = html;
+
+    } catch (e) {
+        list.innerHTML = `<div class="mgr-loading" style="color:var(--error)">❌ فشل: ${esc(e.message)}</div>`;
+    }
+}
+
+async function deleteSingleQuestion(docId, subject) {
+    if (!window._fbReady) return;
+    try {
+        const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+        await deleteDoc(doc(db, "globalQuestions", docId));
+        const row = document.getElementById(`mgr-row-${docId}`);
+        if (row) row.remove();
+        if (mgrSubjectCounts[subject]) mgrSubjectCounts[subject]--;
+        document.getElementById("mgr-panel-title").textContent = `أسئلة مادة: ${subject} (${mgrSubjectCounts[subject] || 0} سؤال)`;
+        // Update card count
+        document.querySelectorAll(".subj-card").forEach(c => {
+            if (c.querySelector(".subj-name")?.textContent === subject) {
+                const el = c.querySelector(".subj-count");
+                if (el) el.textContent = mgrSubjectCounts[subject] || 0;
+            }
+        });
+        showNotif(`✅ تم حذف السؤال من مادة ${subject}`);
+        const listEl = document.getElementById("mgr-list");
+        if (listEl && listEl.querySelectorAll(".mgr-q-row").length === 0) {
+            listEl.innerHTML = `<div class="mgr-empty">📭 لا توجد أسئلة لهذه المادة على الخادم</div>`;
+        }
+    } catch(e) {
+        showNotif(`❌ فشل الحذف: ${e.message}`, true);
+    }
+}
+
+async function deleteSubjectAll() {
+    if (!mgrSelectedSubject) return;
+    const name = mgrSelectedSubject;
+    const count = mgrSubjectCounts[name] || 0;
+    if (!confirm(`⚠️ هل أنت متأكد من حذف جميع (${count}) سؤال من مادة "${name}"؟ لا يمكن التراجع!`)) return;
+
+    document.getElementById("mgr-list").innerHTML = `<div class="mgr-loading"><div class="spinner"></div>جاري الحذف...</div>`;
+    try {
+        const { collection, getDocs, query, where, doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+        const q = query(collection(db, "globalQuestions"), where("subject", "==", name));
+        const snap = await getDocs(q);
+        let deleted = 0;
+        for (const d of snap.docs) {
+            await deleteDoc(doc(db, "globalQuestions", d.id));
+            deleted++;
+        }
+        mgrSubjectCounts[name] = 0;
+        document.getElementById("mgr-panel-title").textContent = `أسئلة مادة: ${name} (0 سؤال)`;
+        document.getElementById("mgr-list").innerHTML = `<div class="mgr-empty">📭 لا توجد أسئلة لهذه المادة على الخادم</div>`;
+        // Update card
+        document.querySelectorAll(".subj-card").forEach(c => {
+            if (c.querySelector(".subj-name")?.textContent === name) {
+                const el = c.querySelector(".subj-count");
+                if (el) el.textContent = "0";
+            }
+        });
+        showNotif(`✅ تم حذف ${deleted} سؤال من مادة ${name} بنجاح`);
+    } catch(e) {
+        showNotif(`❌ فشل الحذف: ${e.message}`, true);
+        selectSubject(name);
+    }
+}
 </script>
 </body>
 </html>
