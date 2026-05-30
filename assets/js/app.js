@@ -784,7 +784,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         if (Array.isArray(savedState.customQuestions)) {
-            appState.customQuestions = savedState.customQuestions;
+            // دمج أسئلة Firebase مع الأسئلة المحلية (من لوحة الأدمن) بدون تكرار
+            const localQs = Array.isArray(appState.customQuestions) ? appState.customQuestions : [];
+            const cloudQs = savedState.customQuestions;
+            const allIds  = new Set(cloudQs.map(q => q.id));
+            const merged  = [...cloudQs, ...localQs.filter(q => !allIds.has(q.id))];
+            appState.customQuestions = merged;
         }
 
         if (Array.isArray(savedState.weeklyActivity) && savedState.weeklyActivity.length === 7) {
