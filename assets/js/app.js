@@ -4,7 +4,7 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
     // قائمة الإيميلات التي يحق لها رؤية زر "لوحة المطور" (أضف إيميلك هنا)
-    const ADMIN_EMAILS = ["nour714@gmail.com"];
+    const ADMIN_EMAILS = ["noureg122@gmail.com"];
 
     const queryParams = new URLSearchParams(window.location.search);
     const launchSource = queryParams.get("source") || "";
