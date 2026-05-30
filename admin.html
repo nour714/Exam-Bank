@@ -477,6 +477,7 @@ function buildTable(page) {
             <div class="q-num">${i+1}</div>
             <div class="q-body">
                 <div class="q-text-main">${esc(q.text)}</div>
+                ${q.croppedUrl ? `<img src="${q.croppedUrl}" style="max-height:120px; border-radius:6px; margin-bottom:10px; border:1px solid var(--border);" alt="رسمة السؤال">` : ''}
                 <div class="q-meta-row">
                     <span class="q-chip">📚 ${esc(q.subject)}</span>
                     ${q.topic ? `<span class="q-chip">📌 ${esc(q.topic)}</span>` : ""}
@@ -536,44 +537,74 @@ function setProgress(done, total, status) {
 }
 
 async function extractAllQuestions(dataUrl) {
-    const res = await fetch(`${API_URL}/chat/completions`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-            model: MODEL, temperature: 0.1,
-            response_format: { type: "json_object" },
-            messages: [
-                { role: "system", content: [
-                    "أنت نظام استخراج أسئلة من صفحات كتب الثانوية العامة المصرية.",
-                    "استخرج جميع أسئلة الاختيار من متعدد الموجودة في الصورة، بغض النظر عن عددها.",
-                    "لكل سؤال: text, options (array 4), correct (A/B/C/D), subject, topic, hasDiagram (true إذا يشير لشكل/رسمة).",
-                    "أعد JSON بالمفتاح: questions (array).",
-                    "إذا لا توجد أسئلة: {\"questions\":[]}",
-                    "المواد: الفيزياء, الكيمياء, الأحياء, الرياضيات, اللغة العربية, اللغة الإنجليزية, الجيولوجيا, التاريخ, الجغرافيا.",
-                    "لا تضع Markdown."
-                ].join(" ")},
-                { role: "user", content: [
-                    { type: "text", text: "استخرج جميع أسئلة الاختيار من متعدد من هذه الصفحة." },
-                    { type: "image_url", image_url: { url: dataUrl } }
-                ]}
-            ]
-        })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error?.message || `خطأ ${res.status}`);
-    const content = data.choices?.[0]?.message?.content || "";
-    let parsed;
-    try { parsed = JSON.parse(content); } catch { throw new Error("رد غير مفهوم من الذكاء الاصطناعي"); }
-    const raw = Array.isArray(parsed.questions) ? parsed.questions : [];
-    return raw.map(q => {
-        const opts = Array.isArray(q.options) ? q.options.map(o => String(o||"").trim()) : [];
-        while (opts.length < 4) opts.push(`اختيار ${opts.length+1}`);
-        const correct = ["A","B","C","D"].includes(String(q.correct||"").toUpperCase())
-            ? String(q.correct).toUpperCase() : "A";
-        return { text: String(q.text||"").trim(), options: opts.slice(0,4), correct,
-            subject: String(q.subject||"الفيزياء").trim(), topic: String(q.topic||"").trim(),
-            hasDiagram: !!q.hasDiagram, added: false };
-    }).filter(q => q.text.length > 3);
+        const img = new Image();
+        img.src = dataUrl;
+        await new Promise(r => img.onload = r);
+
+        const res = await fetch(`${API_URL}/chat/completions`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                model: MODEL, temperature: 0.1,
+                response_format: { type: "json_object" },
+                messages: [
+                    { role: "system", content: [
+                        "أنت نظام استخراج أسئلة من صفحات كتب الثانوية العامة المصرية.",
+                        "استخرج جميع أسئلة الاختيار من متعدد الموجودة في الصورة، بغض النظر عن عددها.",
+                        "لكل سؤال: text, options (array 4), correct (A/B/C/D), subject, topic, hasDiagram (true إذا يشير لشكل/رسمة).",
+                        "هام جداً للرسومات: إذا كان السؤال يحتوي على رسمة خاصة به، قم بوضع إحداثيات هذه الرسمة في حقل `diagramBox` كمصفوفة [ymin, xmin, ymax, xmax] بأرقام من 0 إلى 1000. يجب أن يحيط الصندوق بالرسمة فقط.",
+                        "أعد JSON بالمفتاح: questions (array).",
+                        "إذا لا توجد أسئلة: {\"questions\":[]}",
+                        "المواد: الفيزياء, الكيمياء, الأحياء, الرياضيات, اللغة العربية, اللغة الإنجليزية, الجيولوجيا, التاريخ, الجغرافيا.",
+                        "لا تضع Markdown."
+                    ].join(" ")},
+                    { role: "user", content: [
+                        { type: "text", text: "استخرج جميع أسئلة الاختيار من متعدد من هذه الصفحة." },
+                        { type: "image_url", image_url: { url: dataUrl } }
+                    ]}
+                ]
+            })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error?.message || `خطأ ${res.status}`);
+        const content = data.choices?.[0]?.message?.content || "";
+        let parsed;
+        try { parsed = JSON.parse(content); } catch { throw new Error("رد غير مفهوم من الذكاء الاصطناعي"); }
+        const raw = Array.isArray(parsed.questions) ? parsed.questions : [];
+        return raw.map(q => {
+            const opts = Array.isArray(q.options) ? q.options.map(o => String(o||"").trim()) : [];
+            while (opts.length < 4) opts.push(`اختيار ${opts.length+1}`);
+            const correct = ["A","B","C","D"].includes(String(q.correct||"").toUpperCase())
+                ? String(q.correct).toUpperCase() : "A";
+            
+            let croppedUrl = null;
+            if (q.hasDiagram && Array.isArray(q.diagramBox) && q.diagramBox.length === 4) {
+                try {
+                    const [ymin, xmin, ymax, xmax] = q.diagramBox;
+                    const sx = (xmin / 1000) * img.width;
+                    const sy = (ymin / 1000) * img.height;
+                    const sW = ((xmax - xmin) / 1000) * img.width;
+                    const sH = ((ymax - ymin) / 1000) * img.height;
+                    
+                    if (sW > 0 && sH > 0) {
+                        const canvas = document.createElement("canvas");
+                        // add padding
+                        const pad = 10;
+                        canvas.width = sW + pad*2;
+                        canvas.height = sH + pad*2;
+                        const ctx = canvas.getContext("2d");
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillRect(0,0, canvas.width, canvas.height);
+                        ctx.drawImage(img, Math.max(0, sx - pad), Math.max(0, sy - pad), sW + pad*2, sH + pad*2, 0, 0, sW + pad*2, sH + pad*2);
+                        croppedUrl = canvas.toDataURL("image/jpeg", 0.9);
+                    }
+                } catch(e) { console.error("Crop failed", e); }
+            }
+
+            return { text: String(q.text||"").trim(), options: opts.slice(0,4), correct,
+                subject: String(q.subject||"الفيزياء").trim(), topic: String(q.topic||"").trim(),
+                hasDiagram: !!q.hasDiagram, croppedUrl: croppedUrl, added: false };
+        }).filter(q => q.text.length > 3);
 }
 
 // ===== ADD TO BANK =====
@@ -619,7 +650,7 @@ async function pushToFirebase(questions, pageDataUrl) {
         options:      q.options,
         correct:      q.correct,
         hasDiagram:   q.hasDiagram,
-        imageDataUrl: q.hasDiagram ? (pageDataUrl || "") : "",
+        imageDataUrl: q.hasDiagram ? (q.croppedUrl || pageDataUrl || "") : "",
         isCustom:     true,
         createdDate:  new Date().toLocaleDateString("ar-EG")
     }));
