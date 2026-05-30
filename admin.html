@@ -627,7 +627,7 @@ async function extractAllQuestions(dataUrl) {
         img.src = dataUrl;
         await new Promise(r => img.onload = r);
 
-        const tryExtract = async (retries = 2) => {
+        const tryExtract = async (retries = 3, attempt = 1) => {
             try {
                 const res = await fetch(`${API_URL}/chat/completions`, {
                     method: "POST",
@@ -653,28 +653,46 @@ async function extractAllQuestions(dataUrl) {
                         ]
                     })
                 });
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data.error?.message || `خطأ ${res.status}`);
+                
+                const textResponse = await res.text();
+                let data = {};
+                try { data = JSON.parse(textResponse); } catch(e) {}
+                
+                if (!res.ok) {
+                    if (res.status === 429) throw new Error("تجاوز حد الطلبات (Rate Limit)، سيتم إعادة المحاولة...");
+                    throw new Error(data.error?.message || `خطأ HTTP ${res.status}`);
+                }
+                
                 let content = data.choices?.[0]?.message?.content || "";
+                
+                // تنظيف الرد من علامات Markdown التي قد يضيفها النموذج
+                content = content.replace(/^```json/mi, '').replace(/```$/mi, '').trim();
+                
                 const firstBrace = content.indexOf('{');
                 const lastBrace = content.lastIndexOf('}');
                 if (firstBrace !== -1 && lastBrace !== -1) {
                     content = content.substring(firstBrace, lastBrace + 1);
                 }
+                
                 let parsed;
-                try { parsed = JSON.parse(content); } catch (e) { throw new Error("رد غير مفهوم من الذكاء الاصطناعي"); }
+                try { 
+                    parsed = JSON.parse(content); 
+                } catch (e) { 
+                    throw new Error("رد غير مفهوم من الذكاء الاصطناعي - فشل في تحويل JSON"); 
+                }
                 return Array.isArray(parsed.questions) ? parsed.questions : [];
             } catch (e) {
                 if (retries > 0) {
-                    console.warn("Extraction failed, retrying...", e);
-                    await new Promise(r => setTimeout(r, 2000));
-                    return tryExtract(retries - 1);
+                    console.warn(`Extraction failed (attempt ${attempt}), retrying...`, e);
+                    const delay = Math.min(10000, 1000 * Math.pow(2, attempt)); // 2s, 4s, 8s...
+                    await new Promise(r => setTimeout(r, delay));
+                    return tryExtract(retries - 1, attempt + 1);
                 }
                 throw e;
             }
         };
 
-        const raw = await tryExtract();
+        const raw = await tryExtract(4); // زيادة عدد مرات المحاولة إلى 4
 
         return raw.map(q => {
             const opts = Array.isArray(q.options) ? q.options.map(o => String(o||"").trim()) : [];
