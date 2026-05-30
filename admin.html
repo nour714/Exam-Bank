@@ -663,6 +663,17 @@ async function startAll() {
     if (isRunning) return;
     isRunning = true; updateButtons();
 
+    // Reset duplicate tracking based on already extracted questions to allow re-extracting deleted pages
+    extractedNormTexts = new Set();
+    pages.forEach(p => {
+        if (p.status === "done" && Array.isArray(p.questions)) {
+            p.questions.forEach(q => {
+                const norm = String(q.text || "").replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '');
+                extractedNormTexts.add(norm);
+            });
+        }
+    });
+
     const pending = pages.filter(p => p.status === "pending" || p.status === "error");
     let done = 0; const total = pending.length;
 
@@ -759,7 +770,10 @@ async function extractAllQuestions(dataUrl) {
                 } catch (e) { 
                     throw new Error("رد غير مفهوم من الذكاء الاصطناعي - فشل في تحويل JSON"); 
                 }
-                return Array.isArray(parsed.questions) ? parsed.questions : [];
+                
+                if (Array.isArray(parsed.questions)) return parsed.questions;
+                if (Array.isArray(parsed)) return parsed;
+                return [];
             } catch (e) {
                 if (retries > 0) {
                     console.warn(`Extraction failed (attempt ${attempt}), retrying...`, e);
