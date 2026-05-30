@@ -837,7 +837,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             const cloudState = await firebaseBackend.loadUserState();
             if (cloudState) {
                 applyPersistedState(cloudState);
-                showToast("تم تحميل بياناتك من Firebase", "success");
             }
         } catch (error) {
             console.warn("تعذر تحميل البيانات من Firebase:", error);
