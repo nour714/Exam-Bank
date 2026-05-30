@@ -595,46 +595,62 @@ function setProgress(done, total, status) {
     document.getElementById("prog-status").textContent = status;
 }
 
+let extractedNormTexts = new Set();
+
 async function extractAllQuestions(dataUrl) {
         const img = new Image();
         img.src = dataUrl;
         await new Promise(r => img.onload = r);
 
-        const res = await fetch(`${API_URL}/chat/completions`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-                model: MODEL, temperature: 0.1,
-                response_format: { type: "json_object" },
-                messages: [
-                    { role: "system", content: [
-                        "أنت نظام استخراج أسئلة من صفحات كتب الثانوية العامة المصرية.",
-                        "استخرج جميع أسئلة الاختيار من متعدد الموجودة في الصورة، بغض النظر عن عددها.",
-                        "لكل سؤال: text, options (array 4), correct (A/B/C/D), subject, topic, hasDiagram (true إذا يشير لشكل/رسمة).",
-                        "هام جداً للرسومات: إذا كان السؤال يحتوي على رسمة خاصة به، قم بوضع إحداثيات هذه الرسمة في حقل `diagramBox` كمصفوفة [ymin, xmin, ymax, xmax] بأرقام من 0 إلى 1000. يجب أن يحيط الصندوق بالرسمة فقط.",
-                        "أعد JSON بالمفتاح: questions (array).",
-                        "إذا لا توجد أسئلة: {\"questions\":[]}",
-                        "المواد: الفيزياء, الكيمياء, الأحياء, الرياضيات, اللغة العربية, اللغة الإنجليزية, الجيولوجيا, التاريخ, الجغرافيا.",
-                        "لا تضع Markdown."
-                    ].join(" ")},
-                    { role: "user", content: [
-                        { type: "text", text: "استخرج جميع أسئلة الاختيار من متعدد من هذه الصفحة." },
-                        { type: "image_url", image_url: { url: dataUrl } }
-                    ]}
-                ]
-            })
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error?.message || `خطأ ${res.status}`);
-        let content = data.choices?.[0]?.message?.content || "";
-        const firstBrace = content.indexOf('{');
-        const lastBrace = content.lastIndexOf('}');
-        if (firstBrace !== -1 && lastBrace !== -1) {
-            content = content.substring(firstBrace, lastBrace + 1);
-        }
-        let parsed;
-        try { parsed = JSON.parse(content); } catch (e) { console.error("Parse Error:", e, content); throw new Error("رد غير مفهوم من الذكاء الاصطناعي"); }
-        const raw = Array.isArray(parsed.questions) ? parsed.questions : [];
+        const tryExtract = async (retries = 2) => {
+            try {
+                const res = await fetch(`${API_URL}/chat/completions`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: MODEL, temperature: 0.1,
+                        response_format: { type: "json_object" },
+                        messages: [
+                            { role: "system", content: [
+                                "أنت نظام استخراج أسئلة من صفحات كتب الثانوية العامة المصرية.",
+                                "استخرج جميع أسئلة الاختيار من متعدد الموجودة في الصورة بدقة، بغض النظر عن عددها.",
+                                "لكل سؤال: text, options (array 4), correct (A/B/C/D), subject, topic, hasDiagram (true إذا يشير لشكل/رسمة).",
+                                "تأكد من عدم تكرار نفس السؤال في الرد.",
+                                "هام جداً للرسومات: إذا كان السؤال يحتوي على رسمة خاصة به، قم بوضع إحداثيات هذه الرسمة في حقل `diagramBox` كمصفوفة [ymin, xmin, ymax, xmax] بأرقام من 0 إلى 1000. يجب أن يحيط الصندوق بالرسمة فقط.",
+                                "أعد JSON بالمفتاح: questions (array).",
+                                "إذا لا توجد أسئلة: {\"questions\":[]}",
+                                "المواد: الفيزياء, الكيمياء, الأحياء, الرياضيات, اللغة العربية, اللغة الإنجليزية, الجيولوجيا, التاريخ, الجغرافيا."
+                            ].join(" ")},
+                            { role: "user", content: [
+                                { type: "text", text: "استخرج جميع أسئلة الاختيار من متعدد من هذه الصفحة." },
+                                { type: "image_url", image_url: { url: dataUrl } }
+                            ]}
+                        ]
+                    })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error?.message || `خطأ ${res.status}`);
+                let content = data.choices?.[0]?.message?.content || "";
+                const firstBrace = content.indexOf('{');
+                const lastBrace = content.lastIndexOf('}');
+                if (firstBrace !== -1 && lastBrace !== -1) {
+                    content = content.substring(firstBrace, lastBrace + 1);
+                }
+                let parsed;
+                try { parsed = JSON.parse(content); } catch (e) { throw new Error("رد غير مفهوم من الذكاء الاصطناعي"); }
+                return Array.isArray(parsed.questions) ? parsed.questions : [];
+            } catch (e) {
+                if (retries > 0) {
+                    console.warn("Extraction failed, retrying...", e);
+                    await new Promise(r => setTimeout(r, 2000));
+                    return tryExtract(retries - 1);
+                }
+                throw e;
+            }
+        };
+
+        const raw = await tryExtract();
+
         return raw.map(q => {
             const opts = Array.isArray(q.options) ? q.options.map(o => String(o||"").trim()) : [];
             while (opts.length < 4) opts.push(`اختيار ${opts.length+1}`);
@@ -652,7 +668,6 @@ async function extractAllQuestions(dataUrl) {
                     
                     if (sW > 0 && sH > 0) {
                         const canvas = document.createElement("canvas");
-                        // add padding
                         const pad = 10;
                         canvas.width = sW + pad*2;
                         canvas.height = sH + pad*2;
@@ -668,7 +683,14 @@ async function extractAllQuestions(dataUrl) {
             return { text: String(q.text||"").trim(), options: opts.slice(0,4), correct,
                 subject: String(q.subject||"الفيزياء").trim(), topic: String(q.topic||"").trim(),
                 hasDiagram: !!q.hasDiagram, croppedUrl: croppedUrl, added: false };
-        }).filter(q => q.text.length > 3);
+        }).filter(q => {
+            if (q.text.length <= 3) return false;
+            // Prevent duplicates
+            const norm = q.text.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '');
+            if (extractedNormTexts.has(norm)) return false;
+            extractedNormTexts.add(norm);
+            return true;
+        });
 }
 
 // ===== ADD TO BANK =====
@@ -766,6 +788,7 @@ function removePage(id) {
 function clearAll() {
     if (!confirm("هتمسح كل الصفحات والأسئلة من القائمة؟")) return;
     pages = [];
+    extractedNormTexts.clear();
     document.getElementById("pages-list").innerHTML =
         `<div class="empty"><div class="e-icon">📚</div><p>ارفع صور صفحات الكتاب لتبدأ</p></div>`;
     updateStats(); updateButtons();
