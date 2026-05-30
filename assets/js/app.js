@@ -1736,6 +1736,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const totalQuestions = appState.exam.questions.length;
+        if (totalQuestions === 0) {
+            showToast("لا توجد أسئلة حالياً في هذه المادة! 📭", "warning");
+            appState.exam.isActive = false;
+            return;
+        }
+
         appState.exam.title = `${subjectName} – بنك الأسئلة (${totalQuestions} سؤال)`;
         const examTitleDisplay = document.getElementById("exam-title-display");
         if (examTitleDisplay) examTitleDisplay.textContent = appState.exam.title;
