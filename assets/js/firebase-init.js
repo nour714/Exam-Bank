@@ -6,7 +6,9 @@ import {
     getDoc,
     getFirestore,
     serverTimestamp,
-    setDoc
+    setDoc,
+    collection,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -103,6 +105,20 @@ async function saveUserState(state) {
     }
 }
 
+async function loadGlobalQuestions() {
+    try {
+        const querySnapshot = await getDocs(collection(db, "globalQuestions"));
+        const questions = [];
+        querySnapshot.forEach((doc) => {
+            questions.push({ id: doc.id, ...doc.data() });
+        });
+        return questions;
+    } catch (e) {
+        console.error("Error loading global questions:", e);
+        return [];
+    }
+}
+
 window.examBankFirebase = {
     app,
     db,
@@ -112,7 +128,8 @@ window.examBankFirebase = {
     getUserId,
     waitForAuthState,
     loadUserState,
-    saveUserState
+    saveUserState,
+    loadGlobalQuestions
 };
 
 export default window.examBankFirebase;

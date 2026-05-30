@@ -322,17 +322,23 @@ onAuthStateChanged(auth, async (user) => {
 // ── Main save function ─────────────────────────────────────────
 window._saveQuestionsToFirebase = async function(newQuestions) {
     if (!window._fbReady || !window._fbUserId) throw new Error("Firebase غير جاهز");
-    const ref      = getUserDocRef();
-    const snapshot = await getDoc(ref);
-    const existing = snapshot.exists() ? snapshot.data() : {};
-    const oldQs    = Array.isArray(existing.customQuestions) ? existing.customQuestions : [];
-
-    // Merge: add new questions without duplicating by id
-    const existingIds = new Set(oldQs.map(q => q.id));
-    const merged = [...oldQs, ...newQuestions.filter(q => !existingIds.has(q.id))];
-
-    await setDoc(ref, { ...existing, customQuestions: merged, updatedAt: serverTimestamp() }, { merge: true });
-    return merged.length;
+    
+    // Save to the globalQuestions collection so everyone can see them
+    const { collection, setDoc, doc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+    let count = 0;
+    
+    for (const q of newQuestions) {
+        // use q.id as document id
+        const docRef = doc(collection(db, "globalQuestions"), q.id);
+        await setDoc(docRef, {
+            ...q,
+            addedBy: window._fbUserId,
+            updatedAt: serverTimestamp()
+        }, { merge: true });
+        count++;
+    }
+    
+    return count;
 };
 </script>
 

@@ -839,12 +839,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function loadStateFromFirebase() {
         const firebaseBackend = await getFirebaseBackend();
-        if (!firebaseBackend || typeof firebaseBackend.loadUserState !== "function") return;
+        if (!firebaseBackend) return;
 
         try {
-            const cloudState = await firebaseBackend.loadUserState();
-            if (cloudState) {
-                applyPersistedState(cloudState);
+            if (typeof firebaseBackend.loadUserState === "function") {
+                const cloudState = await firebaseBackend.loadUserState();
+                if (cloudState) {
+                    applyPersistedState(cloudState);
+                }
+            }
+            
+            // تحميل الأسئلة العامة من قاعدة البيانات
+            if (typeof firebaseBackend.loadGlobalQuestions === "function") {
+                const globalQs = await firebaseBackend.loadGlobalQuestions();
+                if (globalQs && globalQs.length > 0) {
+                    const localQs = Array.isArray(appState.customQuestions) ? appState.customQuestions : [];
+                    const allIds = new Set(localQs.map(q => q.id));
+                    const merged = [...localQs, ...globalQs.filter(q => !allIds.has(q.id))];
+                    appState.customQuestions = merged;
+                }
             }
         } catch (error) {
             console.warn("تعذر تحميل البيانات من Firebase:", error);
