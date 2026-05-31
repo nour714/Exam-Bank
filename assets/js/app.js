@@ -2447,7 +2447,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const AI_API_KEY = "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";
     const AI_BASE_URL = "https://api.groq.com/openai/v1";
-    const AI_MODEL = "llama3-70b-8192";
+    const AI_MODEL = "llama-3.3-70b-versatile";
 
     async function requestAiProviderResponse(query) {
         const subject = detectSubjectFromQuery(query);
