@@ -2447,50 +2447,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function requestAiProviderResponse(query) {
         const subject = detectSubjectFromQuery(query);
-        const providerResponse = await fetch(`${GEMINI_BASE_URL}/chat/completions`, {
+        const providerResponse = await fetch("/api/ai-mentor", {
             method: "POST",
-            headers: {
-                Authorization: `Bearer ${GEMINI_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: GEMINI_MODEL,
-                temperature: 0.45,
-                response_format: { type: "json_object" },
-                messages: [
-                    {
-                        role: "system",
-                        content: [
-                            "أنت AI Mentor داخل منصة Exam Bank لطلاب ثالثة ثانوي.",
-                            "رد دائمًا بالعربية المصرية الواضحة وبأسلوب مدرس هادئ.",
-                            "لا تطوّل. اشرح في 3 نقاط عملية، ثم اسأل سؤال متابعة واحد، ثم اقترح امتحانًا مناسبًا.",
-                            "أعد JSON فقط بدون Markdown بالمفاتيح: subject, topic, explain, followUp, practicePrompt.",
-                            "explain يجب أن تكون array من 3 strings."
-                        ].join(" ")
-                    },
-                    {
-                        role: "user",
-                        content: `المادة المتوقعة: ${subject}\nسؤال الطالب: ${query}`
-                    }
-                ]
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: query, subject })
         });
 
         const data = await providerResponse.json().catch(() => ({}));
         if (!providerResponse.ok) {
-            throw new Error(data.error?.message || "AI provider request failed");
+            throw new Error(data.error || "AI provider request failed");
         }
 
-        const content = data.choices?.[0]?.message?.content || "";
-        const parsed = parseMentorResponse(content, subject, query);
-        
         return {
             type: "lesson",
-            subject: parsed.subject,
-            topic: parsed.topic,
-            explain: parsed.explain,
-            followUp: parsed.followUp,
-            practicePrompt: parsed.practicePrompt
+            subject: data.subject,
+            topic: data.topic,
+            explain: data.explain,
+            followUp: data.followUp,
+            practicePrompt: data.practicePrompt
         };
     }
 
@@ -2767,48 +2741,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     async function requestSimilarQuestions(payload) {
-        const { questionText, subject, topic, correctAnswer, userAnswer, options } = payload;
-        const providerResponse = await fetch(`${GEMINI_BASE_URL}/chat/completions`, {
+        const response = await fetch("/api/generate-similar-questions", {
             method: "POST",
-            headers: { Authorization: `Bearer ${GEMINI_API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-                model: GEMINI_MODEL,
-                temperature: 0.6,
-                response_format: { type: "json_object" },
-                messages: [
-                    {
-                        role: "system",
-                        content: [
-                            "أنت معلم خبير لطلاب الثانوية العامة المصرية.",
-                            "مهمتك: شرح سبب الخطأ في سؤال ثم توليد 3 أسئلة اختيار من متعدد مشابهة بنفس الفكرة ومستوى الصعوبة.",
-                            "رد دائمًا بالعربية المصرية الواضحة.",
-                            "أعد JSON فقط بدون Markdown بالمفاتيح: explanation (array من 3 strings), similarQuestions (array من 3 objects).",
-                            "كل object في similarQuestions يحتوي على: text (string), options (array من 4 strings), correct (A/B/C/D), hint (string قصير)."
-                        ].join(" ")
-                    },
-                    {
-                        role: "user",
-                        content: [
-                            `المادة: ${subject || "الفيزياء"}`,
-                            topic ? `الدرس/الموضوع: ${topic}` : "",
-                            `نص السؤال: ${questionText || ""}`,
-                            (options && options.length) ? `الاختيارات: ${options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`).join(" | ")}` : "",
-                            correctAnswer ? `الإجابة الصحيحة: ${correctAnswer}` : "",
-                            userAnswer ? `إجابة الطالب الخاطئة: ${userAnswer}` : "الطالب لم يجب",
-                            "اشرح سبب الخطأ في 3 نقاط مختصرة، ثم ولّد 3 أسئلة شبيهة بنفس الفكرة."
-                        ].filter(Boolean).join("\n")
-                    }
-                ]
-            })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
         });
 
-        const data = await providerResponse.json().catch(() => ({}));
-        if (!providerResponse.ok) {
-            throw new Error(data.error?.message || "AI provider request failed");
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(data.error || "Failed to generate similar questions");
         }
 
-        const content = data.choices?.[0]?.message?.content || "";
-        return parseSimilarResponse(content);
+        return data;
     }
 
     function renderWrongAnswersList() {
