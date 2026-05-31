@@ -2445,26 +2445,60 @@ document.addEventListener("DOMContentLoaded", async () => {
         return match ? match.subject : "الفيزياء";
     }
 
+    const AI_API_KEY = "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";
+    const AI_BASE_URL = "https://api.groq.com/openai/v1";
+    const AI_MODEL = "llama3-70b-8192";
+
     async function requestAiProviderResponse(query) {
         const subject = detectSubjectFromQuery(query);
-        const providerResponse = await fetch("/api/ai-mentor", {
+        const providerResponse = await fetch(`${AI_BASE_URL}/chat/completions`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: query, subject })
+            headers: {
+                "Authorization": `Bearer ${AI_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: AI_MODEL,
+                temperature: 0.45,
+                response_format: { type: "json_object" },
+                messages: [
+                    {
+                        role: "system",
+                        content: [
+                            "أنت AI Mentor داخل منصة Exam Bank لطلاب ثالثة ثانوي.",
+                            "رد دائمًا بالعربية المصرية الواضحة وبأسلوب مدرس هادئ.",
+                            "لا تطوّل. اشرح في 3 نقاط عملية، ثم اسأل سؤال متابعة واحد، ثم اقترح امتحانًا مناسبًا.",
+                            "أعد JSON فقط بدون Markdown بالمفاتيح: subject, topic, explain, followUp, practicePrompt.",
+                            "explain يجب أن تكون array من 3 strings."
+                        ].join(" ")
+                    },
+                    {
+                        role: "user",
+                        content: `المادة المتوقعة: ${subject}\nسؤال الطالب: ${query}`
+                    }
+                ]
+            })
         });
 
         const data = await providerResponse.json().catch(() => ({}));
         if (!providerResponse.ok) {
-            throw new Error(data.error || "AI provider request failed");
+            throw new Error(data.error?.message || "AI provider request failed");
+        }
+
+        let parsedContent;
+        try {
+            parsedContent = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+        } catch {
+            parsedContent = {};
         }
 
         return {
             type: "lesson",
-            subject: data.subject,
-            topic: data.topic,
-            explain: data.explain,
-            followUp: data.followUp,
-            practicePrompt: data.practicePrompt
+            subject: parsedContent.subject || subject,
+            topic: parsedContent.topic || query,
+            explain: Array.isArray(parsedContent.explain) ? parsedContent.explain : ["تعذر توليد شرح", "حاول مرة أخرى"],
+            followUp: parsedContent.followUp || "ما رأيك؟",
+            practicePrompt: parsedContent.practicePrompt || "ابدأ الاختبار"
         };
     }
 
@@ -2741,18 +2775,57 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     async function requestSimilarQuestions(payload) {
-        const response = await fetch("/api/generate-similar-questions", {
+        const { questionText, subject, topic, correctAnswer, userAnswer, options } = payload;
+        const response = await fetch(`${AI_BASE_URL}/chat/completions`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
+            headers: { 
+                "Authorization": `Bearer ${AI_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: AI_MODEL,
+                temperature: 0.6,
+                response_format: { type: "json_object" },
+                messages: [
+                    {
+                        role: "system",
+                        content: [
+                            "أنت معلم خبير لطلاب الثانوية العامة المصرية.",
+                            "مهمتك: شرح سبب الخطأ في سؤال ثم توليد 3 أسئلة اختيار من متعدد مشابهة بنفس الفكرة ومستوى الصعوبة.",
+                            "رد دائمًا بالعربية المصرية الواضحة.",
+                            "أعد JSON فقط بدون Markdown بالمفاتيح: explanation (array من 3 strings), similarQuestions (array من 3 objects).",
+                            "كل object في similarQuestions يحتوي على: text (string), options (array من 4 strings), correct (A/B/C/D), hint (string قصير)."
+                        ].join(" ")
+                    },
+                    {
+                        role: "user",
+                        content: [
+                            `المادة: ${subject || "الفيزياء"}`,
+                            topic ? `الدرس/الموضوع: ${topic}` : "",
+                            `نص السؤال: ${questionText || ""}`,
+                            (options && options.length) ? `الاختيارات: ${options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`).join(" | ")}` : "",
+                            correctAnswer ? `الإجابة الصحيحة: ${correctAnswer}` : "",
+                            userAnswer ? `إجابة الطالب الخاطئة: ${userAnswer}` : "الطالب لم يجب",
+                            "اشرح سبب الخطأ في 3 نقاط مختصرة، ثم ولّد 3 أسئلة شبيهة بنفس الفكرة."
+                        ].filter(Boolean).join("\n")
+                    }
+                ]
+            })
         });
 
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
-            throw new Error(data.error || "Failed to generate similar questions");
+            throw new Error(data.error?.message || "Failed to generate similar questions");
         }
 
-        return data;
+        let parsedContent;
+        try {
+            parsedContent = JSON.parse(data.choices?.[0]?.message?.content || "{}");
+        } catch {
+            parsedContent = { explanation: ["حدث خطأ في التحليل"], similarQuestions: [] };
+        }
+        
+        return parsedContent;
     }
 
     function renderWrongAnswersList() {
