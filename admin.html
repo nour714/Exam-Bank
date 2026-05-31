@@ -451,7 +451,7 @@ window.clearFirebaseDB = async function() {
 const ADMIN_PASS  = "nourwael2006"; // ← غيّر كلمة المرور هنا
 const API_KEY     = "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";
 const API_URL     = "https://api.groq.com/openai/v1";
-const MODEL       = "llama-3.2-90b-vision-preview";
+const MODEL       = "meta-llama/llama-4-scout-17b-16e-instruct";
 const CONCURRENCY = 1;
 const MAX_PX      = 1400;
 const IMG_QUALITY = 0.85;
@@ -791,7 +791,7 @@ async function extractAllQuestions(dataUrl) {
                     await new Promise(r => setTimeout(r, delay));
                     return tryExtract(retries - 1, attempt + 1);
                 }
-                throw new Error("تجاوز حد الطلبات، يرجى المحاولة لاحقاً أو التحقق من خطة Gemini API.");
+                throw new Error("تجاوز حد الطلبات، يرجى المحاولة لاحقاً.");
             }
         };
 
