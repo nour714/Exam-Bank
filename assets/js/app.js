@@ -602,19 +602,21 @@ document.addEventListener("DOMContentLoaded", async () => {
                 }
             }
             
-            // تحميل الأسئلة العامة من قاعدة البيانات
+            // تحميل الأسئلة العامة من قاعدة البيانات — Firebase هو المصدر الوحيد للحقيقة
             if (typeof firebaseBackend.loadGlobalQuestions === "function") {
                 const globalQs = await firebaseBackend.loadGlobalQuestions();
-                if (globalQs && globalQs.length > 0) {
-                    const localQs = Array.isArray(appState.customQuestions) ? appState.customQuestions : [];
-                    const allIds = new Set(localQs.map(q => q.id));
-                    const merged = [...localQs, ...globalQs.filter(q => !allIds.has(q.id))];
-                    if (merged.length > localQs.length) {
-                        appState.customQuestions = merged;
-                        saveStateToLocalStorage(false);
-                        updateUserStatsUI();
-                    }
-                }
+                // الأسئلة المخصصة للمستخدم (customQuestions) تنقسم لنوعين:
+                // 1. أسئلة المستخدم نفسه (المصدر: customQuestion) — نحتفظ بيها
+                // 2. الأسئلة العامة من Firebase (المصدر: globalQuestion) — Firebase هو مرجعها
+                const localQs = Array.isArray(appState.customQuestions) ? appState.customQuestions : [];
+                // نحتفظ فقط بالأسئلة التي أضافها المستخدم نفسه (مش من Firebase)
+                const userOwnQs = localQs.filter(q => q.source === "custom" || q.source === "user");
+                // ندمج أسئلة المستخدم مع أسئلة Firebase (Firebase تستبدل كل اللي عندنا من الـ global)
+                const globalIds = new Set(globalQs.map(q => q.id));
+                const merged = [...globalQs, ...userOwnQs.filter(q => !globalIds.has(q.id))];
+                appState.customQuestions = merged;
+                saveStateToLocalStorage(false);
+                updateUserStatsUI();
             }
         } catch (error) {
             console.warn("تعذر تحميل البيانات من Firebase:", error);

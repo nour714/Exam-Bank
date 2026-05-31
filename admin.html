@@ -874,18 +874,27 @@ async function addAllQuestions() {
 
 async function pushToFirebase(questions, pageDataUrl) {
     // Build question objects matching app.js format
-    const qObjs = questions.map(q => ({
-        id:           "custom-" + Date.now() + "-" + Math.random().toString(36).slice(2),
-        text:         q.text,
-        subject:      q.subject,
-        topic:        q.topic,
-        options:      q.options,
-        correct:      q.correct,
-        hasDiagram:   q.hasDiagram,
-        imageDataUrl: q.hasDiagram ? (q.croppedUrl || pageDataUrl || "") : "",
-        isCustom:     true,
-        createdDate:  new Date().toLocaleDateString("ar-EG")
-    }));
+    const qObjs = questions.map(q => {
+        // نولّد ID ثابت بناءً على نص السؤال + المادة — هدف: منع التكرار لو اترفعت نفس الصورة مرتين
+        const rawKey = (q.text + "__" + q.subject + "__" + (q.options || []).join("|")).toLowerCase().replace(/\s+/g, "");
+        let hash = 0;
+        for (let i = 0; i < rawKey.length; i++) {
+            hash = (Math.imul(31, hash) + rawKey.charCodeAt(i)) | 0;
+        }
+        const stableId = "q-" + Math.abs(hash).toString(36);
+        return {
+            id:           stableId,
+            text:         q.text,
+            subject:      q.subject,
+            topic:        q.topic,
+            options:      q.options,
+            correct:      q.correct,
+            hasDiagram:   q.hasDiagram,
+            imageDataUrl: q.hasDiagram ? (q.croppedUrl || pageDataUrl || "") : "",
+            source:       "globalQuestion",
+            createdDate:  new Date().toLocaleDateString("ar-EG")
+        };
+    });
 
     // Also save to localStorage as backup
     try {
