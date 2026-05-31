@@ -326,7 +326,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             solvedCount: 0,
             streak: 0,
             accuracy: 0,
-            avatar: ""
+            avatar: "",
+            lastActiveDate: ""
         },
         studyGroups: cloneDefaultStudyGroups(),
         exam: {
@@ -347,12 +348,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     function recordTodayActivity(questionsCount) {
+        if (questionsCount <= 0) return;
+
         const jsDay = new Date().getDay();
         const todayIdx = (jsDay + 1) % 7;
         if (!Array.isArray(appState.weeklyActivity) || appState.weeklyActivity.length !== 7) {
             appState.weeklyActivity = [0,0,0,0,0,0,0];
         }
         appState.weeklyActivity[todayIdx] = (appState.weeklyActivity[todayIdx] || 0) + questionsCount;
+
+        // تحديث الـ Streak
+        const todayStr = new Date().toISOString().split('T')[0];
+        const lastDateStr = appState.user.lastActiveDate;
+
+        if (lastDateStr !== todayStr) {
+            if (lastDateStr) {
+                const today = new Date(todayStr);
+                const lastDate = new Date(lastDateStr);
+                const diffTime = today - lastDate;
+                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays === 1) {
+                    appState.user.streak += 1;
+                } else if (diffDays > 1) {
+                    appState.user.streak = 1;
+                }
+            } else {
+                appState.user.streak = 1;
+            }
+            appState.user.lastActiveDate = todayStr;
+        }
     }
 
     function resetUserScopedState(name = "", email = "") {
@@ -365,7 +390,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             solvedCount: 0,
             streak: 0,
             accuracy: 0,
-            avatar: ""
+            avatar: "",
+            lastActiveDate: ""
         };
         appState.studyGroups = cloneDefaultStudyGroups();
         appState.customQuestions = [];

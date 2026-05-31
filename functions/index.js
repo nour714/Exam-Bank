@@ -2,8 +2,6 @@ import { onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 
 const aiApiKey = defineSecret("AI_API_KEY");
-const baseUrl = "https://generativelanguage.googleapis.com/v1beta/openai";
-const model = "gemini-2.5-flash";
 
 export const aiMentor = onRequest(
     {
@@ -24,6 +22,8 @@ export const aiMentor = onRequest(
 
         try {
             const apiKey = aiApiKey.value() || process.env.AI_API_KEY;
+            const baseUrl = (process.env.AI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
+            const model = process.env.AI_MODEL || "gpt-4o-mini";
 
             if (!apiKey) {
                 res.status(501).json({ error: "AI_API_KEY is not configured" });
@@ -105,6 +105,8 @@ export const extractQuestionImage = onRequest(
 
         try {
             const apiKey = aiApiKey.value() || process.env.AI_API_KEY;
+            const baseUrl = (process.env.AI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
+            const model = process.env.AI_VISION_MODEL || process.env.AI_MODEL || "gpt-4o-mini";
             const imageDataUrl = String(req.body?.imageDataUrl || "").trim();
 
             if (!apiKey) {
@@ -237,6 +239,8 @@ export const generateSimilarQuestions = onRequest(
         if (req.method !== "POST") { res.status(405).json({ error: "Method not allowed" }); return; }
         try {
             const apiKey = aiApiKey.value() || process.env.AI_API_KEY;
+            const baseUrl = (process.env.AI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "");
+            const model = process.env.AI_MODEL || "gpt-4o-mini";
             if (!apiKey) { res.status(501).json({ error: "AI_API_KEY is not configured" }); return; }
             const body = typeof req.body === "object" && req.body ? req.body : {};
             const questionText = String(body.questionText || "").trim();
