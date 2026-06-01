@@ -644,7 +644,7 @@ function buildTable(page) {
             <div class="q-num">${i+1}</div>
             <div class="q-body">
                 <div class="q-text-main">${esc(q.text)}</div>
-                ${q.croppedUrl ? `<img src="${q.croppedUrl}" style="max-height:120px; border-radius:6px; margin-bottom:10px; border:1px solid var(--border);" alt="رسمة السؤال">` : ''}
+                ${q.croppedUrl ? `<div style="display:flex;align-items:start;gap:10px;margin-bottom:10px;"><img src="${q.croppedUrl}" style="max-height:120px; border-radius:6px; border:1px solid var(--border);" alt="رسمة السؤال"> <button class="btn btn-danger btn-sm" onclick="removeCrop('${page.id}', ${i})" style="padding:4px 8px; font-size:0.7rem;">حذف الرسمة</button></div>` : ''}
                 <div class="q-meta-row">
                     <span class="q-chip">📚 ${esc(q.subject)}</span>
                     ${q.topic ? `<span class="q-chip">📌 ${esc(q.topic)}</span>` : ""}
@@ -653,6 +653,7 @@ function buildTable(page) {
                 <div class="q-opts">${optsHtml}</div>
             </div>
             <div class="q-side">
+                <button class="btn btn-outline btn-sm" onclick="openCropModal('${page.id}', ${i})" style="margin-bottom:5px;width:100%;justify-content:center;">✂️ قص الرسمة</button>
                 ${q.added
                     ? `<span class="added-check">✓ أُضيف</span>`
                     : `<button class="btn btn-success btn-sm" onclick="addOneQ('${page.id}',${i})">➕ أضف</button>`}
@@ -1199,6 +1200,122 @@ async function deleteSubjectAll() {
     }
 }
 
+// ===== MANUAL CROP =====
+let cropState = { pageId: null, qIdx: null, startX: 0, startY: 0, endX: 0, endY: 0, isDragging: false };
+
+function openCropModal(pageId, qIdx) {
+    const page = pages.find(p => p.id === pageId);
+    if (!page || !page.dataUrl) return;
+    cropState.pageId = pageId;
+    cropState.qIdx = qIdx;
+    
+    const img = document.getElementById("crop-img");
+    img.src = page.dataUrl;
+    document.getElementById("crop-box").style.display = "none";
+    document.getElementById("crop-modal").classList.add("open");
+}
+
+function closeCropModal() {
+    document.getElementById("crop-modal").classList.remove("open");
+    cropState.isDragging = false;
+}
+
+function removeCrop(pageId, qIdx) {
+    const page = pages.find(p => p.id === pageId);
+    if (!page) return;
+    const q = page.questions[qIdx];
+    q.croppedUrl = null;
+    q.hasDiagram = false;
+    refreshCard(pageId);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const cropContainer = document.getElementById("crop-container");
+    const cropBox = document.getElementById("crop-box");
+
+    cropContainer.addEventListener("mousedown", e => {
+        const rect = cropContainer.getBoundingClientRect();
+        cropState.startX = e.clientX - rect.left;
+        cropState.startY = e.clientY - rect.top;
+        cropState.isDragging = true;
+        cropBox.style.left = cropState.startX + "px";
+        cropBox.style.top = cropState.startY + "px";
+        cropBox.style.width = "0px";
+        cropBox.style.height = "0px";
+        cropBox.style.display = "block";
+    });
+
+    window.addEventListener("mousemove", e => {
+        if (!cropState.isDragging) return;
+        const rect = cropContainer.getBoundingClientRect();
+        cropState.endX = e.clientX - rect.left;
+        cropState.endY = e.clientY - rect.top;
+        
+        // Clamp to container bounds
+        cropState.endX = Math.max(0, Math.min(cropState.endX, rect.width));
+        cropState.endY = Math.max(0, Math.min(cropState.endY, rect.height));
+
+        const x = Math.min(cropState.startX, cropState.endX);
+        const y = Math.min(cropState.startY, cropState.endY);
+        const w = Math.abs(cropState.endX - cropState.startX);
+        const h = Math.abs(cropState.endY - cropState.startY);
+        
+        cropBox.style.left = x + "px";
+        cropBox.style.top = y + "px";
+        cropBox.style.width = w + "px";
+        cropBox.style.height = h + "px";
+    });
+
+    window.addEventListener("mouseup", () => {
+        cropState.isDragging = false;
+    });
+});
+
+function applyCrop() {
+    const page = pages.find(p => p.id === cropState.pageId);
+    if (!page) return;
+    const q = page.questions[cropState.qIdx];
+    
+    const img = document.getElementById("crop-img");
+    const rect = img.getBoundingClientRect();
+    
+    const x = Math.min(cropState.startX, cropState.endX);
+    const y = Math.min(cropState.startY, cropState.endY);
+    const w = Math.abs(cropState.endX - cropState.startX);
+    const h = Math.abs(cropState.endY - cropState.startY);
+    
+    if (w < 15 || h < 15) {
+        showNotif("التحديد صغير جداً، قم برسم مربع أو مستطيل واضح.", true);
+        return;
+    }
+    
+    const scaleX = img.naturalWidth / rect.width;
+    const scaleY = img.naturalHeight / rect.height;
+    
+    const sx = x * scaleX;
+    const sy = y * scaleY;
+    const sW = w * scaleX;
+    const sH = h * scaleY;
+    
+    const canvas = document.createElement("canvas");
+    canvas.width = sW;
+    canvas.height = sH;
+    const ctx = canvas.getContext("2d");
+    
+    const originalImg = new Image();
+    originalImg.onload = () => {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0,0, canvas.width, canvas.height);
+        ctx.drawImage(originalImg, sx, sy, sW, sH, 0, 0, sW, sH);
+        q.croppedUrl = canvas.toDataURL("image/jpeg", 0.9);
+        q.hasDiagram = true;
+        closeCropModal();
+        refreshCard(page.id);
+        showNotif("✅ تم قص الرسمة وحفظها بنجاح!");
+    };
+    originalImg.src = img.src;
+}
+
 // Edit functionality
 let editingDocId = null;
 let editingSubject = null;
@@ -1312,6 +1429,23 @@ async function saveEditedQuestion() {
         <div class="modal-actions">
             <button class="btn btn-outline" onclick="closeEditModal()">إلغاء</button>
             <button class="btn btn-success" id="btn-save-edit" onclick="saveEditedQuestion()">💾 حفظ التعديلات</button>
+        </div>
+    </div>
+</div>
+
+<!-- Crop Modal -->
+<div class="modal-overlay" id="crop-modal">
+    <div class="modal-box" style="max-width:95vw; max-height:95vh; text-align:center; padding:15px; display:flex; flex-direction:column; align-items:center;">
+        <h3 style="margin-bottom:15px; color:var(--accent);">✂️ قم برسم مربع حول الرسمة فقط لقصها</h3>
+        
+        <div style="position:relative; display:inline-block; user-select:none; max-width:100%; flex:1; overflow:auto; border:2px solid var(--border); border-radius:10px; background:var(--bg2);" id="crop-container">
+            <img id="crop-img" style="max-width:100%; max-height:70vh; display:block; pointer-events:none;" draggable="false">
+            <div id="crop-box" style="position:absolute; border:2px dashed #fbbf24; background:rgba(245,158,11,0.2); display:none; pointer-events:none;"></div>
+        </div>
+        
+        <div class="modal-actions" style="margin-top:20px; width:100%; justify-content:center; gap:15px;">
+            <button class="btn btn-outline" onclick="closeCropModal()">إلغاء</button>
+            <button class="btn btn-success" onclick="applyCrop()" style="padding:10px 30px; font-size:1.1rem;">✅ حفظ الرسمة</button>
         </div>
     </div>
 </div>
