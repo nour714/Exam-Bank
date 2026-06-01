@@ -222,6 +222,10 @@
             border-radius:8px;padding:6px 10px;cursor:pointer;font-size:.75rem;font-weight:700;
             white-space:nowrap;transition:all .2s;flex-shrink:0}
         .mgr-q-del:hover{background:rgba(239,68,68,.3)}
+        .mgr-q-edit{background:rgba(59,130,246,.15);color:var(--accent);border:1px solid rgba(59,130,246,.3);
+            border-radius:8px;padding:6px 10px;cursor:pointer;font-size:.75rem;font-weight:700;
+            white-space:nowrap;transition:all .2s;flex-shrink:0}
+        .mgr-q-edit:hover{background:rgba(59,130,246,.3)}
         .mgr-list{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
         .mgr-empty{text-align:center;padding:56px;color:var(--text2)}
         .mgr-loading{display:flex;align-items:center;gap:12px;padding:24px;color:var(--text2);font-size:.85rem}
@@ -1104,10 +1108,12 @@ async function selectSubject(name) {
         const lettersE = ["A","B","C","D"];
         let html = "";
         let idx = 0;
+        window._mgrCurrentQuestions = {};
         snap.forEach(docSnap => {
             idx++;
             const q = docSnap.data();
             const docId = docSnap.id;
+            window._mgrCurrentQuestions[docId] = q;
             const opts = Array.isArray(q.options) ? q.options : [];
             const cIdx = lettersE.indexOf(String(q.correct||"").toUpperCase());
             const optsHtml = opts.map((o,j) =>
@@ -1121,7 +1127,10 @@ async function selectSubject(name) {
                     <div class="mgr-q-opts">${optsHtml}</div>
                     ${q.topic ? `<span style="font-size:.72rem;color:var(--text2)">📌 ${esc(q.topic)}</span>` : ""}
                 </div>
-                <button class="mgr-q-del" onclick="deleteSingleQuestion('${docId}', '${name}')">🗑️ حذف</button>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <button class="mgr-q-edit" onclick="editSingleQuestion('${docId}', '${name}')">✏️ تعديل</button>
+                    <button class="mgr-q-del" onclick="deleteSingleQuestion('${docId}', '${name}')">🗑️ حذف</button>
+                </div>
             </div>`;
         });
         list.innerHTML = html;
@@ -1189,6 +1198,123 @@ async function deleteSubjectAll() {
         selectSubject(name);
     }
 }
+
+// Edit functionality
+let editingDocId = null;
+let editingSubject = null;
+
+function editSingleQuestion(docId, subject) {
+    const q = window._mgrCurrentQuestions[docId];
+    if (!q) return;
+    editingDocId = docId;
+    editingSubject = subject;
+    
+    document.getElementById("edit-q-text").value = q.text || "";
+    document.getElementById("edit-q-topic").value = q.topic || "";
+    document.getElementById("edit-q-optA").value = (q.options && q.options[0]) || "";
+    document.getElementById("edit-q-optB").value = (q.options && q.options[1]) || "";
+    document.getElementById("edit-q-optC").value = (q.options && q.options[2]) || "";
+    document.getElementById("edit-q-optD").value = (q.options && q.options[3]) || "";
+    document.getElementById("edit-q-correct").value = String(q.correct || "A").toUpperCase();
+    
+    document.getElementById("edit-modal").classList.add("open");
+}
+
+function closeEditModal() {
+    document.getElementById("edit-modal").classList.remove("open");
+    editingDocId = null;
+    editingSubject = null;
+}
+
+async function saveEditedQuestion() {
+    if (!editingDocId || !window._fbReady) return;
+    const btn = document.getElementById("btn-save-edit");
+    btn.disabled = true;
+    btn.textContent = "جاري الحفظ...";
+    
+    try {
+        const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
+        
+        const newText = document.getElementById("edit-q-text").value.trim();
+        const newTopic = document.getElementById("edit-q-topic").value.trim();
+        const newOpts = [
+            document.getElementById("edit-q-optA").value.trim(),
+            document.getElementById("edit-q-optB").value.trim(),
+            document.getElementById("edit-q-optC").value.trim(),
+            document.getElementById("edit-q-optD").value.trim()
+        ];
+        const newCorrect = document.getElementById("edit-q-correct").value;
+
+        await updateDoc(doc(window._db, "globalQuestions", editingDocId), {
+            text: newText,
+            topic: newTopic,
+            options: newOpts,
+            correct: newCorrect
+        });
+
+        showNotif("✅ تم تحديث السؤال بنجاح!");
+        closeEditModal();
+        if (editingSubject) selectSubject(editingSubject);
+
+    } catch (e) {
+        showNotif(`❌ فشل التحديث: ${e.message}`, true);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "💾 حفظ التعديلات";
+    }
+}
 </script>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal">
+    <div class="modal-box">
+        <h3 style="color:var(--accent);font-size:1.2rem;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:10px;">✏️ تعديل السؤال</h3>
+        
+        <div style="margin-bottom: 12px;">
+            <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">نص السؤال:</label>
+            <textarea id="edit-q-text" style="width:100%;height:80px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-family:inherit;font-size:0.9rem;"></textarea>
+        </div>
+        
+        <div style="margin-bottom: 12px;">
+            <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">الدرس / الموضوع:</label>
+            <input type="text" id="edit-q-topic" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-family:inherit;font-size:0.9rem;">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div>
+                <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">اختيار أ (A):</label>
+                <input type="text" id="edit-q-optA" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-family:inherit;font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">اختيار ب (B):</label>
+                <input type="text" id="edit-q-optB" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-family:inherit;font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">اختيار ج (C):</label>
+                <input type="text" id="edit-q-optC" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-family:inherit;font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">اختيار د (D):</label>
+                <input type="text" id="edit-q-optD" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-family:inherit;font-size:0.85rem;">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">الإجابة الصحيحة:</label>
+            <select id="edit-q-correct" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-family:inherit;font-size:0.9rem;outline:none;">
+                <option value="A">أ (A)</option>
+                <option value="B">ب (B)</option>
+                <option value="C">ج (C)</option>
+                <option value="D">د (D)</option>
+            </select>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeEditModal()">إلغاء</button>
+            <button class="btn btn-success" id="btn-save-edit" onclick="saveEditedQuestion()">💾 حفظ التعديلات</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
