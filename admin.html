@@ -456,6 +456,9 @@ const ADMIN_PASS  = "nourwael2006"; // ← غيّر كلمة المرور هنا
 const API_KEY     = "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";
 const API_URL     = "https://api.groq.com/openai/v1";
 const MODEL       = "llama-3.2-90b-vision-preview";
+const GEMINI_API_KEY = "AQ.Ab8RN6ITcTRv8JAoW_J3wovLkUzspHrvhZrewpKSkqDoUd_clw";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/openai";
+const GEMINI_MODEL   = "gemini-2.5-flash";
 const CONCURRENCY = 1;
 const MAX_PX      = 1400;
 const IMG_QUALITY = 0.85;
@@ -717,12 +720,65 @@ function setProgress(done, total, status) {
 
 let extractedNormTexts = new Set();
 
+function cleanJsonString(content) {
+    let cleaned = content.replace(/^```json/mi, '').replace(/```$/mi, '').trim();
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1) {
+        cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+    }
+    return cleaned;
+}
+
+function findMatchingQuestion(groqQuestions, geminiDiagram) {
+    const geminiSnippet = (geminiDiagram.snippet || "").trim();
+    if (!geminiSnippet) return null;
+    
+    const normalize = (txt) => {
+        return txt
+            .replace(/[\u064B-\u065F]/g, "") // Remove Arabic diacritics
+            .replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "") // Keep only letters and numbers
+            .toLowerCase();
+    };
+    
+    const normalizedSnippet = normalize(geminiSnippet);
+    if (!normalizedSnippet) return null;
+    
+    // 1. Check exact substring match
+    for (const q of groqQuestions) {
+        const normalizedQText = normalize(q.text);
+        if (normalizedQText.includes(normalizedSnippet) || normalizedSnippet.includes(normalizedQText)) {
+            return q;
+        }
+    }
+    
+    // 2. Check word overlap (fallback)
+    const snippetWords = geminiSnippet.split(/\s+/).map(normalize).filter(w => w.length > 1);
+    if (snippetWords.length >= 2) {
+        let bestMatch = null;
+        let maxOverlap = 0;
+        for (const q of groqQuestions) {
+            const qWords = q.text.split(/\s+/).map(normalize).filter(w => w.length > 1);
+            const overlap = snippetWords.filter(w => qWords.includes(w)).length;
+            if (overlap > maxOverlap && overlap >= 2) {
+                maxOverlap = overlap;
+                bestMatch = q;
+            }
+        }
+        if (bestMatch && (maxOverlap / snippetWords.length) >= 0.5) {
+            return bestMatch;
+        }
+    }
+    
+    return null;
+}
+
 async function extractAllQuestions(dataUrl) {
         const img = new Image();
         img.src = dataUrl;
         await new Promise(r => img.onload = r);
 
-        const tryExtract = async (retries = 3, attempt = 1) => {
+        const tryGroqExtract = async (retries = 4, attempt = 1) => {
             try {
                 const res = await fetch(`${API_URL}/chat/completions`, {
                     method: "POST",
@@ -734,9 +790,8 @@ async function extractAllQuestions(dataUrl) {
                             { role: "system", content: [
                                 "أنت نظام استخراج أسئلة من صفحات كتب الثانوية العامة المصرية.",
                                 "استخرج جميع أسئلة الاختيار من متعدد الموجودة في الصورة بدقة، بغض النظر عن عددها.",
-                                "لكل سؤال: text, options (array 4), correct (A/B/C/D), subject, topic, hasDiagram (true إذا يشير لشكل/رسمة).",
+                                "لكل سؤال: text, options (array 4), correct (A/B/C/D), subject, topic, hasDiagram (true إذا كان السؤال يحتوي على رسمة أو شكل توضيحي خاص به أو يشير إليه).",
                                 "تأكد من عدم تكرار نفس السؤال في الرد.",
-                                "هام جداً للرسومات: إذا كان السؤال يحتوي على رسمة خاصة به، قم بوضع إحداثيات هذه الرسمة في حقل `diagramBox` كمصفوفة [ymin, xmin, ymax, xmax] بأرقام من 0 إلى 1000. يجب أن يحيط الصندوق بالرسمة فقط.",
                                 "أعد JSON بالمفتاح: questions (array).",
                                 "إذا لا توجد أسئلة: {\"questions\":[]}",
                                 "المواد: الفيزياء, الكيمياء, الأحياء, الرياضيات, اللغة العربية, اللغة الإنجليزية, الجيولوجيا, التاريخ, الجغرافيا."
@@ -748,39 +803,31 @@ async function extractAllQuestions(dataUrl) {
                         ]
                     })
                 });
-                
+
                 const textResponse = await res.text();
                 let data = {};
                 try { data = JSON.parse(textResponse); } catch(e) {}
-                
+
                 if (!res.ok) {
                     if (res.status === 429) {
-                        let delay = 30000; // default 30s
+                        let delay = 30000;
                         const match = textResponse.match(/"retryDelay":\s*"(\d+)s"/);
                         if (match) delay = parseInt(match[1], 10) * 1000 + 2000;
                         throw new Error(`RATELIMIT:${delay}`);
                     }
                     throw new Error(data.error?.message || `خطأ HTTP ${res.status}`);
                 }
-                
+
                 let content = data.choices?.[0]?.message?.content || "";
-                
-                // تنظيف الرد من علامات Markdown التي قد يضيفها النموذج
-                content = content.replace(/^```json/mi, '').replace(/```$/mi, '').trim();
-                
-                const firstBrace = content.indexOf('{');
-                const lastBrace = content.lastIndexOf('}');
-                if (firstBrace !== -1 && lastBrace !== -1) {
-                    content = content.substring(firstBrace, lastBrace + 1);
-                }
-                
+                content = cleanJsonString(content);
+
                 let parsed;
                 try { 
                     parsed = JSON.parse(content); 
                 } catch (e) { 
-                    throw new Error("رد غير مفهوم من الذكاء الاصطناعي - فشل في تحويل JSON"); 
+                    throw new Error("رد غير مفهوم من Groq - فشل في تحويل JSON"); 
                 }
-                
+
                 if (Array.isArray(parsed.questions)) return parsed.questions;
                 if (Array.isArray(parsed)) return parsed;
                 return [];
@@ -789,20 +836,116 @@ async function extractAllQuestions(dataUrl) {
                     let delay = 5000;
                     if (e.message.startsWith("RATELIMIT:")) {
                         delay = parseInt(e.message.split(":")[1], 10) || 30000;
-                        console.warn(`Rate limit hit, waiting ${delay}ms before retry ${attempt}...`);
+                        console.warn(`Groq extraction failed (attempt ${attempt}), retrying in ${delay}ms...`);
                     } else {
-                        console.warn(`Extraction failed (attempt ${attempt}), retrying in ${delay}ms...`, e);
+                        console.warn(`Groq extraction failed (attempt ${attempt}), retrying in ${delay}ms...`, e);
                     }
                     await new Promise(r => setTimeout(r, delay));
-                    return tryExtract(retries - 1, attempt + 1);
+                    return tryGroqExtract(retries - 1, attempt + 1);
                 }
-                throw new Error("تجاوز حد الطلبات، يرجى المحاولة لاحقاً.");
+                throw new Error(`فشل Groq: ${e.message}`);
             }
         };
 
-        const raw = await tryExtract(4); // زيادة عدد مرات المحاولة إلى 4
+        const tryGeminiExtract = async (retries = 4, attempt = 1) => {
+            try {
+                const res = await fetch(`${GEMINI_API_URL}/chat/completions`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${GEMINI_API_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: GEMINI_MODEL, temperature: 0.1,
+                        response_format: { type: "json_object" },
+                        messages: [
+                            { role: "system", content: [
+                                "أنت نظام خبير في تحديد وقص الرسومات البيانية والأشكال التوضيحية لأسئلة امتحانات الثانوية العامة المصرية.",
+                                "مهمتك هي تحليل الصورة واستخراج إحداثيات صناديق الإحاطة (bounding boxes) لجميع الرسومات أو الأشكال التوضيحية المرتبطة بالأسئلة.",
+                                "لكل رسمة أو شكل توضيحي، حدد صندوق الإحاطة الخاص بها بدقة عالية كـ [ymin, xmin, ymax, xmax] بقيم صحيحة من 0 إلى 1000 تغطي الرسمة بالكامل.",
+                                "لكل رسمة، استخرج أيضاً أول 5 كلمات من نص السؤال المرتبط بها كـ snippet لمساعدتنا في ربط الرسمة بالسؤال المناسب.",
+                                "يجب أن تعيد النتيجة بصيغة JSON فقط كالتالي: {\"diagrams\": [ {\"snippet\": \"أول خمس كلمات من السؤال\", \"diagramBox\": [ymin, xmin, ymax, xmax]} ]}.",
+                                "إذا لم يكن هناك أي رسومات أو أشكال توضيحية في الصورة، أعد: {\"diagrams\": []}."
+                            ].join(" ")},
+                            { role: "user", content: [
+                                { type: "text", text: "استخرج إحداثيات الرسومات التوضيحية والـ snippets للأسئلة المرتبطة بها من هذه الصفحة." },
+                                { type: "image_url", image_url: { url: dataUrl } }
+                            ]}
+                        ]
+                    })
+                });
 
-        return raw.map(q => {
+                const textResponse = await res.text();
+                let data = {};
+                try { data = JSON.parse(textResponse); } catch(e) {}
+
+                if (!res.ok) {
+                    if (res.status === 429) {
+                        let delay = 30000;
+                        const match = textResponse.match(/"retryDelay":\s*"(\d+)s"/);
+                        if (match) delay = parseInt(match[1], 10) * 1000 + 2000;
+                        throw new Error(`RATELIMIT:${delay}`);
+                    }
+                    throw new Error(data.error?.message || `خطأ HTTP ${res.status}`);
+                }
+
+                let content = data.choices?.[0]?.message?.content || "";
+                content = cleanJsonString(content);
+
+                let parsed;
+                try { 
+                    parsed = JSON.parse(content); 
+                } catch (e) { 
+                    throw new Error("رد غير مفهوم من Gemini - فشل في تحويل JSON"); 
+                }
+
+                if (Array.isArray(parsed.diagrams)) return parsed.diagrams;
+                return [];
+            } catch (e) {
+                if (retries > 0) {
+                    let delay = 5000;
+                    if (e.message.startsWith("RATELIMIT:")) {
+                        delay = parseInt(e.message.split(":")[1], 10) || 30000;
+                        console.warn(`Gemini extraction failed (attempt ${attempt}), retrying in ${delay}ms...`);
+                    } else {
+                        console.warn(`Gemini extraction failed (attempt ${attempt}), retrying in ${delay}ms...`, e);
+                    }
+                    await new Promise(r => setTimeout(r, delay));
+                    return tryGeminiExtract(retries - 1, attempt + 1);
+                }
+                throw new Error(`فشل Gemini: ${e.message}`);
+            }
+        };
+
+        let groqQuestions = [];
+        let geminiDiagrams = [];
+
+        // Run extraction concurrently
+        try {
+            const [gQs, gDiags] = await Promise.all([
+                tryGroqExtract(4),
+                tryGeminiExtract(4).catch(err => {
+                    console.warn("Gemini extraction failed, continuing with empty diagrams list:", err);
+                    return [];
+                })
+            ]);
+            groqQuestions = gQs;
+            geminiDiagrams = gDiags;
+        } catch (e) {
+            throw new Error(`فشل استخراج الأسئلة: ${e.message}`);
+        }
+
+        // Merge Gemini diagram boxes into Groq questions
+        if (geminiDiagrams.length > 0) {
+            for (const diag of geminiDiagrams) {
+                if (diag.diagramBox && Array.isArray(diag.diagramBox) && diag.diagramBox.length === 4) {
+                    const matchedQ = findMatchingQuestion(groqQuestions, diag);
+                    if (matchedQ) {
+                        matchedQ.diagramBox = diag.diagramBox;
+                        matchedQ.hasDiagram = true;
+                    }
+                }
+            }
+        }
+
+        return groqQuestions.map(q => {
             const opts = Array.isArray(q.options) ? q.options.map(o => String(o||"").trim()) : [];
             while (opts.length < 4) opts.push(`اختيار ${opts.length+1}`);
             const correct = ["A","B","C","D"].includes(String(q.correct||"").toUpperCase())
