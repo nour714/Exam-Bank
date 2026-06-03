@@ -357,7 +357,7 @@
 import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp }
                              from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-import { getAuth, onAuthStateChanged }
+import { getAuth, onAuthStateChanged, signInAnonymously, setPersistence, browserLocalPersistence }
                              from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 const FB_CONFIG = {
@@ -373,6 +373,9 @@ const fbApp  = initializeApp(FB_CONFIG);
 const db     = getFirestore(fbApp);
 const auth   = getAuth(fbApp);
 window._db   = db; // expose to global scope for management functions
+
+// Set persistence explicitly to browserLocalPersistence
+setPersistence(auth, browserLocalPersistence).catch(console.error);
 
 // ── Expose Firebase helpers to window ──────────────────────────
 window._fbReady = false;
@@ -391,15 +394,22 @@ onAuthStateChanged(auth, async (user) => {
         statusEl.className = "fb-status fb-ok";
         statusEl.textContent = `✅ متصل كـ ${user.email || user.uid}`;
     } else {
-        // Try using stored email / device id as fallback (same logic as main app)
-        const storedEmail = localStorage.getItem("userEmail");
-        const deviceId    = localStorage.getItem("examBankDeviceId");
-        window._fbUserId  = storedEmail
-            ? storedEmail.replace(/[^a-zA-Z0-9@.-]/g, "_")
-            : (deviceId || "admin-local");
-        window._fbReady = true;
-        statusEl.className = "fb-status fb-ok";
-        statusEl.textContent = `✅ متصل (ID: ${window._fbUserId.slice(0,20)}...)`;
+        // Try anonymous sign-in so request.auth is not null for writes
+        try {
+            statusEl.className = "fb-status fb-loading";
+            statusEl.textContent = "⏳ جاري الاتصال الآمن بـ Firebase...";
+            await signInAnonymously(auth);
+        } catch (e) {
+            console.error("Anonymous auth failed:", e);
+            const storedEmail = localStorage.getItem("userEmail");
+            const deviceId    = localStorage.getItem("examBankDeviceId");
+            window._fbUserId  = storedEmail
+                ? storedEmail.replace(/[^a-zA-Z0-9@.-]/g, "_")
+                : (deviceId || "admin-local");
+            window._fbReady = true;
+            statusEl.className = "fb-status fb-err";
+            statusEl.textContent = `⚠️ متصل محلياً فقط (سجل دخول أولاً) (ID: ${window._fbUserId.slice(0,10)}...)`;
+        }
     }
 });
 
