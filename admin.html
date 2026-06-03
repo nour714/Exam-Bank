@@ -778,13 +778,13 @@ async function extractAllQuestions(dataUrl) {
         img.src = dataUrl;
         await new Promise(r => img.onload = r);
 
-        const tryGroqExtract = async (retries = 4, attempt = 1) => {
+        const tryQuestionExtract = async (retries = 4, attempt = 1) => {
             try {
-                const res = await fetch(`${API_URL}/chat/completions`, {
+                const res = await fetch(`${GEMINI_API_URL}/chat/completions`, {
                     method: "POST",
-                    headers: { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" },
+                    headers: { Authorization: `Bearer ${GEMINI_API_KEY}`, "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        model: MODEL, temperature: 0.1,
+                        model: GEMINI_MODEL, temperature: 0.1,
                         response_format: { type: "json_object" },
                         messages: [
                             { role: "system", content: [
@@ -825,7 +825,7 @@ async function extractAllQuestions(dataUrl) {
                 try { 
                     parsed = JSON.parse(content); 
                 } catch (e) { 
-                    throw new Error("رد غير مفهوم من Groq - فشل في تحويل JSON"); 
+                    throw new Error("رد غير مفهوم من Gemini (الأسئلة) - فشل في تحويل JSON"); 
                 }
 
                 if (Array.isArray(parsed.questions)) return parsed.questions;
@@ -836,14 +836,14 @@ async function extractAllQuestions(dataUrl) {
                     let delay = 5000;
                     if (e.message.startsWith("RATELIMIT:")) {
                         delay = parseInt(e.message.split(":")[1], 10) || 30000;
-                        console.warn(`Groq extraction failed (attempt ${attempt}), retrying in ${delay}ms...`);
+                        console.warn(`Gemini question extraction failed (attempt ${attempt}), retrying in ${delay}ms...`);
                     } else {
-                        console.warn(`Groq extraction failed (attempt ${attempt}), retrying in ${delay}ms...`, e);
+                        console.warn(`Gemini question extraction failed (attempt ${attempt}), retrying in ${delay}ms...`, e);
                     }
                     await new Promise(r => setTimeout(r, delay));
-                    return tryGroqExtract(retries - 1, attempt + 1);
+                    return tryQuestionExtract(retries - 1, attempt + 1);
                 }
-                throw new Error(`فشل Groq: ${e.message}`);
+                throw new Error(`فشل استخراج الأسئلة من Gemini: ${e.message}`);
             }
         };
 
@@ -920,7 +920,7 @@ async function extractAllQuestions(dataUrl) {
         // Run extraction concurrently
         try {
             const [gQs, gDiags] = await Promise.all([
-                tryGroqExtract(4),
+                tryQuestionExtract(4),
                 tryGeminiExtract(4).catch(err => {
                     console.warn("Gemini extraction failed, continuing with empty diagrams list:", err);
                     return [];
