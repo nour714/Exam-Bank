@@ -1365,45 +1365,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     async function extractQuestionFromImage(imageDataUrl) {
-        const providerResponse = await fetch(`${GEMINI_BASE_URL}/chat/completions`, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${GEMINI_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: GEMINI_MODEL,
-                temperature: 0.1,
-                response_format: { type: "json_object" },
-                messages: [
-                    {
-                        role: "system",
-                        content: [
-                            "استخرج سؤال اختيار من متعدد من الصورة.",
-                            "حدد المادة الأنسب من: الفيزياء، الكيمياء، الأحياء، الرياضيات، اللغة العربية، اللغة الإنجليزية، الجيولوجيا، التاريخ، الجغرافيا.",
-                            "أعد JSON فقط بالمفاتيح: subject, topic, text, options, correct.",
-                            "options يجب أن تكون array من 4 strings.",
-                            "correct يجب أن يكون A أو B أو C أو D. إذا لم تكن الإجابة واضحة اختر أفضل تقدير منطقي."
-                        ].join(" ")
-                    },
-                    {
-                        role: "user",
-                        content: [
-                            { type: "text", text: "حلل الصورة واستخرج السؤال والاختيارات والمادة المناسبة." },
-                            { type: "image_url", image_url: { url: imageDataUrl } }
-                        ]
-                    }
-                ]
-            })
-        });
+        const endpoints = getQuestionImageEndpoints();
+        let lastError = new Error("جميع خوادم الاستخراج غير متاحة");
 
-        const data = await providerResponse.json().catch(() => ({}));
-        if (!providerResponse.ok) {
-            throw new Error(data.error?.message || "AI provider request failed");
+        for (const endpoint of endpoints) {
+            try {
+                const providerResponse = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ imageDataUrl })
+                });
+
+                const data = await providerResponse.json().catch(() => ({}));
+                if (!providerResponse.ok) {
+                    lastError = new Error(data.error || "فشل استخراج السؤال من الصورة");
+                    continue;
+                }
+                return data;
+            } catch (err) {
+                lastError = err;
+            }
         }
 
-        const content = data.choices?.[0]?.message?.content || "";
-        return parseExtractedQuestion(content);
+        throw lastError;
     }
 
     function fillCustomQuestionForm(question) {
@@ -2447,61 +2431,39 @@ document.addEventListener("DOMContentLoaded", async () => {
         return match ? match.subject : "الفيزياء";
     }
 
-    const AI_API_KEY = "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";
-    const AI_BASE_URL = "https://api.groq.com/openai/v1";
-    const AI_MODEL = "llama-3.3-70b-versatile";
-
     async function requestAiProviderResponse(query) {
         const subject = detectSubjectFromQuery(query);
-        const providerResponse = await fetch(`${AI_BASE_URL}/chat/completions`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${AI_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: AI_MODEL,
-                temperature: 0.45,
-                response_format: { type: "json_object" },
-                messages: [
-                    {
-                        role: "system",
-                        content: [
-                            "أنت AI Mentor داخل منصة Exam Bank لطلاب ثالثة ثانوي.",
-                            "رد دائمًا بالعربية المصرية الواضحة وبأسلوب مدرس هادئ.",
-                            "لا تطوّل. اشرح في 3 نقاط عملية، ثم اسأل سؤال متابعة واحد، ثم اقترح امتحانًا مناسبًا.",
-                            "أعد JSON فقط بدون Markdown بالمفاتيح: subject, topic, explain, followUp, practicePrompt.",
-                            "explain يجب أن تكون array من 3 strings."
-                        ].join(" ")
-                    },
-                    {
-                        role: "user",
-                        content: `المادة المتوقعة: ${subject}\nسؤال الطالب: ${query}`
-                    }
-                ]
-            })
-        });
+        const endpoints = getApiEndpoints("/api/ai-mentor");
+        let lastError = new Error("خدمة AI Mentor غير متاحة حالياً");
 
-        const data = await providerResponse.json().catch(() => ({}));
-        if (!providerResponse.ok) {
-            throw new Error(data.error?.message || "AI provider request failed");
+        for (const endpoint of endpoints) {
+            try {
+                const providerResponse = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: query, subject })
+                });
+
+                const data = await providerResponse.json().catch(() => ({}));
+                if (!providerResponse.ok) {
+                    lastError = new Error(data.error || "فشل الاتصال بـ AI Mentor");
+                    continue;
+                }
+
+                return {
+                    type: "lesson",
+                    subject: data.subject || subject,
+                    topic: data.topic || query,
+                    explain: Array.isArray(data.explain) ? data.explain : ["تعذر توليد شرح", "حاول مرة أخرى"],
+                    followUp: data.followUp || "ما رأيك؟",
+                    practicePrompt: data.practicePrompt || "ابدأ الاختبار"
+                };
+            } catch (err) {
+                lastError = err;
+            }
         }
 
-        let parsedContent;
-        try {
-            parsedContent = JSON.parse(data.choices?.[0]?.message?.content || "{}");
-        } catch {
-            parsedContent = {};
-        }
-
-        return {
-            type: "lesson",
-            subject: parsedContent.subject || subject,
-            topic: parsedContent.topic || query,
-            explain: Array.isArray(parsedContent.explain) ? parsedContent.explain : ["تعذر توليد شرح", "حاول مرة أخرى"],
-            followUp: parsedContent.followUp || "ما رأيك؟",
-            practicePrompt: parsedContent.practicePrompt || "ابدأ الاختبار"
-        };
+        throw lastError;
     }
 
     function appendAiBubble(text, isUser) {
@@ -2778,56 +2740,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function requestSimilarQuestions(payload) {
         const { questionText, subject, topic, correctAnswer, userAnswer, options } = payload;
-        const response = await fetch(`${AI_BASE_URL}/chat/completions`, {
-            method: "POST",
-            headers: { 
-                "Authorization": `Bearer ${AI_API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: AI_MODEL,
-                temperature: 0.6,
-                response_format: { type: "json_object" },
-                messages: [
-                    {
-                        role: "system",
-                        content: [
-                            "أنت معلم خبير لطلاب الثانوية العامة المصرية.",
-                            "مهمتك: شرح سبب الخطأ في سؤال ثم توليد 3 أسئلة اختيار من متعدد مشابهة بنفس الفكرة ومستوى الصعوبة.",
-                            "رد دائمًا بالعربية المصرية الواضحة.",
-                            "أعد JSON فقط بدون Markdown بالمفاتيح: explanation (array من 3 strings), similarQuestions (array من 3 objects).",
-                            "كل object في similarQuestions يحتوي على: text (string), options (array من 4 strings), correct (A/B/C/D), hint (string قصير)."
-                        ].join(" ")
-                    },
-                    {
-                        role: "user",
-                        content: [
-                            `المادة: ${subject || "الفيزياء"}`,
-                            topic ? `الدرس/الموضوع: ${topic}` : "",
-                            `نص السؤال: ${questionText || ""}`,
-                            (options && options.length) ? `الاختيارات: ${options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`).join(" | ")}` : "",
-                            correctAnswer ? `الإجابة الصحيحة: ${correctAnswer}` : "",
-                            userAnswer ? `إجابة الطالب الخاطئة: ${userAnswer}` : "الطالب لم يجب",
-                            "اشرح سبب الخطأ في 3 نقاط مختصرة، ثم ولّد 3 أسئلة شبيهة بنفس الفكرة."
-                        ].filter(Boolean).join("\n")
-                    }
-                ]
-            })
-        });
+        const endpoints = getSimilarQuestionsEndpoints();
+        let lastError = new Error("خدمة الأسئلة المشابهة غير متاحة حالياً");
 
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) {
-            throw new Error(data.error?.message || "Failed to generate similar questions");
+        for (const endpoint of endpoints) {
+            try {
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ questionText, subject, topic, correctAnswer, userAnswer, options })
+                });
+
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    lastError = new Error(data.error || "فشل توليد الأسئلة المشابهة");
+                    continue;
+                }
+                return data;
+            } catch (err) {
+                lastError = err;
+            }
         }
 
-        let parsedContent;
-        try {
-            parsedContent = JSON.parse(data.choices?.[0]?.message?.content || "{}");
-        } catch {
-            parsedContent = { explanation: ["حدث خطأ في التحليل"], similarQuestions: [] };
-        }
-        
-        return parsedContent;
+        throw lastError;
     }
 
     function renderWrongAnswersList() {
@@ -3031,12 +2966,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // ==========================================
-    // Gemini Direct API Integration
-    // ==========================================
-    const GEMINI_API_KEY = "AQ.Ab8RN6ITcTRv8JAoW_J3wovLkUzspHrvhZrewpKSkqDoUd_clw";
-    const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai";
-    const GEMINI_MODEL = "gemini-2.5-flash";
 
     function sanitizeText(value) {
         return String(value || "").replace(/[<>]/g, "").trim();

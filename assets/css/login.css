@@ -429,6 +429,50 @@ body {
 .toast-warning { background: #78350f; border: 1px solid var(--warning); }
 .t-icon { font-size: 1rem; }
 
+/* ── PWA & Offline Actions ───────────────────── */
+.pwa-offline-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--border2);
+}
+.pwa-btn, .offline-btn {
+    width: 100%;
+    padding: 12px;
+    font-family: var(--font);
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
+}
+.pwa-btn {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    color: var(--primary2);
+}
+.pwa-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+.offline-btn {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    color: var(--accent);
+}
+.offline-btn:hover {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
 /* ── Responsive ──────────────────────────────── */
 @media (max-width: 900px) {
     .brand-panel { display: none; }
