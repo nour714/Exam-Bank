@@ -5502,3 +5502,118 @@ body.dark-theme .sq-hint {
     0% { transform: scale(0.9) translate(0, 0); opacity: 0.3; }
     100% { transform: scale(1.1) translate(-2%, 2%); opacity: 0.8; }
 }
+
+/* ==========================================
+   Mobile Bottom Navigation
+   ========================================== */
+.mobile-bottom-nav {
+    display: none;
+}
+
+/* Mobile Header Profile (hidden on desktop) */
+.mobile-header-profile {
+    display: none;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.mobile-header-profile .user-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-light);
+    box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 768px) {
+    /* Replace hamburger menu with profile picture */
+    .app-header .btn-menu-toggle {
+        display: none !important;
+    }
+    
+    .mobile-header-profile {
+        display: block;
+    }
+
+    .mobile-bottom-nav {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 75px;
+        background-color: #0f172a; /* Dark navy */
+        z-index: 1000;
+        padding: 0 5px;
+        box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
+        border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    body.dark-theme .mobile-bottom-nav {
+        background-color: #020617; /* Even darker for dark mode */
+    }
+
+    .mobile-bottom-nav .menu-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        color: #94a3b8;
+        padding: 10px 14px;
+        border-radius: 18px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 0;
+        height: 60px;
+        min-width: 65px;
+    }
+
+    .mobile-bottom-nav .menu-item i {
+        width: 24px;
+        height: 24px;
+        stroke-width: 2.5;
+        margin-left: 0;
+        margin-right: 0;
+        transition: transform 0.2s ease;
+    }
+
+    .mobile-bottom-nav .menu-item span {
+        font-size: 0.7rem;
+        font-weight: 700;
+        margin-right: 0;
+    }
+
+    .mobile-bottom-nav .menu-item.active {
+        background-color: #6366f1; /* Purple/Blue accent from the image */
+        color: #ffffff;
+    }
+
+    body.dark-theme .mobile-bottom-nav .menu-item.active {
+        background-color: #4f46e5;
+    }
+
+    .mobile-bottom-nav .menu-item:hover:not(.active) i {
+        transform: translateY(-2px);
+    }
+    
+    .mobile-bottom-nav .menu-item::before {
+        display: none !important;
+    }
+    
+    .mobile-bottom-nav .menu-item.active i {
+        color: #ffffff;
+    }
+
+    .main-layout {
+        padding-bottom: 85px !important;
+    }
+    
+    /* Optionally hide sidebar navigation items on mobile to avoid duplication */
+    .sidebar-menu {
+        display: none;
+    }
+}

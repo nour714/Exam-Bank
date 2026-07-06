@@ -126,6 +126,10 @@
                     <button class="btn-menu-toggle" id="menu-toggle">
                         <i data-lucide="menu"></i>
                     </button>
+                    <!-- Mobile Profile Picture (Replaces menu-toggle on mobile) -->
+                    <div class="mobile-header-profile" id="mobile-header-profile" onclick="document.querySelector('.menu-item[data-target=\'settings-view\']').click()">
+                        <img src="" alt="Profile" class="user-avatar" id="mobile-user-avatar-img">
+                    </div>
                     <div class="search-bar">
                         <i data-lucide="search" class="search-icon"></i>
                         <input type="text" placeholder="ابحث في مواد ثالثة ثانوي..." id="global-search">
@@ -1542,5 +1546,44 @@
         </div>
     </div>
 
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <div class="menu-item active" data-target="home-view">
+            <i data-lucide="home"></i>
+            <span>الرئيسية</span>
+        </div>
+        <div class="menu-item" data-target="dashboard-view">
+            <i data-lucide="bar-chart-2"></i>
+            <span>تقدمي</span>
+        </div>
+        <div class="menu-item" data-target="qbank-view">
+            <i data-lucide="book-open"></i>
+            <span>البنك</span>
+        </div>
+        <div class="menu-item" data-target="exams-view">
+            <i data-lucide="file-text"></i>
+            <span>الامتحانات</span>
+        </div>
+        <div class="menu-item" data-target="settings-view">
+            <i data-lucide="settings"></i>
+            <span>الإعدادات</span>
+        </div>
+    </nav>
+    <!-- Sync Mobile Profile Picture Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainAvatar = document.getElementById('user-avatar-img');
+            const mobileAvatar = document.getElementById('mobile-user-avatar-img');
+            if (mainAvatar && mobileAvatar) {
+                const observer = new MutationObserver(() => {
+                    if (mobileAvatar.src !== mainAvatar.src) {
+                        mobileAvatar.src = mainAvatar.src;
+                    }
+                });
+                observer.observe(mainAvatar, { attributes: true, attributeFilter: ['src'] });
+                if (mainAvatar.src) mobileAvatar.src = mainAvatar.src;
+            }
+        });
+    </script>
 </body>
 </html>
