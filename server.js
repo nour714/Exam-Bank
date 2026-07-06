@@ -73,6 +73,19 @@ function serveStatic(req, res) {
     const filePath = join(rootDir, safePath);
 
     if (!filePath.startsWith(rootDir) || !existsSync(filePath)) {
+        // Fallback to index.html for SPA routing (like Firebase rewrite)
+        if (!extname(requestedPath)) {
+            const indexPath = join(rootDir, "index.html");
+            if (existsSync(indexPath)) {
+                res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+                if (req.method === "HEAD") {
+                    res.end();
+                    return;
+                }
+                createReadStream(indexPath).pipe(res);
+                return;
+            }
+        }
         res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
         res.end("Not found");
         return;
