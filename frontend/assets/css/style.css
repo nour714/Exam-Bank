@@ -5510,30 +5510,19 @@ body.dark-theme .sq-hint {
     display: none;
 }
 
-/* Mobile Header Profile (hidden on desktop) */
-.mobile-header-profile {
+/* Mobile Header Logo (hidden on desktop) */
+.mobile-header-logo {
     display: none;
-    cursor: pointer;
-    margin-left: 10px;
-}
-
-.mobile-header-profile .user-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--primary-light);
-    box-shadow: var(--shadow-sm);
 }
 
 @media (max-width: 768px) {
-    /* Replace hamburger menu with profile picture */
+    /* Replace hamburger menu with logo */
     .app-header .btn-menu-toggle {
         display: none !important;
     }
     
-    .mobile-header-profile {
-        display: block;
+    .mobile-header-logo {
+        display: flex !important;
     }
 
     .mobile-bottom-nav {
