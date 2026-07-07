@@ -5480,8 +5480,8 @@ body.dark-theme .sq-hint {
         background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.12) 0%, transparent 60%);
     }
 
-    /* Remove expensive backdrop-filters */
-    .sidebar, .glass-panel, .card, .app-header, .subject-large-card {
+    /* Remove expensive backdrop-filters from heavy elements */
+    .sidebar, .glass-panel, .card, .subject-large-card {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         background-color: var(--card-bg) !important;
@@ -5493,8 +5493,27 @@ body.dark-theme .sq-hint {
         box-shadow: var(--shadow-lg) !important;
     }
     
+    /* Floating Attractive Header on Mobile */
     .app-header {
-        background-color: var(--bg-color) !important;
+        position: fixed !important;
+        top: 15px !important;
+        left: 15px !important;
+        right: 15px !important;
+        height: 65px !important;
+        border-radius: 20px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 0 15px !important;
+        background-color: rgba(255, 255, 255, 0.9) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        width: auto !important;
+        margin-top: 0 !important;
+    }
+
+    body.dark-theme .app-header {
+        background-color: rgba(15, 23, 42, 0.85) !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
     }
 }
 
