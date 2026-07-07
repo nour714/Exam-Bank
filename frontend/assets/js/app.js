@@ -595,6 +595,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!firebaseBackend) return;
 
         try {
+            // تحميل بيانات الملف الشخصي من الخادم (الاسم، الصورة، الإعدادات)
+            try {
+                const authUser = JSON.parse(localStorage.getItem('authUser') || 'null');
+                if (authUser) {
+                    if (authUser.name) {
+                        appState.user.name = authUser.name;
+                        localStorage.setItem('userName', authUser.name);
+                    }
+                    if (authUser.avatar) {
+                        appState.user.avatar = authUser.avatar;
+                    }
+                    if (authUser.notifications !== undefined) {
+                        appState.user.notifications = authUser.notifications;
+                    }
+                }
+            } catch (e) { /* ignore */ }
+
             if (typeof firebaseBackend.loadUserState === "function") {
                 const cloudState = await firebaseBackend.loadUserState();
                 if (cloudState) {
@@ -605,13 +622,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             // تحميل الأسئلة العامة من قاعدة البيانات — Firebase هو المصدر الوحيد للحقيقة
             if (typeof firebaseBackend.loadGlobalQuestions === "function") {
                 const globalQs = await firebaseBackend.loadGlobalQuestions();
-                // الأسئلة المخصصة للمستخدم (customQuestions) تنقسم لنوعين:
-                // 1. أسئلة المستخدم نفسه (المصدر: customQuestion) — نحتفظ بيها
-                // 2. الأسئلة العامة من Firebase (المصدر: globalQuestion) — Firebase هو مرجعها
                 const localQs = Array.isArray(appState.customQuestions) ? appState.customQuestions : [];
-                // نحتفظ فقط بالأسئلة التي أضافها المستخدم نفسه (مش من Firebase)
                 const userOwnQs = localQs.filter(q => q.source === "custom" || q.source === "user");
-                // ندمج أسئلة المستخدم مع أسئلة Firebase (Firebase تستبدل كل اللي عندنا من الـ global)
                 const globalIds = new Set(globalQs.map(q => q.id));
                 const merged = [...globalQs, ...userOwnQs.filter(q => !globalIds.has(q.id))];
                 appState.customQuestions = merged;
@@ -863,7 +875,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
     scheduleBackgroundTask(() => loadStateFromFirebase());
 
-    // تحميل اسم المستخدم من صفحة اللوجن إذا لم يكن محفوظاً في الحالة
+    // تحميل بيانات المستخدم من الخادم (authUser) إذا كانت متوفرة
     (function syncLoginName() {
         const loginName = localStorage.getItem('userName');
         const loginEmail = localStorage.getItem('userEmail');
@@ -880,6 +892,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (loginName) appState.user.name = loginName;
         appState.user.email = loginEmail || "";
         if (loginEmail) localStorage.setItem('appStateOwnerEmail', loginEmail);
+
+        // تحميل بيانات الملف الشخصي من الخادم (avatar, notifications, darkMode)
+        try {
+            const authUser = JSON.parse(localStorage.getItem('authUser') || 'null');
+            if (authUser) {
+                // تحميل الصورة من الخادم إذا كانت موجودة ولم يكن هناك صورة محلية بالفعل
+                if (authUser.avatar && !appState.user.avatar) {
+                    appState.user.avatar = authUser.avatar;
+                }
+                // تحميل إعدادات الإشعارات
+                if (authUser.notifications !== undefined) {
+                    appState.user.notifications = authUser.notifications;
+                }
+                // تحميل الاسم من الخادم (الاسم المسجل عند التسجيل)
+                if (authUser.name) {
+                    appState.user.name = authUser.name;
+                    localStorage.setItem('userName', authUser.name);
+                }
+            }
+        } catch (e) {
+            console.warn("تعذر تحميل بيانات الملف الشخصي:", e);
+        }
 
         if (nameChanged || emailChanged) {
             saveStateToLocalStorage(false);
@@ -906,7 +940,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             const reader = new FileReader();
-            reader.onload = () => {
+            reader.onload = async () => {
                 const result = typeof reader.result === "string" ? reader.result : "";
                 if (!result) {
                     showToast("تعذر تحميل الصورة.", "error");
@@ -916,8 +950,19 @@ document.addEventListener("DOMContentLoaded", async () => {
                 appState.user.avatar = result;
                 updateUserStatsUI();
                 saveStateToLocalStorage();
-                showToast("تم تحديث صورة الملف الشخصي.", "success");
                 settingsAvatarInput.value = "";
+
+                // حفظ الصورة في الخادم لتكون متاحة من أي جهاز
+                try {
+                    const firebaseBackend = await getFirebaseBackend();
+                    if (firebaseBackend && typeof firebaseBackend.updateProfile === "function") {
+                        await firebaseBackend.updateProfile({ avatar: result });
+                    }
+                    showToast("تم تحديث صورة الملف الشخصي وحفظها. ✅", "success");
+                } catch (e) {
+                    console.warn("تعذر حفظ الصورة في الخادم:", e);
+                    showToast("تم تحديث الصورة محلياً فقط.", "warning");
+                }
             };
             reader.onerror = () => {
                 showToast("تعذر تحميل الصورة.", "error");
@@ -928,10 +973,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     if (removeAvatarBtn) {
-        removeAvatarBtn.addEventListener("click", () => {
+        removeAvatarBtn.addEventListener("click", async () => {
             appState.user.avatar = "";
             updateUserStatsUI();
             saveStateToLocalStorage();
+
+            // حذف الصورة من الخادم أيضاً
+            try {
+                const firebaseBackend = await getFirebaseBackend();
+                if (firebaseBackend && typeof firebaseBackend.updateProfile === "function") {
+                    await firebaseBackend.updateProfile({ avatar: null });
+                }
+            } catch (e) {
+                console.warn("تعذر حذف الصورة من الخادم:", e);
+            }
             showToast("تم حذف صورة الملف الشخصي.", "info");
         });
     }
@@ -1682,7 +1737,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Settings Operations
     // ==========================================
     if (saveSettingsBtn) {
-        saveSettingsBtn.addEventListener("click", () => {
+        saveSettingsBtn.addEventListener("click", async () => {
             const newName = settingsNameInput.value.trim();
             const emailInput = document.getElementById("settings-email");
             const notifyInput = document.getElementById("settings-notifications");
@@ -1695,6 +1750,20 @@ document.addEventListener("DOMContentLoaded", async () => {
                 localStorage.setItem("userEmail", appState.user.email || "");
                 saveStateToLocalStorage();
                 updateUserStatsUI();
+
+                // حفظ البيانات في الخادم لتكون متاحة من أي جهاز
+                try {
+                    const firebaseBackend = await getFirebaseBackend();
+                    if (firebaseBackend && typeof firebaseBackend.updateProfile === "function") {
+                        await firebaseBackend.updateProfile({
+                            name: appState.user.name,
+                            avatar: appState.user.avatar || null,
+                            notifications: appState.user.notifications,
+                        });
+                    }
+                } catch (e) {
+                    console.warn("تعذر حفظ الملف الشخصي في الخادم:", e);
+                }
                 showToast("تم حفظ التعديلات بنجاح! 💾", "success");
             }
         });

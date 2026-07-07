@@ -27,7 +27,7 @@ export const changePasswordSchema = z.object({
 
 export const updateProfileSchema = z.object({
     name: z.string().min(2).max(100).optional(),
-    avatar: z.string().url().optional().or(z.literal("")),
+    avatar: z.string().max(5000000).optional().nullable(), // Accepts base64 data URLs, regular URLs, or null
     notifications: z.boolean().optional(),
     darkMode: z.boolean().optional(),
 });

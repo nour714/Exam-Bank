@@ -133,6 +133,27 @@ async function waitForAuthState() {
     return await verifyAndRefresh();
 }
 
+// Update user profile (name, avatar, notifications, darkMode) — persists to database
+async function updateProfile(profileData) {
+    try {
+        const res = await fetchAPI("/auth/profile", {
+            method: "PUT",
+            body: JSON.stringify(profileData),
+        });
+        if (res && res.success) {
+            // Update the local authUser cache with the new data
+            const authUser = JSON.parse(localStorage.getItem("authUser") || "{}");
+            Object.assign(authUser, res.data);
+            localStorage.setItem("authUser", JSON.stringify(authUser));
+            return res.data;
+        }
+        return null;
+    } catch (error) {
+        console.warn("Failed to update profile on server:", error);
+        return null;
+    }
+}
+
 // Export a mock firebase object for app.js backwards compatibility
 window.examBankFirebase = {
     app: {},
@@ -149,8 +170,9 @@ window.examBankFirebase = {
     loadUserState,
     saveUserState,
     loadGlobalQuestions,
+    updateProfile,
     fetchAPI // Export fetchAPI for other uses
 };
 
 export default window.examBankFirebase;
-export { fetchAPI };
+export { fetchAPI, updateProfile };
