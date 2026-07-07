@@ -633,6 +633,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         } catch (error) {
             console.warn("تعذر تحميل البيانات من Firebase:", error);
             showToast("Firebase غير متاح حاليًا، نستخدم التخزين المحلي.", "info");
+        } finally {
+            // إخفاء شاشة التحميل
+            const skeletonLoader = document.getElementById("app-skeleton-loader");
+            if (skeletonLoader) {
+                skeletonLoader.classList.add("hidden");
+                setTimeout(() => {
+                    skeletonLoader.style.display = "none";
+                }, 600); // Wait for transition
+            }
         }
     }
 
