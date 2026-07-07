@@ -5494,11 +5494,11 @@ body.dark-theme .sq-hint {
     }
     
     /* Floating Attractive Header on Mobile */
+    /* Floating Attractive Header on Mobile */
     .app-header {
-        position: fixed !important;
+        position: sticky !important;
         top: 15px !important;
-        left: 15px !important;
-        right: 15px !important;
+        margin: 15px 15px 15px 15px !important;
         height: 65px !important;
         border-radius: 20px !important;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
@@ -5508,7 +5508,7 @@ body.dark-theme .sq-hint {
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         width: auto !important;
-        margin-top: 0 !important;
+        z-index: 9999 !important;
     }
 
     body.dark-theme .app-header {
