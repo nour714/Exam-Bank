@@ -13,6 +13,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         localStorage.removeItem("isLoggedIn");
         localStorage.removeItem("userName");
         localStorage.removeItem("userPhoto");
+        localStorage.removeItem("authUser");
+        localStorage.removeItem("userStats");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("authMode");
+        localStorage.removeItem("appStateOwnerEmail");
     }
 
     function hasLocalOfflineSession() {
