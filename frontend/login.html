@@ -364,10 +364,12 @@ function syncPersistedSession(user) {
     persistSessionUser(name, email, user.photoURL || '');
 }
 
-if (typeof apiObj.waitForAuthState === 'function') {
-    await apiObj.waitForAuthState();
-}
-syncPersistedSession(apiObj.auth.currentUser);
+(async () => {
+    if (typeof apiObj.waitForAuthState === 'function') {
+        await apiObj.waitForAuthState();
+    }
+    syncPersistedSession(apiObj.auth.currentUser);
+})();
 
 // ── LOGIN ─────────────────────────────────────────
 document.getElementById('login-form').addEventListener('submit', async (e) => {

@@ -93,31 +93,44 @@ async function loadGlobalQuestions() {
 }
 
 async function waitForAuthState() {
-    // Attempt to refresh token or verify session on load
-    try {
-        const res = await fetchAPI("/auth/me", { method: "GET" });
-        if (res && res.success) {
-            localStorage.setItem("authUser", JSON.stringify(res.data));
-            return res.data;
-        }
-    } catch (error) {
-        // If unauthorized, attempt refresh
+    const localUser = localStorage.getItem("authUser");
+    const token = localStorage.getItem("accessToken");
+
+    const verifyAndRefresh = async () => {
         try {
-            const refreshRes = await fetchAPI("/auth/refresh", { method: "POST" });
-            if (refreshRes && refreshRes.success) {
-                localStorage.setItem("accessToken", refreshRes.data.accessToken);
-                const meRes = await fetchAPI("/auth/me", { method: "GET" });
-                if (meRes && meRes.success) {
-                    localStorage.setItem("authUser", JSON.stringify(meRes.data));
-                    return meRes.data;
+            const res = await fetchAPI("/auth/me", { method: "GET" });
+            if (res && res.success) {
+                localStorage.setItem("authUser", JSON.stringify(res.data));
+                return res.data;
+            }
+        } catch (error) {
+            try {
+                const refreshRes = await fetchAPI("/auth/refresh", { method: "POST" });
+                if (refreshRes && refreshRes.success) {
+                    localStorage.setItem("accessToken", refreshRes.data.accessToken);
+                    const meRes = await fetchAPI("/auth/me", { method: "GET" });
+                    if (meRes && meRes.success) {
+                        localStorage.setItem("authUser", JSON.stringify(meRes.data));
+                        return meRes.data;
+                    }
+                }
+            } catch (e) {
+                localStorage.removeItem("authUser");
+                localStorage.removeItem("accessToken");
+                if (window.location.pathname.includes("index.html") || window.location.pathname.endsWith("/")) {
+                    window.location.replace("login.html");
                 }
             }
-        } catch (e) {
-            localStorage.removeItem("authUser");
-            localStorage.removeItem("accessToken");
         }
+        return null;
+    };
+
+    if (localUser && token) {
+        verifyAndRefresh(); // Run in background
+        return JSON.parse(localUser); // Return immediately
     }
-    return null; // Return null if not logged in
+
+    return await verifyAndRefresh();
 }
 
 // Export a mock firebase object for app.js backwards compatibility
