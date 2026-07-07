@@ -352,109 +352,70 @@
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 </script>
 
-<!-- Firebase SDK -->
+<!-- API Client -->
 <script type="module">
-import { initializeApp }    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp }
-                             from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signInAnonymously, setPersistence, browserLocalPersistence }
-                             from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import apiObj, { fetchAPI } from "./assets/js/api-client.js";
 
-const FB_CONFIG = {
-    apiKey:            "AIzaSyAtxAc6b0MwXy2u0F3ef_douT-WmI61k3c",
-    authDomain:        "protifol-36f7d.firebaseapp.com",
-    projectId:         "protifol-36f7d",
-    storageBucket:     "protifol-36f7d.firebasestorage.app",
-    messagingSenderId: "40419608031",
-    appId:             "1:40419608031:web:5fe660cd4cc98039a9306a"
-};
-
-const fbApp  = initializeApp(FB_CONFIG);
-const db     = getFirestore(fbApp);
-const auth   = getAuth(fbApp);
-window._db   = db; // expose to global scope for management functions
-
-// Set persistence explicitly to browserLocalPersistence
-setPersistence(auth, browserLocalPersistence).catch(console.error);
-
-// ── Expose Firebase helpers to window ──────────────────────────
 window._fbReady = false;
 window._fbUserId = null;
 
-function getUserDocRef(uid) {
-    return doc(db, "examBankUsers", uid || window._fbUserId || "admin-local");
-}
-
-// ── Try to detect the logged-in user ──────────────────────────
-onAuthStateChanged(auth, async (user) => {
+// Try to load user to verify admin session
+async function checkAdmin() {
     const statusEl = document.getElementById("fb-status");
-    if (user) {
-        window._fbUserId = user.uid;
-        window._fbReady  = true;
-        statusEl.className = "fb-status fb-ok";
-        statusEl.textContent = `✅ متصل كـ ${user.email || user.uid}`;
-    } else {
-        // Try anonymous sign-in so request.auth is not null for writes
-        try {
-            statusEl.className = "fb-status fb-loading";
-            statusEl.textContent = "⏳ جاري الاتصال الآمن بـ Firebase...";
-            await signInAnonymously(auth);
-        } catch (e) {
-            console.error("Anonymous auth failed:", e);
-            const storedEmail = localStorage.getItem("userEmail");
-            const deviceId    = localStorage.getItem("examBankDeviceId");
-            window._fbUserId  = storedEmail
-                ? storedEmail.replace(/[^a-zA-Z0-9@.-]/g, "_")
-                : (deviceId || "admin-local");
+    try {
+        statusEl.className = "fb-status fb-loading";
+        statusEl.textContent = "⏳ جاري الاتصال بالخادم...";
+        
+        await apiObj.waitForAuthState();
+        const user = apiObj.auth.currentUser;
+        
+        if (user && user.role === "ADMIN") {
+            window._fbUserId = user.id;
             window._fbReady = true;
+            statusEl.className = "fb-status fb-ok";
+            statusEl.textContent = `✅ متصل كـ المشرف: ${user.name || user.email}`;
+        } else {
+            window._fbReady = false;
             statusEl.className = "fb-status fb-err";
-            statusEl.textContent = `⚠️ متصل محلياً فقط (سجل دخول أولاً) (ID: ${window._fbUserId.slice(0,10)}...)`;
+            statusEl.textContent = "⚠️ يجب تسجيل الدخول كمسؤول أولاً";
+            alert("يرجى تسجيل الدخول بحساب مسؤول (Admin) عبر صفحة الدخول.");
         }
+    } catch (e) {
+        statusEl.className = "fb-status fb-err";
+        statusEl.textContent = "⚠️ خطأ في الاتصال بالخادم";
     }
-});
+}
+checkAdmin();
 
-// ── Main save function ─────────────────────────────────────────
 window._saveQuestionsToFirebase = async function(newQuestions) {
-    if (!window._fbReady || !window._fbUserId) throw new Error("Firebase غير جاهز");
+    if (!window._fbReady) throw new Error("يجب تسجيل الدخول كمسؤول أولاً");
     
-    // Save to the globalQuestions collection so everyone can see them
-    const { collection, setDoc, doc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
-    let count = 0;
-    
-    for (const q of newQuestions) {
-        // use q.id as document id
-        const docRef = doc(collection(db, "globalQuestions"), q.id);
-        await setDoc(docRef, {
-            ...q,
-            addedBy: window._fbUserId,
-            updatedAt: serverTimestamp()
-        }, { merge: true });
-        count++;
+    try {
+        const res = await fetchAPI("/questions/global/bulk", {
+            method: "POST",
+            body: JSON.stringify({ questions: newQuestions })
+        });
+        return res?.data?.count || 0;
+    } catch (error) {
+        console.error("Bulk save failed:", error);
+        throw error;
     }
-    
-    return count;
 };
 
-// ── Clear all Firebase questions ────────────────────────────────
 window.clearFirebaseDB = async function() {
-    if (!window._fbReady || !window._fbUserId) {
-        alert("انتظر حتى يتم الاتصال بفايربيس...");
+    if (!window._fbReady) {
+        alert("يرجى تسجيل الدخول كمسؤول أولاً.");
         return;
     }
     if (!confirm("⚠️ هل أنت متأكد من حذف جميع الأسئلة من قاعدة البيانات للجميع؟ لا يمكن التراجع عن هذا!")) return;
     
     try {
-        const { collection, getDocs, deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
-        const querySnapshot = await getDocs(collection(db, "globalQuestions"));
-        let count = 0;
-        for (let d of querySnapshot.docs) {
-            await deleteDoc(doc(db, "globalQuestions", d.id));
-            count++;
-        }
-        alert(`✅ تم حذف ${count} سؤال من قاعدة البيانات بنجاح.`);
+        const res = await fetchAPI("/questions/global", { method: "DELETE" });
+        const count = res?.data?.count || 0;
+        alert(`✅ تم حذف ${count} سؤال من الخادم بنجاح.`);
         showNotif(`تم تنظيف الخادم (${count} سؤال)`, false);
     } catch (e) {
-        console.error("Firebase clear failed:", e);
+        console.error("Clear DB failed:", e);
         alert(`❌ حدث خطأ أثناء الحذف: ${e.message}`);
     }
 };
@@ -462,7 +423,6 @@ window.clearFirebaseDB = async function() {
 
 <script>
 // ===== CONFIG =====
-const ADMIN_PASS  = "nourwael2006"; // ← غيّر كلمة المرور هنا
 const API_KEY     = "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";
 const API_URL     = "https://api.groq.com/openai/v1";
 const MODEL       = "llama-3.2-90b-vision-preview";
@@ -476,19 +436,34 @@ const IMG_QUALITY = 0.85;
 let pages = [];
 let isRunning = false;
 
-// ===== LOGIN =====
-function checkLogin() {
-    const v = document.getElementById("admin-pass").value;
-    if (v === ADMIN_PASS) {
-        document.getElementById("login-screen").style.display = "none";
-        document.getElementById("admin-app").style.display = "block";
-    } else {
-        document.getElementById("login-err").style.display = "block";
-        document.getElementById("admin-pass").value = "";
-        document.getElementById("admin-pass").focus();
+// ===== VERIFY ADMIN ROLE =====
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) {
+            window.location.replace("login.html");
+            return;
+        }
+
+        const res = await fetch("/api/auth/me", {
+            headers: {
+                "Authorization": `Bearer ${accessToken}`
+            }
+        });
+
+        const data = await res.json();
+        if (data.success && data.data && data.data.role === "ADMIN") {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("admin-app").style.display = "block";
+            loadGlobalStats();
+            loadGlobalBank();
+        } else {
+            window.location.replace("index.html");
+        }
+    } catch (error) {
+        window.location.replace("index.html");
     }
-}
-document.getElementById("admin-pass").addEventListener("keydown", e => { if (e.key === "Enter") checkLogin(); });
+});
 
 // ===== FILE INPUT =====
 const fi = document.getElementById("file-input");
@@ -1194,13 +1169,13 @@ async function loadSubjectStats() {
     cardsEl.innerHTML = `<div class="mgr-loading"><div class="spinner"></div>جاري تحميل الإحصائيات...</div>`;
 
     try {
-        const { collection, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
-        const snap = await getDocs(collection(window._db, "globalQuestions"));
+        const res = await fetchAPI("/questions/global?limit=5000");
+        const questions = res?.data || [];
         
         // Count per subject
         mgrSubjectCounts = {};
-        snap.forEach(d => {
-            const subj = d.data().subject || "غير محدد";
+        questions.forEach(q => {
+            const subj = q.subject || "غير محدد";
             mgrSubjectCounts[subj] = (mgrSubjectCounts[subj] || 0) + 1;
         });
 
@@ -1249,11 +1224,10 @@ async function selectSubject(name) {
     list.innerHTML = `<div class="mgr-loading"><div class="spinner"></div>جاري تحميل الأسئلة...</div>`;
 
     try {
-        const { collection, getDocs, query, where } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
-        const q = query(collection(window._db, "globalQuestions"), where("subject", "==", name));
-        const snap = await getDocs(q);
+        const res = await fetchAPI(`/questions/global?subject=${encodeURIComponent(name)}&limit=1000`);
+        const questions = res?.data || [];
         
-        if (snap.empty) {
+        if (questions.length === 0) {
             list.innerHTML = `<div class="mgr-empty">📭 لا توجد أسئلة لهذه المادة على الخادم</div>`;
             return;
         }
@@ -1263,10 +1237,9 @@ async function selectSubject(name) {
         let html = "";
         let idx = 0;
         window._mgrCurrentQuestions = {};
-        snap.forEach(docSnap => {
+        questions.forEach(q => {
             idx++;
-            const q = docSnap.data();
-            const docId = docSnap.id;
+            const docId = q.id;
             window._mgrCurrentQuestions[docId] = q;
             const opts = Array.isArray(q.options) ? q.options : [];
             const cIdx = lettersE.indexOf(String(q.correct||"").toUpperCase());
@@ -1297,8 +1270,7 @@ async function selectSubject(name) {
 async function deleteSingleQuestion(docId, subject) {
     if (!window._fbReady) return;
     try {
-        const { doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
-        await deleteDoc(doc(window._db, "globalQuestions", docId));
+        await fetchAPI(`/questions/global/${docId}`, { method: "DELETE" });
         const row = document.getElementById(`mgr-row-${docId}`);
         if (row) row.remove();
         if (mgrSubjectCounts[subject]) mgrSubjectCounts[subject]--;
@@ -1328,12 +1300,11 @@ async function deleteSubjectAll() {
 
     document.getElementById("mgr-list").innerHTML = `<div class="mgr-loading"><div class="spinner"></div>جاري الحذف...</div>`;
     try {
-        const { collection, getDocs, query, where, doc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
-        const q = query(collection(window._db, "globalQuestions"), where("subject", "==", name));
-        const snap = await getDocs(q);
+        const res = await fetchAPI(`/questions/global?subject=${encodeURIComponent(name)}&limit=1000`);
+        const questions = res?.data || [];
         let deleted = 0;
-        for (const d of snap.docs) {
-            await deleteDoc(doc(window._db, "globalQuestions", d.id));
+        for (const q of questions) {
+            await fetchAPI(`/questions/global/${q.id}`, { method: "DELETE" });
             deleted++;
         }
         mgrSubjectCounts[name] = 0;
@@ -1503,8 +1474,6 @@ async function saveEditedQuestion() {
     btn.textContent = "جاري الحفظ...";
     
     try {
-        const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js");
-        
         const newText = document.getElementById("edit-q-text").value.trim();
         const newTopic = document.getElementById("edit-q-topic").value.trim();
         const newOpts = [
@@ -1515,11 +1484,14 @@ async function saveEditedQuestion() {
         ];
         const newCorrect = document.getElementById("edit-q-correct").value;
 
-        await updateDoc(doc(window._db, "globalQuestions", editingDocId), {
-            text: newText,
-            topic: newTopic,
-            options: newOpts,
-            correct: newCorrect
+        await fetchAPI(`/questions/global/${editingDocId}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                text: newText,
+                topic: newTopic,
+                options: newOpts,
+                correct: newCorrect
+            })
         });
 
         showNotif("✅ تم تحديث السؤال بنجاح!");

@@ -2,23 +2,10 @@
   "version": 2,
   "buildCommand": "echo 'No build step needed'",
   "outputDirectory": ".",
-  "functions": {
-    "api/*.js": {
-      "maxDuration": 30
-    }
-  },
   "routes": [
     {
-      "src": "/api/ai-mentor",
-      "dest": "/api/ai-mentor.js"
-    },
-    {
-      "src": "/api/extract-question-image",
-      "dest": "/api/extract-question-image.js"
-    },
-    {
-      "src": "/api/generate-similar-questions",
-      "dest": "/api/generate-similar-questions.js"
+      "src": "/login",
+      "dest": "/login.html"
     },
     {
       "src": "/login",
@@ -34,14 +21,6 @@
     }
   ],
   "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
-      ]
-    },
     {
       "source": "/service-worker.js",
       "headers": [

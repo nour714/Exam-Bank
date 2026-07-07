@@ -1,0 +1,363 @@
+import config from "../config/index.js";
+import { successResponse, errorResponse } from "../utils/response.js";
+
+// ── Helper Functions ──────────────────────────────────────
+
+function sanitizeText(value) {
+    return String(value || "").replace(/[<>]/g, "").trim();
+}
+
+function parseMentorResponse(content, subject, message) {
+    try {
+        const parsed = JSON.parse(content);
+        return {
+            subject: sanitizeText(parsed.subject) || subject,
+            topic: sanitizeText(parsed.topic) || message,
+            explain: normalizeExplain(parsed.explain),
+            followUp: sanitizeText(parsed.followUp) || "تحب تحاول تحل خطوة وتبعتها لي؟",
+            practicePrompt: sanitizeText(parsed.practicePrompt) || `ابدأ امتحان ${subject} على نفس الفكرة`,
+        };
+    } catch {
+        return {
+            subject,
+            topic: message,
+            explain: [
+                "وصلني رد من مزود الذكاء الاصطناعي، لكن تنسيقه لم يكن مناسبًا للعرض.",
+                "اكتب السؤال مرة أخرى بصيغة أوضح أو حدد المادة والدرس.",
+                "سأقسمه لك إلى معطيات ومطلوب وقانون وخطوات حل.",
+            ],
+            followUp: "ما أول خطوة حاولت تعملها في السؤال؟",
+            practicePrompt: `ابدأ امتحان ${subject} على نفس الفكرة`,
+        };
+    }
+}
+
+function normalizeExplain(value) {
+    if (!Array.isArray(value)) {
+        return ["حدد الفكرة الأساسية.", "اكتب المعطيات والمطلوب.", "طبق القانون خطوة بخطوة."];
+    }
+    return value.map(sanitizeText).filter(Boolean).slice(0, 3);
+}
+
+function parseExtractedQuestion(content) {
+    const allowedSubjects = new Set(["الفيزياء", "الكيمياء", "الأحياء", "الرياضيات", "اللغة العربية", "اللغة الإنجليزية", "الجيولوجيا", "التاريخ", "الجغرافيا"]);
+    let parsed = {};
+    try {
+        parsed = JSON.parse(content);
+    } catch (e) {
+        // Fallback for bad JSON
+        parsed = {
+            subject: "الفيزياء",
+            topic: "سؤال غير مقروء",
+            text: "عذراً، لم أتمكن من استخراج السؤال بشكل صحيح.",
+            options: ["A", "B", "C", "D"],
+            correct: "A"
+        };
+    }
+    const options = Array.isArray(parsed.options) ? parsed.options.map(sanitizeText).filter(Boolean).slice(0, 4) : [];
+    while (options.length < 4) options.push(`اختيار ${options.length + 1}`);
+
+    const correct = ["A", "B", "C", "D"].includes(String(parsed.correct || "").toUpperCase())
+        ? String(parsed.correct).toUpperCase()
+        : "A";
+    const subject = allowedSubjects.has(sanitizeText(parsed.subject)) ? sanitizeText(parsed.subject) : "الفيزياء";
+
+    return {
+        subject,
+        topic: sanitizeText(parsed.topic) || "سؤال من صورة",
+        text: sanitizeText(parsed.text) || "راجع صورة السؤال المرفقة واختر الإجابة الصحيحة.",
+        options,
+        correct,
+    };
+}
+
+function parseSimilarResponse(content) {
+    try {
+        const parsed = JSON.parse(content);
+        const explanation = Array.isArray(parsed.explanation)
+            ? parsed.explanation.map(sanitizeText).filter(Boolean).slice(0, 3)
+            : ["لم نتمكن من توليد شرح واضح. حاول مرة أخرى."];
+        while (explanation.length < 3) explanation.push("راجع الفكرة الأساسية للسؤال.");
+        const similarQuestions = Array.isArray(parsed.similarQuestions)
+            ? parsed.similarQuestions.slice(0, 3).map(normalizeSimilarQuestion)
+            : [];
+        return { explanation, similarQuestions };
+    } catch {
+        return {
+            explanation: ["تعذر تحليل رد الذكاء الاصطناعي.", "حاول مرة أخرى بعد لحظات.", "تأكد من اتصالك بالإنترنت."],
+            similarQuestions: [],
+        };
+    }
+}
+
+function normalizeSimilarQuestion(q) {
+    const options = Array.isArray(q?.options) ? q.options.map(sanitizeText).filter(Boolean).slice(0, 4) : [];
+    while (options.length < 4) options.push(`اختيار ${options.length + 1}`);
+    const correct = ["A", "B", "C", "D"].includes(String(q?.correct || "").toUpperCase()) ? String(q.correct).toUpperCase() : "A";
+    return { text: sanitizeText(q?.text) || "سؤال جديد", options, correct, hint: sanitizeText(q?.hint) || "" };
+}
+
+// ── Controllers ──────────────────────────────────────────
+
+/**
+ * POST /api/ai/mentor
+ */
+export async function aiMentor(req, res, next) {
+    try {
+        const { message, subject = "الفيزياء" } = req.body;
+
+        if (!message || !String(message).trim()) {
+            return errorResponse(res, "message is required", 400);
+        }
+
+        const apiKey = config.aiApiKey;
+        const baseUrl = config.aiBaseUrl;
+        const model = config.aiModel;
+
+        if (!apiKey) {
+            return errorResponse(res, "AI_API_KEY is not configured", 501);
+        }
+
+        const providerResponse = await fetch(`${baseUrl}/chat/completions`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                model,
+                temperature: 0.45,
+                response_format: { type: "json_object" },
+                messages: [
+                    {
+                        role: "system",
+                        content: [
+                            "أنت AI Mentor داخل منصة Exam Bank لطلاب ثالثة ثانوي.",
+                            "رد دائمًا بالعربية المصرية الواضحة وبأسلوب مدرس هادئ.",
+                            "لا تطوّل. اشرح في 3 نقاط عملية، ثم اسأل سؤال متابعة واحد، ثم اقترح امتحانًا مناسبًا.",
+                            "أعد JSON فقط بدون Markdown بالمفاتيح: subject, topic, explain, followUp, practicePrompt.",
+                            "explain يجب أن تكون array من 3 strings.",
+                        ].join(" "),
+                    },
+                    { role: "user", content: `المادة المتوقعة: ${subject}\nسؤال الطالب: ${message}` },
+                ],
+            }),
+        });
+
+        const data = await providerResponse.json().catch(() => ({}));
+        if (!providerResponse.ok) {
+            return errorResponse(res, data.error?.message || "AI provider request failed", providerResponse.status);
+        }
+
+        const content = data.choices?.[0]?.message?.content || "";
+        return successResponse(res, parseMentorResponse(content, subject, message));
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * POST /api/ai/extract-question-image
+ */
+export async function extractQuestionImage(req, res, next) {
+    try {
+        const groqApiKey = config.aiApiKey;
+        const groqBaseUrl = config.aiBaseUrl;
+        const geminiApiKey = config.geminiApiKey;
+        const geminiBaseUrl = config.geminiBaseUrl;
+
+        if (!geminiApiKey || !groqApiKey) {
+            return errorResponse(res, "GEMINI_API_KEY or AI_API_KEY is not configured", 501);
+        }
+
+        const imageDataUrl = String(req.body?.imageDataUrl || "").trim();
+        if (!imageDataUrl.startsWith("data:image/")) {
+            return errorResponse(res, "imageDataUrl is required", 400);
+        }
+
+        // Vision Models Pipeline (Fallback)
+        const visionModels = [
+            { provider: "gemini", model: "gemini-2.5-flash" },
+            { provider: "gemini", model: config.aiVisionModel },
+        ];
+
+        let firstContent = "";
+        let visionError = null;
+
+        for (const { provider, model } of visionModels) {
+            const baseUrl = provider === "groq" ? groqBaseUrl : geminiBaseUrl;
+            const apiKey = provider === "groq" ? groqApiKey : geminiApiKey;
+
+            try {
+                const providerResponse = await fetch(`${baseUrl}/chat/completions`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model,
+                        temperature: 0.1,
+                        messages: [
+                            {
+                                role: "system",
+                                content: [
+                                    "أنت معلم خبير ومحلل صور.",
+                                    "مهمتك قراءة الصورة بالكامل، سواء كانت تحتوي على نصوص، معادلات، أو رسومات.",
+                                    "قم بكتابة السؤال كاملاً، واشرح أي تفاصيل في الرسمة قد تكون ضرورية للحل.",
+                                    "إذا كان هناك حل موجود في الصورة، تأكد من صحته أو خطأه واشرح السبب باختصار.",
+                                ].join(" "),
+                            },
+                            {
+                                role: "user",
+                                content: [
+                                    { type: "text", text: "اقرأ الصورة واستخرج جميع التفاصيل والرسومات الموجودة." },
+                                    { type: "image_url", image_url: { url: imageDataUrl } },
+                                ],
+                            },
+                        ],
+                    }),
+                });
+
+                const data = await providerResponse.json().catch(() => ({}));
+                if (providerResponse.ok && data.choices?.[0]?.message?.content) {
+                    firstContent = data.choices[0].message.content;
+                    break;
+                } else {
+                    visionError = data.error?.message || `Vision model ${model} failed`;
+                }
+            } catch (err) {
+                visionError = err.message;
+            }
+        }
+
+        if (!firstContent) {
+            return errorResponse(res, visionError || "All vision models failed", 500);
+        }
+
+        // Text Models Pipeline (Fallback)
+        const textModels = [
+            { provider: "groq", model: config.aiModel },
+            { provider: "groq", model: "llama-3.1-8b-instant" },
+            { provider: "gemini", model: "gemini-2.5-flash" },
+        ];
+
+        let finalContent = "";
+        let textError = null;
+
+        for (const { provider, model } of textModels) {
+            const baseUrl = provider === "groq" ? groqBaseUrl : geminiBaseUrl;
+            const apiKey = provider === "groq" ? groqApiKey : geminiApiKey;
+
+            try {
+                const bodyPayload = {
+                    model,
+                    temperature: 0.1,
+                    messages: [
+                        {
+                            role: "system",
+                            content: [
+                                "أنت مراجع أكاديمي خبير. مهمتك قراءة النص الذي تم استخراجه من صورة، واستخراج السؤال والاختيارات منه، وتحويله إلى صيغة JSON.",
+                                "حدد المادة الأنسب من: الفيزياء، الكيمياء، الأحياء، الرياضيات، اللغة العربية، اللغة الإنجليزية، الجيولوجيا، التاريخ، الجغرافيا.",
+                                "أعد JSON فقط بالمفاتيح: subject, topic, text, options, correct.",
+                                "options يجب أن تكون array من 4 strings.",
+                                "correct يجب أن يكون A أو B أو C أو D بناءً على الحل الصحيح المستنتج من النص المعطى.",
+                            ].join(" "),
+                        },
+                        {
+                            role: "user",
+                            content: `قم بصياغة السؤال واستخراجه من هذا النص الذي تم قراءته من الصورة:\n\n${firstContent}`,
+                        },
+                    ],
+                };
+
+                if (provider === "groq") {
+                    bodyPayload.response_format = { type: "json_object" };
+                }
+
+                const verifyResponse = await fetch(`${baseUrl}/chat/completions`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+                    body: JSON.stringify(bodyPayload),
+                });
+
+                const data = await verifyResponse.json().catch(() => ({}));
+                if (verifyResponse.ok && data.choices?.[0]?.message?.content) {
+                    finalContent = data.choices[0].message.content;
+                    break;
+                } else {
+                    textError = data.error?.message || `Text model ${model} failed`;
+                }
+            } catch (err) {
+                textError = err.message;
+            }
+        }
+
+        if (!finalContent) {
+            return errorResponse(res, textError || "All formatting models failed", 500);
+        }
+
+        return successResponse(res, parseExtractedQuestion(finalContent));
+    } catch (error) {
+        next(error);
+    }
+}
+
+/**
+ * POST /api/ai/generate-similar
+ */
+export async function generateSimilarQuestions(req, res, next) {
+    try {
+        const apiKey = config.aiApiKey;
+        const baseUrl = (process.env.AI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta/openai").replace(/\/$/, "");
+        const model = config.aiModel || "gemini-2.5-flash";
+
+        if (!apiKey) {
+            return errorResponse(res, "AI_API_KEY is not configured", 501);
+        }
+
+        const { questionText, subject = "الفيزياء", topic = "", correctAnswer = "", userAnswer = "", options = [] } = req.body;
+
+        if (!questionText || !String(questionText).trim()) {
+            return errorResponse(res, "questionText is required", 400);
+        }
+
+        const providerResponse = await fetch(`${baseUrl}/chat/completions`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+                model,
+                temperature: 0.6,
+                response_format: { type: "json_object" },
+                messages: [
+                    {
+                        role: "system",
+                        content: [
+                            "أنت معلم خبير لطلاب الثانوية العامة المصرية.",
+                            "مهمتك: شرح سبب الخطأ في سؤال ثم توليد 3 أسئلة اختيار من متعدد مشابهة بنفس الفكرة ومستوى الصعوبة.",
+                            "رد دائمًا بالعربية المصرية الواضحة.",
+                            "أعد JSON فقط بدون Markdown بالمفاتيح: explanation (array من 3 strings), similarQuestions (array من 3 objects).",
+                            "كل object في similarQuestions يحتوي على: text (string), options (array من 4 strings), correct (A/B/C/D), hint (string قصير).",
+                        ].join(" "),
+                    },
+                    {
+                        role: "user",
+                        content: [
+                            `المادة: ${subject}`,
+                            topic ? `الدرس/الموضوع: ${topic}` : "",
+                            `نص السؤال: ${questionText}`,
+                            options.length ? `الاختيارات: ${options.map((o, i) => `${String.fromCharCode(65 + i)}) ${o}`).join(" | ")}` : "",
+                            correctAnswer ? `الإجابة الصحيحة: ${correctAnswer}` : "",
+                            userAnswer ? `إجابة الطالب الخاطئة: ${userAnswer}` : "الطالب لم يجب",
+                            "اشرح سبب الخطأ في 3 نقاط مختصرة، ثم ولّد 3 أسئلة شبيهة بنفس الفكرة.",
+                        ].filter(Boolean).join("\n"),
+                    },
+                ],
+            }),
+        });
+
+        const data = await providerResponse.json().catch(() => ({}));
+        if (!providerResponse.ok) {
+            return errorResponse(res, data.error?.message || "AI provider request failed", providerResponse.status);
+        }
+
+        const content = data.choices?.[0]?.message?.content || "";
+        return successResponse(res, parseSimilarResponse(content));
+    } catch (error) {
+        next(error);
+    }
+}

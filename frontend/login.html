@@ -231,10 +231,7 @@
 </div>
 
 <script type="module">
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import firebaseObj from "./assets/js/firebase-init.js";
-
-const auth = getAuth(firebaseObj.app);
+import apiObj, { fetchAPI } from "./assets/js/api-client.js";
 
 /* ======================================
    إيجزام بنك — Login / Register Logic
@@ -367,10 +364,10 @@ function syncPersistedSession(user) {
     persistSessionUser(name, email, user.photoURL || '');
 }
 
-if (typeof firebaseObj.waitForAuthState === 'function') {
-    await firebaseObj.waitForAuthState();
+if (typeof apiObj.waitForAuthState === 'function') {
+    await apiObj.waitForAuthState();
 }
-syncPersistedSession(auth.currentUser);
+syncPersistedSession(apiObj.auth.currentUser);
 
 // ── LOGIN ─────────────────────────────────────────
 document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -413,19 +410,21 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     setLoading('btn-login', true);
     try {
         clearPersistedSession();
-        if (auth.currentUser) {
-            await signOut(auth);
-        }
 
-        const credential = await signInWithEmailAndPassword(auth, email, pass);
-        const user = credential.user;
-        const resolvedName = (user.displayName || '').trim() || email.split('@')[0];
+        const res = await fetchAPI("/auth/login", {
+            method: "POST",
+            body: JSON.stringify({ email, password: pass })
+        });
+
+        const user = res.data.user;
+        const resolvedName = user.name || email.split('@')[0];
         setLoading('btn-login', false);
         const btn = document.getElementById('btn-login');
         btn.classList.add('success');
         btn.querySelector('.btn-label').textContent = 'تم الدخول ✓';
 
-        persistSessionUser(resolvedName, email);
+        localStorage.setItem("accessToken", res.data.accessToken);
+        persistSessionUser(resolvedName, email, user.avatar || '');
 
         setTimeout(() => { window.location.href = 'index.html'; }, 900);
     } catch (error) {
@@ -464,11 +463,15 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
 
     setLoading('btn-register', true);
     try {
-        const credential = await createUserWithEmailAndPassword(auth, email, pass);
-        await updateProfile(credential.user, { displayName: name });
+        const res = await fetchAPI("/auth/register", {
+            method: "POST",
+            body: JSON.stringify({ name, email, password: pass })
+        });
+        
         setLoading('btn-register', false);
         toast('تم إنشاء الحساب بنجاح! جاري تسجيل الدخول...', 'success');
 
+        localStorage.setItem("accessToken", res.data.accessToken);
         persistSessionUser(name, email);
 
         setTimeout(() => { window.location.href = 'index.html'; }, 1500);
@@ -493,7 +496,10 @@ document.getElementById('forgot-form').addEventListener('submit', async (e) => {
 
     setLoading('btn-forgot', true);
     try {
-        await sendPasswordResetEmail(auth, email);
+        await fetchAPI("/auth/forgot-password", {
+            method: "POST",
+            body: JSON.stringify({ email })
+        });
         setLoading('btn-forgot', false);
         toast('تم إرسال رابط الاستعادة على بريدك الإلكتروني ✅', 'success');
         setTimeout(() => showForm('login'), 2000);

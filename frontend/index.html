@@ -1458,26 +1458,9 @@
     <!-- TOAST NOTIFICATION CONTAINER -->
     <div class="toast-container" id="toast-container"></div>
 
-    <script>
-        const warmFirebase = () => {
-            if (window.examBankFirebaseReady) return window.examBankFirebaseReady;
-            window.examBankFirebaseReady = import("./assets/js/firebase-init.js").catch((error) => {
-                console.warn("Firebase لم يبدأ، سيتم استخدام التخزين المحلي فقط:", error);
-                return null;
-            });
-            return window.examBankFirebaseReady;
-        };
 
-        if (typeof window.requestIdleCallback === "function") {
-            window.requestIdleCallback(() => warmFirebase(), { timeout: 2000 });
-        } else {
-            window.addEventListener("load", () => setTimeout(warmFirebase, 500), { once: true });
-        }
-    </script>
     <!-- Sound Effects Module -->
     <script defer src="assets/js/sound-effects.js"></script>
-    <!-- Extracted PDF Question Bank -->
-    <script defer src="assets/data/book-question-bank.js"></script>
     <!-- Main Application Logic -->
     <script defer src="assets/js/app.js"></script>
     
@@ -1585,5 +1568,6 @@
             }
         });
     </script>
+    <script src="/socket.io/socket.io.js"></script>
 </body>
 </html>

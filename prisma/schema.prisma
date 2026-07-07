@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  name           String
+  email          String    @unique
+  password       String
+  avatar         String?
+  role           Role      @default(USER)
+  
+  // Progress & Stats
+  xp             Int       @default(0)
+  solvedCount    Int       @default(0)
+  streak         Int       @default(0)
+  accuracy       Float     @default(0.0)
+  
+  // Preferences
+  notifications  Boolean   @default(true)
+  darkMode       Boolean   @default(true)
+  
+  lastActiveDate DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  customQuestions CustomQuestion[]
+  studyNotes      StudyNote[]
+  weeklyActivity  WeeklyActivity[]
+  groupMembers    GroupMember[]
+  messages        GroupMessage[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model GlobalQuestion {
+  id          String   @id @default(uuid())
+  subject     String
+  topic       String?
+  text        String
+  options     String[]
+  correct     String   // "A", "B", "C", or "D"
+  imageUrl    String?
+  addedById   String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model CustomQuestion {
+  id          String   @id @default(uuid())
+  subject     String
+  topic       String?
+  text        String
+  options     String[]
+  correct     String   // "A", "B", "C", or "D"
+  imageUrl    String?
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model StudyNote {
+  id          String   @id @default(uuid())
+  subject     String
+  content     String
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model WeeklyActivity {
+  id          String   @id @default(uuid())
+  dayIndex    Int      // 0-6 (Sun-Sat)
+  count       Int      @default(0)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, dayIndex])
+}
+
+model StudyGroup {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  isPublic    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  members     GroupMember[]
+  messages    GroupMessage[]
+}
+
+model GroupMember {
+  id          String     @id @default(uuid())
+  
+  groupId     String
+  group       StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  joinedAt    DateTime   @default(now())
+  
+  @@unique([groupId, userId])
+}
+
+model GroupMessage {
+  id          String     @id @default(uuid())
+  content     String
+  
+  groupId     String
+  group       StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime   @default(now())
+}

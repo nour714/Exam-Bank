@@ -575,8 +575,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             if (window.examBankFirebase) return window.examBankFirebase;
             if (!window.examBankFirebaseReady) {
-                window.examBankFirebaseReady = import("./firebase-init.js").catch((error) => {
-                    console.warn("تعذر تحميل Firebase:", error);
+                window.examBankFirebaseReady = import("./api-client.js").catch((error) => {
+                    console.warn("تعذر تحميل الخادم:", error);
                     return null;
                 });
             }
@@ -585,7 +585,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 return window.examBankFirebase;
             }
         } catch (error) {
-            console.warn("تعذر الاتصال بـ Firebase:", error);
+            console.warn("تعذر الاتصال بالخادم:", error);
         }
         return null;
     }
@@ -1300,7 +1300,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function getQuestionImageEndpoints() {
-        return getApiEndpoints("/api/extract-question-image");
+        return getApiEndpoints("/api/ai/extract-question-image");
     }
 
     function getApiEndpoints(pathname) {
@@ -2433,7 +2433,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     async function requestAiProviderResponse(query) {
         const subject = detectSubjectFromQuery(query);
-        const endpoints = getApiEndpoints("/api/ai-mentor");
+        const endpoints = getApiEndpoints("/api/ai/mentor");
         let lastError = new Error("خدمة AI Mentor غير متاحة حالياً");
 
         for (const endpoint of endpoints) {
@@ -2576,7 +2576,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // ==========================================
-    // Study Group Chat Modal
+    // Study Group Chat Modal (Socket.IO)
     // ==========================================
     const groupChatModal = document.getElementById("group-chat-modal");
     const chatMessagesContainer = document.getElementById("chat-messages-container");
@@ -2586,29 +2586,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     const chatMessageInput = document.getElementById("chat-message-input");
     const btnCloseChat = document.getElementById("btn-close-chat");
 
-    const mockGroupMessages = {
-        "group-calc": [
-            { sender: "محمد علي", text: "هل حللتم مسألة التفاضل رقم 5 من الكتاب؟", isUser: false },
-            { sender: "سارة أحمد", text: "نعم! المشتقة تساوي 3x² + 2x - 1 ✅", isUser: false },
-        ],
-        "group-quantum": [
-            { sender: "خالد محمود", text: "هل يعرف أحد شرح مبدأ عدم اليقين لهايزنبرغ؟", isUser: false },
-        ],
-        "group-carbon": [
-            { sender: "نورا سامي", text: "تفاعلات الإضافة الكهرباء مهمة جداً للامتحان! 🧪", isUser: false },
-            { sender: "يوسف عادل", text: "شكراً! هذا ما كنت أبحث عنه", isUser: false },
-        ],
-        "group-python": [
-            { sender: "ريم عمر", text: "هل يمكن مشاركة حل تمرين for loop؟", isUser: false },
-        ],
-    };
+    let currentChatGroup = null;
+    let socket = null;
 
-    const groupChatReplies = ["فكرة رائعة! 👍", "شكراً على المشاركة الرائعة!", "هذا صحيح تماماً 💡", "سأراجع هذه النقطة وأخبركم لاحقاً.", "ممتاز! هل يمكنك شرح المزيد؟ 😊", "أعتقد هناك طريقة أبسط، سأشاركها قريباً!"];
+    if (window.io) {
+        socket = io({
+            auth: {
+                token: localStorage.getItem("accessToken")
+            }
+        });
+
+        socket.on("connect_error", (err) => {
+            console.warn("Socket connection error:", err.message);
+        });
+
+        socket.on("receiveMessage", (message) => {
+            if (currentChatGroup && message.groupId === currentChatGroup.id) {
+                const isUser = message.userId === appState.user.id;
+                const senderName = isUser ? "أنت" : (message.user ? message.user.name : "عضو المجموعة");
+                appendGroupBubble(message.content, isUser, senderName);
+            }
+        });
+    }
 
     function appendGroupBubble(text, isUser, sender) {
         if (!chatMessagesContainer) return;
         const bubble = document.createElement("div");
-        bubble.className = `chat-bubble ${isUser ? "user-bubble" : "mock-bubble"}`;
+        bubble.className = `chat-bubble ${isUser ? "user-bubble" : "mock-bubble"}`; // Reusing mock-bubble styling for incoming
         bubble.innerHTML = `<span class="sender-name">${sender}</span><p>${text}</p>`;
         chatMessagesContainer.appendChild(bubble);
         chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
@@ -2616,15 +2620,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function openGroupChat(group) {
         if (!groupChatModal) return;
+        currentChatGroup = group;
         chatGroupNameEl.textContent = group.name;
-        chatGroupStatusEl.textContent = "3 أعضاء نشطين الآن";
+        chatGroupStatusEl.textContent = "متصل بالمجموعة";
         chatMessagesContainer.innerHTML = "";
-        const msgs = mockGroupMessages[group.id] || [];
-        if (msgs.length === 0) {
-            appendGroupBubble("مرحباً بك في المجموعة! 👋 ابدأ المحادثة الآن.", false, group.name);
-        } else {
-            msgs.forEach(m => appendGroupBubble(m.text, m.isUser, m.sender));
+        
+        if (socket) {
+            socket.emit("joinGroup", group.id);
+            // Optionally load message history here via REST API or emit
         }
+
+        appendGroupBubble(`مرحباً بك في مجموعة: ${group.name}! 👋`, false, "النظام");
+        
         openModal(groupChatModal);
         if (chatMessageInput) chatMessageInput.focus();
     }
@@ -2633,11 +2640,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         chatSendForm.addEventListener("submit", (e) => {
             e.preventDefault();
             const text = chatMessageInput.value.trim();
-            if (!text) return;
+            if (!text || !currentChatGroup) return;
+            
+            // Append instantly for optimism
             appendGroupBubble(text, true, "أنت");
             chatMessageInput.value = "";
-            const randomReply = groupChatReplies[Math.floor(Math.random() * groupChatReplies.length)];
-            setTimeout(() => appendGroupBubble(randomReply, false, "عضو المجموعة"), 1000);
+            
+            if (socket) {
+                socket.emit("sendMessage", {
+                    groupId: currentChatGroup.id,
+                    content: text
+                });
+            }
         });
     }
 
@@ -2735,7 +2749,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     function getSimilarQuestionsEndpoints() {
-        return getApiEndpoints("/api/generate-similar-questions");
+        return getApiEndpoints("/api/ai/generate-similar");
     }
 
     async function requestSimilarQuestions(payload) {
