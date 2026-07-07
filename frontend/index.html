@@ -1599,10 +1599,6 @@
             <i data-lucide="file-text"></i>
             <span>الامتحانات</span>
         </div>
-        <div class="menu-item" data-target="settings-view">
-            <i data-lucide="settings"></i>
-            <span>الإعدادات</span>
-        </div>
         <div class="menu-item" id="btn-more-menu">
             <i data-lucide="more-vertical"></i>
             <span>المزيد</span>
@@ -1612,11 +1608,15 @@
     <!-- More Mobile Menu -->
     <div class="more-mobile-menu" id="more-mobile-menu" style="display: none;">
         <div class="more-menu-list">
+            <div class="more-menu-item" onclick="document.querySelector('.sidebar-menu .menu-item[data-target=\'settings-view\']')?.click(); document.getElementById('more-mobile-menu').style.display='none';">
+                <i data-lucide="settings"></i>
+                <span>الإعدادات</span>
+            </div>
             <div class="more-menu-item" onclick="document.querySelector('.sidebar-menu .menu-item[data-target=\'groups-view\']')?.click(); document.getElementById('more-mobile-menu').style.display='none';">
                 <i data-lucide="users"></i>
                 <span>مجموعات الدراسة</span>
             </div>
-            <div class="more-menu-item" onclick="window.open('admin.html', '_blank')">
+            <div class="more-menu-item" onclick="window.location.href = 'admin.html'">
                 <i data-lucide="shield"></i>
                 <span>لوحة المطور</span>
             </div>
