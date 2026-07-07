@@ -1070,7 +1070,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     menuItems.forEach(item => {
         item.addEventListener("click", () => {
             const target = item.getAttribute("data-target");
-            switchView(target);
+            if (target) {
+                switchView(target);
+            }
         });
     });
 
