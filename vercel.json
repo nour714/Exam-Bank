@@ -2,22 +2,14 @@
   "version": 2,
   "buildCommand": "echo 'No build step needed'",
   "outputDirectory": ".",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/login",
-      "dest": "/login.html"
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
     },
     {
-      "src": "/login",
-      "dest": "/login.html"
-    },
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/frontend/$1"
     }
   ],
   "headers": [
