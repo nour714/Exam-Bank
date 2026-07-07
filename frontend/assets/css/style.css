@@ -5530,19 +5530,23 @@ body.dark-theme .sq-hint {
         justify-content: space-around;
         align-items: center;
         position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
+        bottom: 15px;
+        left: 15px;
+        right: 15px;
         height: 75px;
-        background-color: #0f172a; /* Dark navy */
+        background-color: rgba(15, 23, 42, 0.85); /* Dark navy, semi-transparent */
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         z-index: 1000;
         padding: 0 5px;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
-        border-top: 1px solid rgba(255,255,255,0.05);
+        border-radius: 25px; /* Attractive rounded border */
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     body.dark-theme .mobile-bottom-nav {
-        background-color: #020617; /* Even darker for dark mode */
+        background-color: rgba(2, 6, 23, 0.85); /* Even darker for dark mode */
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
     .mobile-bottom-nav .menu-item {
