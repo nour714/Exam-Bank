@@ -1603,7 +1603,33 @@
             <i data-lucide="settings"></i>
             <span>الإعدادات</span>
         </div>
+        <div class="menu-item" id="btn-more-menu">
+            <i data-lucide="more-vertical"></i>
+            <span>المزيد</span>
+        </div>
     </nav>
+    
+    <!-- More Mobile Menu -->
+    <div class="more-mobile-menu" id="more-mobile-menu" style="display: none;">
+        <div class="more-menu-list">
+            <div class="more-menu-item" onclick="window.location.href='login.html'">
+                <i data-lucide="log-in"></i>
+                <span>تسجيل الدخول</span>
+            </div>
+            <div class="more-menu-item" onclick="document.querySelector('.sidebar-menu .menu-item[data-target=\'groups-view\']')?.click(); document.getElementById('more-mobile-menu').style.display='none';">
+                <i data-lucide="users"></i>
+                <span>مجموعات الدراسة</span>
+            </div>
+            <div class="more-menu-item" onclick="window.open('admin.html', '_blank')">
+                <i data-lucide="shield"></i>
+                <span>لوحة المطور</span>
+            </div>
+            <div class="more-menu-item text-danger" id="btn-logout-mobile-menu">
+                <i data-lucide="log-out"></i>
+                <span>تسجيل الخروج</span>
+            </div>
+        </div>
+    </div>
     <!-- Sync Mobile Profile Picture Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -1617,6 +1643,39 @@
                 });
                 observer.observe(mainAvatar, { attributes: true, attributeFilter: ['src'] });
                 if (mainAvatar.src) mobileAvatar.src = mainAvatar.src;
+            }
+
+            // More Menu Toggle
+            const btnMoreMenu = document.getElementById('btn-more-menu');
+            const moreMobileMenu = document.getElementById('more-mobile-menu');
+            if (btnMoreMenu && moreMobileMenu) {
+                btnMoreMenu.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (moreMobileMenu.style.display === 'none' || moreMobileMenu.style.display === '') {
+                        moreMobileMenu.style.display = 'block';
+                        // Re-initialize icons in the popup
+                        if(window.lucide) { window.lucide.createIcons(); }
+                    } else {
+                        moreMobileMenu.style.display = 'none';
+                    }
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!btnMoreMenu.contains(e.target) && !moreMobileMenu.contains(e.target)) {
+                        moreMobileMenu.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Mobile logout handler
+            const btnLogoutMobile = document.getElementById('btn-logout-mobile-menu');
+            if (btnLogoutMobile) {
+                btnLogoutMobile.addEventListener('click', () => {
+                    // Trigger the main logout logic if it exists, or clear token and redirect
+                    localStorage.removeItem('token');
+                    window.location.href = 'login.html';
+                });
             }
         });
     </script>
