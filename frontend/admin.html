@@ -241,15 +241,13 @@
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN / CHECKING -->
 <div id="login-screen">
-    <div class="login-box">
+    <div class="login-box" id="checking-box">
         <div class="login-icon">🔐</div>
         <h1>لوحة المطور</h1>
-        <p>مخصصة للمطور فقط — رفع الأسئلة بالجملة</p>
-        <input type="password" id="admin-pass" placeholder="كلمة المرور">
-        <button class="btn-login" onclick="checkLogin()">دخول ←</button>
-        <p class="login-error" id="login-err">❌ كلمة المرور غلط!</p>
+        <p>جاري التحقق من الصلاحيات...</p>
+        <div class="spinner" style="margin: 20px auto; border-top-color: var(--accent);"></div>
     </div>
 </div>
 
@@ -458,10 +456,20 @@ document.addEventListener("DOMContentLoaded", async () => {
             loadGlobalStats();
             loadGlobalBank();
         } else {
-            window.location.replace("index.html");
+            document.getElementById("checking-box").innerHTML = `
+                <div class="login-icon" style="background:rgba(239,68,68,0.15); color:var(--error);">❌</div>
+                <h1>غير مصرح لك</h1>
+                <p>هذه الصفحة مخصصة للمطورين فقط.</p>
+                <button class="btn-login" style="margin-top:20px" onclick="window.location.replace('index.html')">العودة للرئيسية</button>
+            `;
         }
     } catch (error) {
-        window.location.replace("index.html");
+        document.getElementById("checking-box").innerHTML = `
+            <div class="login-icon" style="background:rgba(239,68,68,0.15); color:var(--error);">❌</div>
+            <h1>خطأ في الاتصال</h1>
+            <p>يرجى تسجيل الدخول أولاً.</p>
+            <button class="btn-login" style="margin-top:20px" onclick="window.location.replace('login.html')">تسجيل الدخول</button>
+        `;
     }
 });
 
