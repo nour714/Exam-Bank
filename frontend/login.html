@@ -112,6 +112,11 @@
                 <div class="tab-slider"></div>
             </div>
 
+            <!-- PWA Install Button -->
+            <button type="button" id="btn-install-pwa" class="submit-btn" style="display:none; margin-bottom:15px; background: #10b981; color: #fff;">
+                <span class="btn-label">تثبيت التطبيق (PWA)</span>
+            </button>
+
             <!-- LOGIN FORM -->
             <form id="login-form" class="auth-form active-form" novalidate>
                 <div class="field-group">
@@ -392,7 +397,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
 
     if (!ok) return;
 
-    if (email === 'test@gmail.com' && pass === 'test123') {
+    if ((email === 'test@gmail.com' && pass === 'test123') || (email === 'example@gmail.com' && pass === 'password123')) {
         setLoading('btn-login', true);
         setTimeout(() => {
             setLoading('btn-login', false);
@@ -542,6 +547,27 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('service-worker.js')
             .then(reg => console.log('Service Worker registered successfully:', reg.scope))
             .catch(err => console.error('Service Worker registration failed:', err));
+    });
+}
+
+let deferredPrompt;
+const installBtn = document.getElementById('btn-install-pwa');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.style.display = 'flex';
+});
+
+if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        }
     });
 }
 </script>

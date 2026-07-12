@@ -49,6 +49,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (!currentUser) {
                 if (localStorage.getItem("authMode") === "demo") return true;
                 if (hasLocalOfflineSession() && !navigator.onLine) return true;
+                if (!navigator.onLine) {
+                    localStorage.setItem('authMode', 'demo');
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userName', 'Offline User');
+                    return true;
+                }
                 
                 clearPersistedAuthState();
                 window.location.replace("login.html");
