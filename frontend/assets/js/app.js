@@ -213,7 +213,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Update welcome text in dashboard
         const welcomeEl = document.querySelector('#dashboard-view .welcome-text h1');
         if (welcomeEl) {
-            welcomeEl.innerHTML = `أهلاً بك مجدداً، ${userName}! 👋`;
+            welcomeEl.innerHTML = `أهلاً بك مجدداً، <bdi class="username">${userName}</bdi> 👋`;
         }
 
         // Update Avatar
