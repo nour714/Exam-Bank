@@ -62,8 +62,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             const email = currentUser.email || localStorage.getItem("userEmail") || "";
+            const authUser = JSON.parse(localStorage.getItem("authUser") || "null");
             const resolvedName =
                 (currentUser.displayName || "").trim() ||
+                (currentUser.name || "").trim() ||
+                (authUser && authUser.name ? authUser.name.trim() : "") ||
                 localStorage.getItem("userName") ||
                 (email ? email.split("@")[0] : "") ||
                 "Student";
@@ -202,9 +205,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         return canvas.toDataURL();
     }
     function updateUserProfileUI() {
-        const userName = localStorage.getItem('userName') || 'Student';
+        const authUser = JSON.parse(localStorage.getItem('authUser') || 'null');
+        const userName = (authUser && authUser.name ? authUser.name.trim() : '') || localStorage.getItem('userName') || 'Student';
         const savedUser = safeParseJSON("userStats", null);
-        const savedAvatar = savedUser?.avatar || "";
+        const savedAvatar = authUser?.avatar || savedUser?.avatar || "";
 
         // Update name in sidebar
         const usernameEl = document.querySelector('.user-profile-widget .username');
