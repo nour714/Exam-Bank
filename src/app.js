@@ -12,6 +12,7 @@ import authRoutes from "./routes/auth.routes.js";
 import usersRoutes from "./routes/users.routes.js";
 import questionsRoutes from "./routes/questions.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
+import examsRoutes from "./routes/exams.routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +41,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/questions", questionsRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/exams", examsRoutes);
 
 // SPA Fallback for frontend routing (if needed)
 app.use((req, res, next) => {

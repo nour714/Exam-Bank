@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam Bank</title>
+    <title>Exam Bank | منصة المراجعة الشاملة لطلاب الثانوية العامة</title>
     <link rel="icon" type="image/png" href="/assets/images/icon-192.png">
                             <!-- Google Fonts: Tajawal -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,7 +121,7 @@
                     <span class="status-indicator online"></span>
                 </div>
                 <h3 class="username">طالب</h3>
-                <span class="user-badge">ثالثة ثانوي عام</span>
+                <span class="user-badge" id="sidebar-user-badge">طالب ثانوي</span>
             </div>
 
             <nav class="sidebar-menu">
@@ -234,8 +234,8 @@
                 <section class="content-view active" id="home-view">
                     <div class="hero-banner">
                         <div class="hero-content">
-                            <h1 class="hero-title">ثالثة ثانوي... <br>والامتحان قدامك واثق 💪</h1>
-                            <p class="hero-subtitle">منصة مخصصة لطلاب الصف الثالث الثانوي فقط. بنك أسئلة محدث لامتحانات الثانوية العامة — نماذج نهائية، تحليل أداء، ومراجعات شاملة قبل يوم الامتحان.</p>
+                            <h1 class="hero-title">امتحاناتك... <br>معانا هتدخلها وأنت واثق 💪</h1>
+                            <p class="hero-subtitle">منصة مخصصة لطلاب المرحلة الثانوية. بنك أسئلة محدث لجميع الصفوف — نماذج نهائية، تحليل أداء، ومراجعات شاملة قبل يوم الامتحان.</p>
                             <div class="hero-actions">
                                 <button class="btn btn-primary btn-large btn-start-study" data-target-tab="qbank-view">
                                     <i data-lucide="play"></i><span>ابدأ المذاكرة</span>
@@ -424,8 +424,8 @@
                 <section class="content-view" id="dashboard-view">
                     <div class="welcome-header">
                         <div class="welcome-text">
-                            <h1>أهلاً بك مجدداً، أحمد! 👋</h1>
-                            <p>إليك نظرة عامة على مراجعتك لامتحانات الثانوية العامة هذا الأسبوع. استمر في التقدم قبل يوم الامتحان.</p>
+                            <h1>أهلاً بك مجدداً، <span class="username">طالب</span>! 👋</h1>
+                            <p>إليك نظرة عامة على مراجعتك لامتحاناتك هذا الأسبوع. استمر في التقدم قبل يوم الامتحان.</p>
                         </div>
                         <button class="btn btn-secondary btn-ask-ai">
                             <i data-lucide="message-square"></i><span>اسأل المعلم الذكي</span>
@@ -559,8 +559,8 @@
                 <section class="content-view" id="qbank-view">
                     <div class="view-header">
                         <div class="header-texts">
-                            <span class="badge">الصف الثالث الثانوي</span>
-                            <h1>مواد الثانوية العامة — اختر مادتك وابدأ المراجعة النهائية</h1>
+                            <span class="badge" id="qbank-grade-badge">بنك الأسئلة</span>
+                            <h1>المواد الدراسية — اختر مادتك وابدأ المراجعة والتدريب</h1>
                         </div>
                         <button class="btn btn-primary" id="btn-create-custom-question">
                             <i data-lucide="plus"></i><span>إضافة سؤال مخصص</span>
@@ -998,6 +998,32 @@
                                     <input type="email" id="settings-email" placeholder="name@example.com">
                                 </div>
                             </div>
+                            <div class="settings-row">
+                                <div class="setting-field">
+                                    <label>الصف الدراسي</label>
+                                    <div class="select-wrapper">
+                                        <select id="settings-grade">
+                                            <option value="1">الأول الثانوي</option>
+                                            <option value="2">الثاني الثانوي</option>
+                                            <option value="3">الثالث الثانوي</option>
+                                        </select>
+                                        <i data-lucide="chevron-down" class="select-icon"></i>
+                                    </div>
+                                </div>
+                                <div class="setting-field">
+                                    <label>المسار</label>
+                                    <div class="select-wrapper">
+                                        <select id="settings-pathway">
+                                            <option value="">غير محدد</option>
+                                            <option value="Medicine & Life Sciences">الطب وعلوم الحياة</option>
+                                            <option value="Engineering & Computer Science">الهندسة وعلوم الحاسب</option>
+                                            <option value="Business">إدارة الأعمال</option>
+                                            <option value="Arts & Humanities">الفنون والعلوم الإنسانية</option>
+                                        </select>
+                                        <i data-lucide="chevron-down" class="select-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="settings-section-block">
                             <h3>تفضيلات الحساب</h3>
@@ -1211,6 +1237,44 @@
         </div>
     </div>
 
+    <!-- MODAL: SETUP GRADE AND PATHWAY -->
+    <div class="modal-overlay" id="setup-grade-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>إعداد الملف الشخصي</h3>
+            </div>
+            <form id="setup-grade-form">
+                <div class="form-group">
+                    <label for="setup-grade-select">الصف الدراسي</label>
+                    <div class="select-wrapper">
+                        <select id="setup-grade-select" required>
+                            <option value="1">الصف الأول الثانوي</option>
+                            <option value="2">الصف الثاني الثانوي</option>
+                            <option value="3" selected>الصف الثالث الثانوي</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="select-icon"></i>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="setup-pathway-select">المسار (للمرحلتين الثانية والثالثة)</label>
+                    <div class="select-wrapper">
+                        <select id="setup-pathway-select" required>
+                            <option value="" disabled selected>اختر المسار...</option>
+                            <option value="Medicine & Life Sciences">الطب وعلوم الحياة</option>
+                            <option value="Engineering & Computer Science">الهندسة وعلوم الحاسب</option>
+                            <option value="Business">إدارة الأعمال</option>
+                            <option value="Arts & Humanities">الفنون والعلوم الإنسانية</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="select-icon"></i>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="btn-save-setup">حفظ ومتابعة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL: CREATE STUDY GROUP -->
     <div class="modal-overlay" id="create-group-modal">
         <div class="modal-content">
@@ -1245,6 +1309,30 @@
                     <button type="submit" class="btn btn-primary">إنشاء المجموعة</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EXAM ATTEMPTS HISTORY -->
+    <div class="modal-overlay" id="exam-history-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>سجل الاختبارات السابقة</h3>
+                <button class="btn-close-modal" id="btn-close-exam-history"><i data-lucide="x"></i></button>
+            </div>
+            <div class="exam-history-body" style="max-height: 400px; overflow-y: auto;">
+                <table class="exam-history-table" style="width: 100%; text-align: right; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <th style="padding: 10px;">التاريخ</th>
+                            <th style="padding: 10px;">الصف والمسار</th>
+                            <th style="padding: 10px;">النتيجة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exam-history-list">
+                        <!-- History rows will be loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

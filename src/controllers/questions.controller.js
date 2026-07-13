@@ -7,12 +7,14 @@ import { NotFoundError } from "../utils/errors.js";
  */
 export async function getGlobalQuestions(req, res, next) {
     try {
-        const { subject, page = 1, limit = 50, search } = req.query;
+        const { subject, grade, pathway, page = 1, limit = 50, search } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const take = parseInt(limit);
 
         const where = {};
         if (subject) where.subject = subject;
+        if (grade && grade !== "all") where.grade = { in: [grade, "all"] };
+        if (pathway && pathway !== "all") where.pathway = { in: [pathway, "all"] };
         if (search) {
             where.OR = [
                 { text: { contains: search, mode: "insensitive" } },
@@ -59,6 +61,8 @@ export async function bulkCreateGlobalQuestions(req, res, next) {
             subject: q.subject,
             topic: q.topic || null,
             text: q.text,
+            grade: q.grade || "all",
+            pathway: q.pathway || "all",
             options: q.options,
             correct: q.correct,
             imageUrl: q.imageUrl || null,
@@ -89,10 +93,12 @@ export async function deleteGlobalQuestion(req, res, next) {
  */
 export async function updateGlobalQuestion(req, res, next) {
     try {
-        const { subject, topic, text, options, correct, imageUrl } = req.body;
+        const { subject, topic, text, grade, pathway, options, correct, imageUrl } = req.body;
         
         const updateData = {};
         if (subject !== undefined) updateData.subject = subject;
+        if (grade !== undefined) updateData.grade = grade;
+        if (pathway !== undefined) updateData.pathway = pathway;
         if (topic !== undefined) updateData.topic = topic;
         if (text !== undefined) updateData.text = text;
         if (options !== undefined) updateData.options = options;

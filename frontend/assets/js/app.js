@@ -338,7 +338,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             streak: 0,
             accuracy: 0,
             avatar: "",
-            lastActiveDate: ""
+            lastActiveDate: "",
+            grade: "3",
+            pathway: null
         },
         studyGroups: cloneDefaultStudyGroups(),
         exam: {
@@ -402,12 +404,54 @@ document.addEventListener("DOMContentLoaded", async () => {
             streak: 0,
             accuracy: 0,
             avatar: "",
-            lastActiveDate: ""
+            lastActiveDate: "",
+            grade: "3",
+            pathway: null
         };
         appState.studyGroups = cloneDefaultStudyGroups();
         appState.customQuestions = [];
         appState.notes = [];
         appState.weeklyActivity = [0,0,0,0,0,0,0];
+    }
+
+    // ==========================================
+    // Subjects Logic
+    // ==========================================
+    const SUBJECTS_MAP = {
+        "1": ["physics", "chemistry", "biology", "math", "arabic", "english", "history", "geography"],
+        "2": {
+            "Medicine & Life Sciences": ["physics", "chemistry", "biology", "arabic", "english"],
+            "Engineering & Computer Science": ["physics", "chemistry", "math", "arabic", "english"],
+            "Business": ["math", "arabic", "english", "history", "geography"],
+            "Arts & Humanities": ["arabic", "english", "history", "geography"]
+        },
+        "3": {
+            "Medicine & Life Sciences": ["physics", "chemistry", "biology", "geology", "arabic", "english"],
+            "Engineering & Computer Science": ["physics", "chemistry", "math", "arabic", "english"],
+            "Business": ["math", "arabic", "english", "history", "geography"],
+            "Arts & Humanities": ["arabic", "english", "history", "geography"]
+        }
+    };
+
+    function getUserSubjects() {
+        const g = appState.user.grade || "3";
+        const p = appState.user.pathway;
+        if (g === "1") return SUBJECTS_MAP["1"];
+        if (!p) return ["physics", "chemistry", "biology", "math", "arabic", "english", "geology", "history", "geography"]; // Show all if pathway not set
+        return SUBJECTS_MAP[g][p] || SUBJECTS_MAP["3"]["Medicine & Life Sciences"];
+    }
+
+    function renderSubjectsVisibility() {
+        const allowed = getUserSubjects();
+        const allSubjectCards = document.querySelectorAll('.subject-minimal-card, .subject-large-card');
+        allSubjectCards.forEach(card => {
+            const id = card.getAttribute('data-subject') || card.getAttribute('data-subject-id');
+            if (allowed.includes(id)) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
+        });
     }
 
     // ==========================================
@@ -709,11 +753,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     function updateUserStatsUI() {
         updateUserAvatar(); // تحديث الصورة أولاً
         updateSettingsAvatarPreview();
-        if (usernameHeader) usernameHeader.textContent = appState.user.name || "Ø·Ø§Ù„Ø¨";
+        if (usernameHeader) usernameHeader.textContent = appState.user.name || "طالب";
+        const sidebarUserBadge = document.getElementById("sidebar-user-badge");
+        if (sidebarUserBadge) {
+            const gradesMap = { "1": "الصف الأول الثانوي", "2": "الصف الثاني الثانوي", "3": "الصف الثالث الثانوي" };
+            sidebarUserBadge.textContent = gradesMap[appState.user.grade] || "طالب ثانوي";
+        }
+        
         if (settingsNameInput) settingsNameInput.value = appState.user.name || "";
         
         const settingsEmail = document.getElementById("settings-email");
         if (settingsEmail) settingsEmail.value = appState.user.email || "";
+
+        const settingsGrade = document.getElementById("settings-grade");
+        if (settingsGrade) settingsGrade.value = appState.user.grade || "3";
+
+        const settingsPathway = document.getElementById("settings-pathway");
+        if (settingsPathway) settingsPathway.value = appState.user.pathway || "";
+
+        // Trigger pathway visibility toggle
+        if (settingsGrade) {
+            settingsGrade.dispatchEvent(new Event('change'));
+        }
         
         const adminMenuLink = document.getElementById("admin-menu-link");
         if (adminMenuLink) {
@@ -754,6 +815,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         }
         renderWeeklyChart();
+        renderSubjectsVisibility();
     }
 
     function renderWeeklyChart() {
@@ -874,6 +936,68 @@ document.addEventListener("DOMContentLoaded", async () => {
     const answeredCountDisplay = document.getElementById("answered-count-display");
     
     const examResultsModal = document.getElementById("exam-results-modal");
+    const examHistoryModal = document.getElementById("exam-history-modal");
+    const btnCloseExamHistory = document.getElementById("btn-close-exam-history");
+    const examHistoryList = document.getElementById("exam-history-list");
+
+    if (btnCloseExamHistory) {
+        btnCloseExamHistory.addEventListener("click", () => {
+            if (examHistoryModal) examHistoryModal.classList.remove("active");
+        });
+    }
+
+    const actionCardExams = document.querySelector('.action-card[data-action="exams"]');
+    if (actionCardExams) {
+        actionCardExams.addEventListener("click", async () => {
+            if (examHistoryModal) examHistoryModal.classList.add("active");
+            if (examHistoryList) {
+                examHistoryList.innerHTML = '<tr><td colspan="3" style="text-align: center;">جار التحميل...</td></tr>';
+                try {
+                    const token = localStorage.getItem("token");
+                    if (token) {
+                        const response = await fetch("/api/exams/attempts", {
+                            headers: { "Authorization": `Bearer ${token}` }
+                        });
+                        const data = await response.json();
+                        if (data.success && data.data && data.data.length > 0) {
+                            examHistoryList.innerHTML = "";
+                            data.data.forEach(attempt => {
+                                const tr = document.createElement("tr");
+                                tr.style.borderBottom = "1px solid #e2e8f0";
+                                
+                                const dateStr = new Date(attempt.createdAt).toLocaleDateString("ar-EG");
+                                const tdDate = document.createElement("td");
+                                tdDate.style.padding = "10px";
+                                tdDate.textContent = dateStr;
+                                
+                                const gradeText = attempt.grade === "1" ? "الأول" : attempt.grade === "2" ? "الثاني" : "الثالث";
+                                const pathwayText = attempt.pathway ? attempt.pathway : "غير محدد";
+                                const tdInfo = document.createElement("td");
+                                tdInfo.style.padding = "10px";
+                                tdInfo.textContent = `الصف ${gradeText} - ${pathwayText}`;
+                                
+                                const scorePct = Math.round((attempt.score / attempt.total) * 100);
+                                const tdScore = document.createElement("td");
+                                tdScore.style.padding = "10px";
+                                tdScore.innerHTML = `<span style="color: ${scorePct >= 50 ? 'var(--color-success)' : 'var(--color-danger)'}">${attempt.score}/${attempt.total} (${scorePct}%)</span>`;
+                                
+                                tr.appendChild(tdDate);
+                                tr.appendChild(tdInfo);
+                                tr.appendChild(tdScore);
+                                examHistoryList.appendChild(tr);
+                            });
+                        } else {
+                            examHistoryList.innerHTML = '<tr><td colspan="3" style="text-align: center;">لا توجد اختبارات سابقة</td></tr>';
+                        }
+                    } else {
+                        examHistoryList.innerHTML = '<tr><td colspan="3" style="text-align: center;">يرجى تسجيل الدخول لعرض السجل</td></tr>';
+                    }
+                } catch (e) {
+                    examHistoryList.innerHTML = '<tr><td colspan="3" style="text-align: center;">حدث خطأ أثناء تحميل السجل</td></tr>';
+                }
+            }
+        });
+    }
     const examScoreText = document.getElementById("exam-score-text");
     const examFeedbackText = document.getElementById("exam-feedback-text");
     const resultCorrectCount = document.getElementById("result-correct-count");
@@ -940,6 +1064,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         updateUserStatsUI();
+
+        // Check if grade/pathway need setup
+        const isGrade1 = appState.user.grade === "1";
+        if (!appState.user.pathway && !isGrade1 && localStorage.getItem("authUser")) {
+            const setupModal = document.getElementById("setup-grade-modal");
+            if (setupModal) {
+                setupModal.classList.add("active");
+            }
+        }
     })();
 
     if (settingsAvatarInput) {
@@ -1008,6 +1141,71 @@ document.addEventListener("DOMContentLoaded", async () => {
                 console.warn("تعذر حذف الصورة من الخادم:", e);
             }
             showToast("تم حذف صورة الملف الشخصي.", "info");
+        });
+    }
+
+
+    const setupGradeForm = document.getElementById("setup-grade-form");
+    if (setupGradeForm) {
+        setupGradeForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const gradeVal = document.getElementById("setup-grade-select").value;
+            const pathwayVal = document.getElementById("setup-pathway-select").value;
+
+            if (gradeVal !== "1" && !pathwayVal) {
+                showToast("الرجاء اختيار المسار الدراسي", "warning");
+                return;
+            }
+
+            appState.user.grade = gradeVal;
+            appState.user.pathway = pathwayVal || null;
+
+            updateUserStatsUI();
+            saveStateToLocalStorage();
+
+            const setupModal = document.getElementById("setup-grade-modal");
+            if (setupModal) setupModal.classList.remove("active");
+
+            try {
+                const firebaseBackend = await getFirebaseBackend();
+                if (firebaseBackend && typeof firebaseBackend.updateProfile === "function") {
+                    await firebaseBackend.updateProfile({
+                        grade: appState.user.grade,
+                        pathway: appState.user.pathway
+                    });
+                }
+            } catch (err) {
+                console.warn("تعذر حفظ الإعدادات في الخادم:", err);
+            }
+            showToast("تم إعداد الملف الشخصي بنجاح. ✅", "success");
+        });
+        
+        const setupGradeSelect = document.getElementById("setup-grade-select");
+        const setupPathwaySelect = document.getElementById("setup-pathway-select");
+        if (setupGradeSelect && setupPathwaySelect) {
+            setupGradeSelect.addEventListener("change", () => {
+                if (setupGradeSelect.value === "1") {
+                    setupPathwaySelect.parentElement.parentElement.style.display = "none";
+                    setupPathwaySelect.required = false;
+                } else {
+                    setupPathwaySelect.parentElement.parentElement.style.display = "block";
+                    setupPathwaySelect.required = true;
+                }
+            });
+            // Initial trigger
+            setupGradeSelect.dispatchEvent(new Event('change'));
+        }
+    }
+
+    const settingsGradeSelect = document.getElementById("settings-grade");
+    const settingsPathwaySelect = document.getElementById("settings-pathway");
+    if (settingsGradeSelect && settingsPathwaySelect) {
+        settingsGradeSelect.addEventListener("change", () => {
+            if (settingsGradeSelect.value === "1") {
+                settingsPathwaySelect.parentElement.parentElement.style.display = "none";
+            } else {
+                settingsPathwaySelect.parentElement.parentElement.style.display = "block";
+            }
         });
     }
 
@@ -1763,11 +1961,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             const newName = settingsNameInput.value.trim();
             const emailInput = document.getElementById("settings-email");
             const notifyInput = document.getElementById("settings-notifications");
+            const settingsGrade = document.getElementById("settings-grade");
+            const settingsPathway = document.getElementById("settings-pathway");
             
             if (newName) {
                 appState.user.name = newName;
                 if (emailInput) appState.user.email = emailInput.value.trim();
                 if (notifyInput) appState.user.notifications = notifyInput.checked;
+                if (settingsGrade) appState.user.grade = settingsGrade.value;
+                if (settingsPathway) appState.user.pathway = settingsPathway.value || null;
                 localStorage.setItem("userName", appState.user.name);
                 localStorage.setItem("userEmail", appState.user.email || "");
                 saveStateToLocalStorage();
@@ -1781,6 +1983,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                             name: appState.user.name,
                             avatar: appState.user.avatar || null,
                             notifications: appState.user.notifications,
+                            grade: appState.user.grade,
+                            pathway: appState.user.pathway,
                         });
                     }
                 } catch (e) {
@@ -2284,6 +2488,28 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         showToast(`أحسنت! حصلت على +${xpGained} نقطة خبرة (XP) 🏆`, "success");
 
+        // حفظ محاولة الامتحان في قاعدة البيانات
+        const secondsSpent = (45 * 60) - appState.exam.timeRemaining;
+        try {
+            const token = localStorage.getItem("token");
+            if (token) {
+                fetch("/api/exams/attempts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        score,
+                        total: totalQuestions,
+                        duration: secondsSpent,
+                        grade: appState.user.grade,
+                        pathway: appState.user.pathway
+                    })
+                }).catch(err => console.warn("Failed to save exam attempt", err));
+            }
+        } catch(e) {}
+
         let feedback = "";
         if (scorePercentage >= 90) {
             feedback = "ممتاز جداً! درجة استثنائية تؤهلك للحصول على الدرجات النهائية بامتياز. استمر في التدرب وحافظ على هذا المستوى.";
@@ -2300,7 +2526,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (resultCorrectCount) resultCorrectCount.textContent = score;
         if (resultWrongCount) resultWrongCount.textContent = totalQuestions - score;
 
-        const secondsSpent = (45 * 60) - appState.exam.timeRemaining;
         const minutes = Math.floor(secondsSpent / 60);
         const seconds = secondsSpent % 60;
         if (resultTimeSpent) resultTimeSpent.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;

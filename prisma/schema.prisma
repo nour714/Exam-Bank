@@ -17,6 +17,8 @@ model User {
   role           Role      @default(USER)
   
   // Progress & Stats
+  grade          String    @default("3")
+  pathway        String?
   xp             Int       @default(0)
   solvedCount    Int       @default(0)
   streak         Int       @default(0)
@@ -33,6 +35,7 @@ model User {
   // Relations
   customQuestions CustomQuestion[]
   studyNotes      StudyNote[]
+  examAttempts    ExamAttempt[]
   weeklyActivity  WeeklyActivity[]
   groupMembers    GroupMember[]
   messages        GroupMessage[]
@@ -48,6 +51,8 @@ model GlobalQuestion {
   subject     String
   topic       String?
   text        String
+  grade       String?  @default("all")
+  pathway     String?  @default("all")
   options     String[]
   correct     String   // "A", "B", "C", or "D"
   imageUrl    String?
@@ -62,6 +67,8 @@ model CustomQuestion {
   subject     String
   topic       String?
   text        String
+  grade       String?  @default("all")
+  pathway     String?  @default("all")
   options     String[]
   correct     String   // "A", "B", "C", or "D"
   imageUrl    String?
@@ -134,4 +141,18 @@ model GroupMessage {
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   createdAt   DateTime   @default(now())
+}
+
+model ExamAttempt {
+  id        String   @id @default(uuid())
+  score     Int      @default(0)
+  total     Int      @default(0)
+  duration  Int      @default(0) // in seconds
+  grade     String?
+  pathway   String?
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
 }
