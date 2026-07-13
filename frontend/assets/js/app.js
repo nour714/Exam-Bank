@@ -64,8 +64,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             const email = currentUser.email || localStorage.getItem("userEmail") || "";
             const resolvedName =
                 (currentUser.displayName || "").trim() ||
-                (email ? email.split("@")[0] : "") ||
                 localStorage.getItem("userName") ||
+                (email ? email.split("@")[0] : "") ||
                 "Student";
 
             localStorage.setItem("isLoggedIn", "true");

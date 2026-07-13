@@ -100,8 +100,9 @@ async function waitForAuthState() {
         try {
             const res = await fetchAPI("/auth/me", { method: "GET" });
             if (res && res.success) {
-                localStorage.setItem("authUser", JSON.stringify(res.data));
-                return res.data;
+                const userData = res.data.user || res.data;
+                localStorage.setItem("authUser", JSON.stringify(userData));
+                return userData;
             }
         } catch (error) {
             try {
@@ -110,8 +111,9 @@ async function waitForAuthState() {
                     localStorage.setItem("accessToken", refreshRes.data.accessToken);
                     const meRes = await fetchAPI("/auth/me", { method: "GET" });
                     if (meRes && meRes.success) {
-                        localStorage.setItem("authUser", JSON.stringify(meRes.data));
-                        return meRes.data;
+                        const userData = meRes.data.user || meRes.data;
+                        localStorage.setItem("authUser", JSON.stringify(userData));
+                        return userData;
                     }
                 }
             } catch (e) {
