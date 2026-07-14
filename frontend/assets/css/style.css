@@ -1732,6 +1732,31 @@ body.dark-theme .bar-tooltip {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.strength-item:hover {
+    background-color: var(--primary-light);
+    border-color: rgba(59, 130, 246, 0.2);
+    transform: translateX(-4px);
+}
+
+body.dark-theme .strength-item:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.strength-item:active {
+    transform: scale(0.98);
+}
+
+.strength-item:hover .progress-bar {
+    filter: brightness(1.1);
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
 }
 
 .strength-info {
