@@ -3624,12 +3624,16 @@ body.dark-theme .form-group input:focus, body.dark-theme .form-group textarea:fo
         grid-template-columns: 1fr;
     }
 
-    .hero-title {
+    .hero-title, .welcome-text h1 {
         font-size: 22px;
     }
 
     .section-title {
         font-size: 20px;
+    }
+
+    .feature-card h3 {
+        font-size: 16px;
     }
 
     /* Modals responsive */
@@ -3819,8 +3823,16 @@ body.dark-theme .form-group input:focus, body.dark-theme .form-group textarea:fo
         padding: 18px;
     }
 
-    .hero-title {
+    .hero-title, .welcome-text h1 {
         font-size: 20px;
+    }
+
+    .section-title {
+        font-size: 18px;
+    }
+
+    .feature-card h3 {
+        font-size: 15px;
     }
 
     .questions-grid-map {
@@ -3900,7 +3912,7 @@ body.dark-theme .form-group input:focus, body.dark-theme .form-group textarea:fo
         padding: 14px 10px;
     }
 
-    .hero-title {
+    .hero-title, .welcome-text h1 {
         font-size: 18px;
     }
 
@@ -3932,8 +3944,12 @@ body.dark-theme .form-group input:focus, body.dark-theme .form-group textarea:fo
         padding: 20px 16px;
     }
 
+    .feature-card h3 {
+        font-size: 14px;
+    }
+
     .section-title {
-        font-size: 18px;
+        font-size: 16px;
         margin-bottom: 16px;
     }
 
@@ -4017,7 +4033,7 @@ body.dark-theme .form-group input:focus, body.dark-theme .form-group textarea:fo
         font-size: 12px;
     }
 
-    .hero-title {
+    .hero-title, .welcome-text h1 {
         font-size: 16px;
     }
 
@@ -4026,7 +4042,11 @@ body.dark-theme .form-group input:focus, body.dark-theme .form-group textarea:fo
     }
 
     .section-title {
-        font-size: 16px;
+        font-size: 15px;
+    }
+
+    .feature-card h3 {
+        font-size: 13px;
     }
 
     .btn-unlock-pro {
