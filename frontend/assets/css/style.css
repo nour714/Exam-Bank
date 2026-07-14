@@ -1487,6 +1487,11 @@ body.dark-theme .subject-minimal-card:hover {
     margin-bottom: 6px;
 }
 
+.welcome-text h1 .username {
+    font-size: inherit;
+    font-weight: inherit;
+}
+
 .welcome-text p {
     color: var(--text-muted);
     font-size: 15px;
