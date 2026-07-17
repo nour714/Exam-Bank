@@ -1,0 +1,114 @@
+/* ═══════════════════════════════════════════════════════
+   Design System Components CSS
+   ═══════════════════════════════════════════════════════ */
+
+/* ─── Buttons ───────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-medium);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-sm { padding: var(--space-1) var(--space-3); font-size: var(--text-sm); }
+.btn-md { padding: var(--space-2) var(--space-4); font-size: var(--text-base); }
+.btn-lg { padding: var(--space-3) var(--space-6); font-size: var(--text-lg); }
+
+.btn-primary {
+  background-color: var(--color-primary-500);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-600);
+}
+
+.btn-secondary {
+  background-color: var(--surface-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--gray-100);
+}
+
+.btn-danger {
+  background-color: var(--color-danger-500);
+  color: #fff;
+}
+
+.spinner-sm {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+/* ─── Inputs ────────────────────────────────────────── */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+
+.input-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.input-control {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input-control:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+  outline: none;
+}
+
+.input-error {
+  border-color: var(--color-danger-500);
+}
+
+.error-text {
+  font-size: var(--text-xs);
+  color: var(--color-danger-500);
+}
+
+/* ─── Cards ─────────────────────────────────────────── */
+.card {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card-body {
+  padding: var(--space-4);
+}
+
+.card-footer {
+  padding: var(--space-4);
+  background-color: var(--surface-hover);
+  border-top: 1px solid var(--border-color);
+}

@@ -3,156 +3,633 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
+// -----------------------------------------
+// Multi-Tenancy
+// -----------------------------------------
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  domain    String?  @unique
+  isActive  Boolean  @default(true)
+  plan      String   @default("free")
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users    User[]
+  settings AppSetting[]
+  flags    FeatureFlag[]
+}
+
+// -----------------------------------------
+// Users & RBAC
+// -----------------------------------------
 
 model User {
   id             String    @id @default(uuid())
-  name           String
+  tenantId       String
   email          String    @unique
-  password       String
+  passwordHash   String
+  firstName      String
+  lastName       String
   avatar         String?
-  role           Role      @default(USER)
-  
-  // Progress & Stats
-  grade          String    @default("3")
-  pathway        String?
-  xp             Int       @default(0)
-  solvedCount    Int       @default(0)
-  streak         Int       @default(0)
-  accuracy       Float     @default(0.0)
-  
-  // Preferences
-  notifications  Boolean   @default(true)
-  darkMode       Boolean   @default(true)
-  
-  lastActiveDate DateTime?
+  locale         String    @default("ar")
+  isActive       Boolean   @default(true)
+  isEmailVerified Boolean  @default(false)
+  failedLoginAttempts Int  @default(0)
+  lockedUntil    DateTime?
+  lastLoginAt    DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  // Relations
-  customQuestions CustomQuestion[]
-  studyNotes      StudyNote[]
-  examAttempts    ExamAttempt[]
-  weeklyActivity  WeeklyActivity[]
-  groupMembers    GroupMember[]
-  messages        GroupMessage[]
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  roles         UserRole[]
+  refreshTokens RefreshToken[]
+  sessions      Session[]
+  loginHistory  LoginHistory[]
+  auditLogs     AuditLog[]
+
+  @@index([tenantId])
+  @@index([email])
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
-model GlobalQuestion {
+model Role {
   id          String   @id @default(uuid())
-  subject     String
-  topic       String?
-  text        String
-  grade       String?  @default("all")
-  pathway     String?  @default("all")
-  options     String[]
-  correct     String   // "A", "B", "C", or "D"
-  imageUrl    String?
-  addedById   String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model CustomQuestion {
-  id          String   @id @default(uuid())
-  subject     String
-  topic       String?
-  text        String
-  grade       String?  @default("all")
-  pathway     String?  @default("all")
-  options     String[]
-  correct     String   // "A", "B", "C", or "D"
-  imageUrl    String?
-  
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model StudyNote {
-  id          String   @id @default(uuid())
-  subject     String
-  content     String
-  
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model WeeklyActivity {
-  id          String   @id @default(uuid())
-  dayIndex    Int      // 0-6 (Sun-Sat)
-  count       Int      @default(0)
-  
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, dayIndex])
-}
-
-model StudyGroup {
-  id          String   @id @default(uuid())
-  name        String
+  name        String   @unique
   description String?
-  isPublic    Boolean  @default(true)
-  
+  isSystem    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  members     GroupMember[]
-  messages    GroupMessage[]
+
+  users       UserRole[]
+  permissions RolePermission[]
 }
 
-model GroupMember {
-  id          String     @id @default(uuid())
-  
-  groupId     String
-  group       StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  joinedAt    DateTime   @default(now())
-  
-  @@unique([groupId, userId])
+model Permission {
+  id          String   @id @default(uuid())
+  resource    String
+  action      String
+  description String?
+  createdAt   DateTime @default(now())
+
+  roles RolePermission[]
+
+  @@unique([resource, action])
 }
 
-model GroupMessage {
-  id          String     @id @default(uuid())
-  content     String
-  
-  groupId     String
-  group       StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime   @default(now())
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String
+  roleId    String
+  assignedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+}
+
+model RolePermission {
+  id           String @id @default(uuid())
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+// -----------------------------------------
+// Authentication & Sessions
+// -----------------------------------------
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  family    String
+  expiresAt DateTime
+  revokedAt DateTime?
+  replacedBy String?
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([family])
+}
+
+model Session {
+  id         String   @id @default(uuid())
+  userId     String
+  userAgent  String?
+  ipAddress  String?
+  deviceName String?
+  isActive   Boolean  @default(true)
+  lastSeenAt DateTime @default(now())
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model LoginHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  ipAddress String?
+  userAgent String?
+  status    String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// -----------------------------------------
+// Audit Trail
+// -----------------------------------------
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  oldData    Json?
+  newData    Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([resource, action])
+  @@index([createdAt])
+}
+
+// -----------------------------------------
+// Feature Flags
+// -----------------------------------------
+
+model FeatureFlag {
+  id          String   @id @default(uuid())
+  tenantId    String?
+  key         String
+  enabled     Boolean  @default(false)
+  description String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, key])
+  @@index([key])
+}
+
+// -----------------------------------------
+// Application Settings
+// -----------------------------------------
+
+model AppSetting {
+  id        String   @id @default(uuid())
+  tenantId  String?
+  category  String
+  key       String
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, category, key])
+  @@index([category])
+}
+
+// -----------------------------------------
+// Educational Core: Curriculum & Taxonomy
+// -----------------------------------------
+
+model Curriculum {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  country     String?
+  system      String?  // e.g., "National", "IGCSE", "SAT"
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  grades   Grade[]
+  subjects Subject[]
+  exams    Exam[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  @@index([tenantId])
+}
+
+model Grade {
+  id           String   @id @default(uuid())
+  curriculumId String
+  name         String   // e.g., "Grade 10", "Year 11"
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  curriculum Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  subjects   Subject[]
+
+  @@index([curriculumId])
+}
+
+model Subject {
+  id           String   @id @default(uuid())
+  tenantId     String
+  curriculumId String
+  gradeId      String?
+  name         String
+  code         String?
+  description  String?
+  icon         String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  units      Unit[]
+  questions  Question[]
+  exams      Exam[]
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  curriculum Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  grade      Grade?     @relation(fields: [gradeId], references: [id], onDelete: SetNull)
+  @@index([tenantId])
+  @@index([curriculumId])
+}
+
+model Unit {
+  id          String   @id @default(uuid())
+  subjectId   String
+  name        String
+  order       Int      @default(0)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  subject  Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  lessons  Lesson[]
+
+  @@index([subjectId])
+}
+
+model Lesson {
+  id          String   @id @default(uuid())
+  unitId      String
+  name        String
+  order       Int      @default(0)
+  content     Json?    // Optional rich content
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  unit      Unit       @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  questions Question[]
+
+  @@index([unitId])
+}
+
+// -----------------------------------------
+// Educational Core: Questions Bank
+// -----------------------------------------
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  SHORT_ANSWER
+  ESSAY
+  MATCHING
+  ORDERING
+  FILL_IN_BLANK
+  IMAGE_BASED
+  MULTI_SELECT
+}
+
+enum DifficultyLevel {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
+model Question {
+  id          String          @id @default(uuid())
+  tenantId    String
+  subjectId   String
+  lessonId    String?
+  type        QuestionType
+  difficulty  DifficultyLevel @default(MEDIUM)
+  content     Json            // Rich text, math ML, or structured data
+  explanation Json?           // Solution explanation
+  metadata    Json?           // Specific data for complex types (e.g., pairs for matching)
+  tags        String[]
+  points      Int             @default(1)
+  isPublished Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  lesson  Lesson? @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+
+  choices       Choice[]
+  examQuestions ExamQuestion[]
+
+  @@index([tenantId])
+  @@index([subjectId])
+  @@index([lessonId])
+  @@index([type])
+}
+
+model Choice {
+  id         String   @id @default(uuid())
+  questionId String
+  content    Json
+  isCorrect  Boolean  @default(false)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId])
+}
+
+// -----------------------------------------
+// Educational Core: Exams & Assessments
+// -----------------------------------------
+
+enum ExamType {
+  PRACTICE
+  MOCK
+  TIMED
+  ADAPTIVE
+  AI_GENERATED
+  CUSTOM
+}
+
+model Exam {
+  id           String   @id @default(uuid())
+  tenantId     String
+  curriculumId String?
+  subjectId    String
+  title        String
+  description  String?
+  type         ExamType
+  durationMins Int?     // Null if untimed
+  passingScore Int      @default(50)
+  totalPoints  Int      @default(0)
+  config       Json?    // E.g., randomize questions, adaptive rules
+  isPublished  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subject    Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  curriculum Curriculum? @relation(fields: [curriculumId], references: [id], onDelete: SetNull)
+
+  questions ExamQuestion[]
+
+  @@index([tenantId])
+  @@index([subjectId])
+}
+
+model ExamQuestion {
+  id         String   @id @default(uuid())
+  examId     String
+  questionId String
+  order      Int      @default(0)
+  points     Int?     // Override question default points if needed
+  createdAt  DateTime @default(now())
+
+  exam     Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([examId, questionId])
+  @@index([examId])
+  @@index([questionId])
+}
+
+// -----------------------------------------
+// Phase 5: Exam Engine & Submissions
+// -----------------------------------------
+
+enum ExamStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+  ARCHIVED
+}
+
+enum AttemptStatus {
+  STARTED
+  SUBMITTED
+  AUTO_GRADED
+  REVIEWED
+  ABANDONED
 }
 
 model ExamAttempt {
-  id        String   @id @default(uuid())
-  score     Int      @default(0)
-  total     Int      @default(0)
-  duration  Int      @default(0) // in seconds
-  grade     String?
-  pathway   String?
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt DateTime @default(now())
+  id            String   @id @default(uuid())
+  tenantId      String
+  examId        String
+  userId        String
+  status        AttemptStatus @default(STARTED)
+  startedAt     DateTime @default(now())
+  endedAt       DateTime?
+  remainingSecs Int?     // For tracking disconnected timed exams
+  score         Int?
+  passed        Boolean?
+  metadata      Json?    // E.g., browser finger-print, IP, auto-save states
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  answers ExamAnswer[]
+
+  @@index([tenantId])
+  @@index([examId])
+  @@index([userId])
+  @@index([status])
+}
+
+model ExamAnswer {
+  id           String   @id @default(uuid())
+  attemptId    String
+  questionId   String
+  answerData   Json     // The student's answer (string, array of choice IDs, text, etc)
+  isCorrect    Boolean? // Null if subjective/needs manual grading
+  autoScore    Int      @default(0)
+  manualScore  Int?
+  feedback     String?  // Instructor feedback
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  attempt  ExamAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+}
+
+// -----------------------------------------
+// Phase 7: Billing & Subscriptions
+// -----------------------------------------
+
+model SubscriptionPlan {
+  id              String   @id @default(uuid())
+  name            String
+  stripeProductId String?  @unique
+  priceMonthly    Float
+  priceYearly     Float
+  features        Json     // List of features or limits (e.g. maxUsers, maxStorage)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  subscriptions TenantSubscription[]
+}
+
+model TenantSubscription {
+  id                   String   @id @default(uuid())
+  tenantId             String   @unique
+  planId               String
+  stripeSubscriptionId String?  @unique
+  stripeCustomerId     String?
+  status               String   // active, canceled, past_due
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  tenant Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan   SubscriptionPlan @relation(fields: [planId], references: [id])
+}
+
+// -----------------------------------------
+// Phase 7: Plugins & Webhooks
+// -----------------------------------------
+
+model Plugin {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  version     String
+  description String?
+  author      String?
+  manifest    Json     // Permissions, entrypoints, hooks
+  isVerified  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  installations TenantPlugin[]
+}
+
+model TenantPlugin {
+  id         String   @id @default(uuid())
+  tenantId   String
+  pluginId   String
+  config     Json?    // Tenant-specific config for the plugin
+  isEnabled  Boolean  @default(true)
+  installedAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plugin Plugin @relation(fields: [pluginId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, pluginId])
+}
+
+model WebhookEndpoint {
+  id          String   @id @default(uuid())
+  tenantId    String
+  url         String
+  secret      String?  // For signature verification
+  events      String[] // e.g., ["exam.completed", "user.created"]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deliveries WebhookDelivery[]
+
+  @@index([tenantId])
+}
+
+model WebhookDelivery {
+  id             String   @id @default(uuid())
+  endpointId     String
+  eventId        String   // Reference to the emitted domain event
+  eventType      String
+  requestPayload Json
+  responseStatus Int?
+  responseBody   String?
+  durationMs     Int?
+  status         String   // pending, success, failed
+  createdAt      DateTime @default(now())
+
+  endpoint WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+
+  @@index([endpointId])
+  @@index([status])
+}
+
+// -----------------------------------------
+// Phase 7: Study Groups (Collaboration)
+// -----------------------------------------
+
+model StudyGroup {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  inviteCode  String?  @unique
+  isPrivate   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant  Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  members StudyGroupMember[]
+
+  @@index([tenantId])
+}
+
+model StudyGroupMember {
+  id           String   @id @default(uuid())
+  groupId      String
+  userId       String
+  role         String   // ADMIN, MEMBER
+  joinedAt     DateTime @default(now())
+
+  group StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
 }

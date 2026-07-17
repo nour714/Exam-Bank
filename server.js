@@ -1,13 +1,25 @@
-import http from "http";
-import app from "./src/app.js";
-import config from "./src/config/index.js";
-import { setupSocketIO } from "./src/sockets/index.js";
+require('dotenv').config();
+const app = require('./src/app');
+const { logger } = require('./src/shared/logger');
+const config = require('./src/shared/config');
 
-const server = http.createServer(app);
+const PORT = config.PORT || 3000;
 
-// Initialize Socket.IO
-setupSocketIO(server);
+const server = app.listen(PORT, () => {
+  logger.info(`Server running on port ${PORT} in ${config.NODE_ENV} mode`);
+});
 
-server.listen(config.port, () => {
-    console.log(`🚀 Server running in ${config.nodeEnv} mode on port ${config.port}`);
+// Handle unhandled promise rejections gracefully
+process.on('unhandledRejection', (err) => {
+  logger.fatal(err, 'UNHANDLED REJECTION! Shutting down...');
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM RECEIVED. Shutting down gracefully...');
+  server.close(() => {
+    logger.info('Process terminated!');
+  });
 });

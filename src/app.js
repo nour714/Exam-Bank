@@ -1,58 +1,134 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import morgan from "morgan";
-import cookieParser from "cookie-parser";
-import path from "path";
-import { fileURLToPath } from "url";
-import config from "./config/index.js";
-import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
+const express = require('express');
+const { logger } = require('./shared/logger');
+const { ZodError } = require('zod');
+const { setupGateway } = require('./gateway');
+const { featureFlagRoutes } = require('./modules/feature-flags');
+const { settingsRoutes } = require('./modules/settings');
+const { securityMiddleware, metricsMiddleware, metricsEndpoint } = require('./shared/middlewares');
 
-import authRoutes from "./routes/auth.routes.js";
-import usersRoutes from "./routes/users.routes.js";
-import questionsRoutes from "./routes/questions.routes.js";
-import aiRoutes from "./routes/ai.routes.js";
-import examsRoutes from "./routes/exams.routes.js";
+// Phase 2 Modules
+const { authRoutes } = require('./modules/auth');
+const { userRoutes } = require('./modules/users');
+const { tenantRoutes } = require('./modules/tenant');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Phase 4 Modules
+const { curriculumRoutes } = require('./modules/curriculum');
+const { questionRoutes } = require('./modules/questions');
+const { examRoutes } = require('./modules/exams');
+const { engineRoutes } = require('./modules/engine');
+const { analyticsRoutes } = require('./modules/analytics');
+
+// Phase 7 Modules
+const { billingRoutes } = require('./modules/billing');
+const { pluginRoutes } = require('./modules/plugins');
+const { webhookRoutes } = require('./modules/webhooks');
+const { studyGroupRoutes } = require('./modules/study-groups');
+
+const cors = require('cors');
+const compression = require('compression');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
-// Security and utility middlewares
-app.use(helmet({
-    contentSecurityPolicy: false, // Disabling for now so frontend can load external scripts/images easily
-}));
-app.use(cors({
-    origin: config.corsOrigin,
-    credentials: true,
-}));
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+// ─── 0. Security & Observability ───────────────────────────────
+app.use(cors());
+app.use(compression());
+app.use(express.json());
 app.use(cookieParser());
-app.use(morgan(config.nodeEnv === "development" ? "dev" : "combined"));
+app.use(securityMiddleware);
+app.use(metricsMiddleware);
 
-// Serve static frontend files
-const frontendPath = path.join(__dirname, "../frontend");
-app.use(express.static(frontendPath));
+app.get('/metrics', metricsEndpoint);
 
-// API Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/users", usersRoutes);
-app.use("/api/questions", questionsRoutes);
-app.use("/api/ai", aiRoutes);
-app.use("/api/exams", examsRoutes);
-
-// SPA Fallback for frontend routing (if needed)
-app.use((req, res, next) => {
-    if (req.method !== "GET" || req.originalUrl.startsWith("/api")) {
-        return next();
-    }
-    res.sendFile(path.join(frontendPath, "index.html"));
+// ─── 0.1 Health Probes ─────────────────────────────────────────
+app.get('/health/liveness', (req, res) => {
+  res.status(200).json({ status: 'alive' });
+});
+app.get('/health/readiness', async (req, res) => {
+  // In a real scenario, ping the DB and Redis here
+  // If down, return 503
+  res.status(200).json({ status: 'ready' });
 });
 
-// Error handling
-app.use(notFoundHandler);
-app.use(errorHandler);
+// ─── 0.2 API Documentation (Swagger) ────────────────────────────
+if (process.env.NODE_ENV !== 'production') {
+  const swaggerUi = require('swagger-ui-express');
+  const YAML = require('yamljs');
+  const path = require('path');
+  const swaggerDocument = YAML.load(path.join(__dirname, 'docs', 'openapi.yaml'));
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+}
 
-export default app;
+// ─── 1. Gateway Layer ──────────────────────────────────────────
+setupGateway(app);
+
+// ─── 2. Health & Metrics ───────────────────────────────────────
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// ─── 3. API v1 Routes ──────────────────────────────────────────
+const apiRouter = express.Router();
+
+apiRouter.use('/feature-flags', featureFlagRoutes);
+apiRouter.use('/settings', settingsRoutes);
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/users', userRoutes);
+apiRouter.use('/tenants', tenantRoutes);
+apiRouter.use('/curriculums', curriculumRoutes);
+apiRouter.use('/questions', questionRoutes);
+apiRouter.use('/exams', examRoutes);
+apiRouter.use('/engine', engineRoutes);
+apiRouter.use('/analytics', analyticsRoutes);
+
+// Phase 7
+apiRouter.use('/billing', billingRoutes);
+apiRouter.use('/plugins', pluginRoutes);
+apiRouter.use('/webhooks', webhookRoutes);
+apiRouter.use('/study-groups', studyGroupRoutes);
+
+app.use('/api/v1', apiRouter);
+
+// ─── 4. Zod Validation Error Handler ──────────────────────────
+app.use((err, req, res, next) => {
+  if (err instanceof ZodError) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        message: req.t ? req.t('common.validation_error') : 'Validation error',
+        details: err.errors.map((e) => ({
+          field: e.path.join('.'),
+          message: e.message,
+        })),
+      },
+    });
+  }
+  next(err);
+});
+
+// ─── 5. Global Error Handler ──────────────────────────────────
+app.use((err, req, res, next) => {
+  logger.error(err);
+  const status = err.statusCode || 500;
+  const message = err.isOperational
+    ? err.message
+    : (req.t ? req.t('common.server_error') : 'Internal Server Error');
+
+  res.status(status).json({
+    success: false,
+    error: {
+      message,
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    },
+  });
+});
+
+// ─── 6. 404 Handler ───────────────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: { message: req.t ? req.t('common.not_found') : 'Not Found' },
+  });
+});
+
+module.exports = app;

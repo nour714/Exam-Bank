@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Exam Bank – Enterprise exam management platform" />
+  <meta name="theme-color" content="#6C5CE7" />
+  <title>Exam Bank</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Design System -->
+  <link rel="stylesheet" href="/src/design-system/theme.css" />
+  <link rel="stylesheet" href="/src/design-system/reset.css" />
+  <link rel="stylesheet" href="/src/design-system/utilities.css" />
+</head>
+<body>
+  <!-- App Shell for PWA / Offline -->
+  <div id="app-root">
+    <div id="app-sidebar"></div>
+    <div id="app-content">
+      <header id="app-header"></header>
+      <main id="app-main">
+        <!-- Pages render here -->
+        <div id="page-loader" class="page-loader" aria-live="polite">
+          <div class="spinner"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+  <!-- Modal Container -->
+  <div id="modal-container" role="dialog" aria-modal="true"></div>
+
+  <!-- Drawer Container -->
+  <div id="drawer-container"></div>
+
+  <!-- App Bootstrap -->
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

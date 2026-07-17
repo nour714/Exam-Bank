@@ -1,0 +1,183 @@
+openapi: 3.1.0
+info:
+  title: Exam Bank Enterprise API
+  description: Enterprise exam management and learning platform
+  version: 1.0.0
+  contact:
+    name: Exam Bank Team
+    email: support@exambank.com
+servers:
+  - url: /api/v1
+    description: Current API Version
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            code:
+              type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [STUDENT, TEACHER, ADMIN, SUPER_ADMIN]
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Authenticate user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                      refreshToken:
+                        type: string
+                      user:
+                        $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Token refreshed
+        '401':
+          description: Invalid refresh token
+
+  /exams:
+    get:
+      tags:
+        - Exams
+      summary: List available exams
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: subjectId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of exams
+    post:
+      tags:
+        - Exams
+      summary: Create a new exam
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - durationMinutes
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                durationMinutes:
+                  type: integer
+      responses:
+        '201':
+          description: Exam created
+
+  /engine/exams/{examId}/start:
+    post:
+      tags:
+        - Exam Engine
+      summary: Start an exam attempt
+      parameters:
+        - name: examId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attempt started successfully

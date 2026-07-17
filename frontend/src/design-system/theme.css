@@ -1,0 +1,189 @@
+/* ═══════════════════════════════════════════════════════
+   EXAM BANK — Design System Theme
+   All design tokens are CSS custom properties.
+   Business components NEVER use raw values.
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* ─── Color Palette ────────────────────────────────── */
+  --color-primary-50:  #EDE9FE;
+  --color-primary-100: #DDD6FE;
+  --color-primary-200: #C4B5FD;
+  --color-primary-300: #A78BFA;
+  --color-primary-400: #8B5CF6;
+  --color-primary-500: #6C5CE7;
+  --color-primary-600: #5B4BD5;
+  --color-primary-700: #4C3DC3;
+  --color-primary-800: #3C2EA8;
+  --color-primary-900: #2E2384;
+
+  --color-secondary-50:  #E0F7FA;
+  --color-secondary-100: #B2EBF2;
+  --color-secondary-200: #80DEEA;
+  --color-secondary-300: #4DD0E1;
+  --color-secondary-400: #26C6DA;
+  --color-secondary-500: #00BCD4;
+  --color-secondary-600: #00ACC1;
+  --color-secondary-700: #0097A7;
+
+  --color-success-50:  #ECFDF5;
+  --color-success-500: #10B981;
+  --color-success-600: #059669;
+
+  --color-warning-50:  #FFFBEB;
+  --color-warning-500: #F59E0B;
+  --color-warning-600: #D97706;
+
+  --color-danger-50:   #FEF2F2;
+  --color-danger-500:  #EF4444;
+  --color-danger-600:  #DC2626;
+
+  --color-info-50:  #EFF6FF;
+  --color-info-500: #3B82F6;
+
+  /* ─── Neutral / Gray Scale ─────────────────────────── */
+  --gray-50:  #F9FAFB;
+  --gray-100: #F3F4F6;
+  --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
+  --gray-400: #9CA3AF;
+  --gray-500: #6B7280;
+  --gray-600: #4B5563;
+  --gray-700: #374151;
+  --gray-800: #1F2937;
+  --gray-900: #111827;
+  --gray-950: #0A0E17;
+
+  /* ─── Semantic Tokens ──────────────────────────────── */
+  --bg-primary:    #FFFFFF;
+  --bg-secondary:  var(--gray-50);
+  --bg-tertiary:   var(--gray-100);
+  --bg-inverse:    var(--gray-900);
+  --bg-sidebar:    var(--gray-950);
+
+  --text-primary:   var(--gray-900);
+  --text-secondary: var(--gray-600);
+  --text-muted:     var(--gray-400);
+  --text-inverse:   #FFFFFF;
+  --text-link:      var(--color-primary-600);
+
+  --border-color:   var(--gray-200);
+  --border-focus:   var(--color-primary-400);
+
+  --surface-card:   #FFFFFF;
+  --surface-hover:  var(--gray-50);
+  --surface-active: var(--color-primary-50);
+
+  /* ─── Typography ───────────────────────────────────── */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --text-xs:   0.75rem;   /* 12px */
+  --text-sm:   0.875rem;  /* 14px */
+  --text-base: 1rem;      /* 16px */
+  --text-lg:   1.125rem;  /* 18px */
+  --text-xl:   1.25rem;   /* 20px */
+  --text-2xl:  1.5rem;    /* 24px */
+  --text-3xl:  1.875rem;  /* 30px */
+  --text-4xl:  2.25rem;   /* 36px */
+
+  --font-light:    300;
+  --font-regular:  400;
+  --font-medium:   500;
+  --font-semibold: 600;
+  --font-bold:     700;
+  --font-extrabold: 800;
+
+  --leading-tight:  1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* ─── Spacing Scale ────────────────────────────────── */
+  --space-0:  0;
+  --space-1:  0.25rem;  /* 4px */
+  --space-2:  0.5rem;   /* 8px */
+  --space-3:  0.75rem;  /* 12px */
+  --space-4:  1rem;     /* 16px */
+  --space-5:  1.25rem;  /* 20px */
+  --space-6:  1.5rem;   /* 24px */
+  --space-8:  2rem;     /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --space-20: 5rem;     /* 80px */
+
+  /* ─── Border Radius ────────────────────────────────── */
+  --radius-sm:   0.25rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1.5rem;
+  --radius-full: 9999px;
+
+  /* ─── Shadows ──────────────────────────────────────── */
+  --shadow-xs:   0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md:   0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-lg:   0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  --shadow-xl:   0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+  --shadow-inner: inset 0 2px 4px rgba(0,0,0,0.06);
+
+  /* ─── Z-Index Scale ────────────────────────────────── */
+  --z-dropdown: 1000;
+  --z-sticky:   1100;
+  --z-modal:    1300;
+  --z-drawer:   1200;
+  --z-toast:    1400;
+  --z-tooltip:  1500;
+
+  /* ─── Transitions ──────────────────────────────────── */
+  --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base:   200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow:   300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ─── Layout ───────────────────────────────────────── */
+  --sidebar-width:    260px;
+  --sidebar-collapsed: 72px;
+  --header-height:    64px;
+  --container-max:    1280px;
+
+  /* ─── Breakpoints (reference, CSS uses media queries) ─ */
+  /* sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px */
+}
+
+/* ─── Dark Mode ──────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg-primary:    var(--gray-900);
+  --bg-secondary:  var(--gray-800);
+  --bg-tertiary:   var(--gray-700);
+  --bg-inverse:    #FFFFFF;
+  --bg-sidebar:    #0D1117;
+
+  --text-primary:   var(--gray-100);
+  --text-secondary: var(--gray-400);
+  --text-muted:     var(--gray-500);
+  --text-inverse:   var(--gray-900);
+  --text-link:      var(--color-primary-300);
+
+  --border-color:   var(--gray-700);
+  --border-focus:   var(--color-primary-400);
+
+  --surface-card:   var(--gray-800);
+  --surface-hover:  var(--gray-700);
+  --surface-active: rgba(108, 92, 231, 0.15);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
+}
+
+/* ─── High Contrast Mode ─────────────────────────────── */
+[data-theme="high-contrast"] {
+  --bg-primary:    #000000;
+  --text-primary:  #FFFFFF;
+  --border-color:  #FFFFFF;
+  --border-focus:  #FFD700;
+  --color-primary-500: #FFD700;
+  --surface-card:  #1A1A1A;
+}

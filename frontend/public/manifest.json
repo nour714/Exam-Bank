@@ -1,0 +1,22 @@
+{
+  "name": "Exam Bank Enterprise",
+  "short_name": "Exam Bank",
+  "description": "Enterprise exam management and learning platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#6C5CE7",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
