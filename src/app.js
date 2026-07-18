@@ -123,7 +123,22 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ─── 6. 404 Handler ───────────────────────────────────────────
+// ─── 6. Frontend static serving (SPA) ──────────────────────────
+const path = require('path');
+const frontendPath = path.join(__dirname, '..', 'frontend');
+
+app.use(express.static(path.join(frontendPath, 'public')));
+app.use('/src', express.static(path.join(frontendPath, 'src')));
+
+// SPA fallback
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || req.path.startsWith('/api')) {
+    return next();
+  }
+  res.sendFile(path.join(frontendPath, 'public', 'index.html'));
+});
+
+// ─── 7. 404 Handler (for API) ──────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
     success: false,
