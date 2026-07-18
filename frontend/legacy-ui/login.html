@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Bank</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%230f172a' width='32' height='32' rx='6'/><g transform='translate(4,4) scale(1)' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10v6M2 10l10-5 10 5-10 5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></g></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Exam Bank">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%230f172a' width='180' height='180' rx='40'/><g transform='translate(45, 45) scale(3.75)' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10v6M2 10l10-5 10 5-10 5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></g></svg>">
+    <link rel="stylesheet" href="assets/css/login.css">
+</head>
+<body>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Glow Orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- Toast Container -->
+<div id="toast-wrap"></div>
+
+<!-- Main Layout -->
+<div class="page-wrap">
+
+    <!-- LEFT: Branding Panel -->
+    <aside class="brand-panel">
+        <div class="brand-panel-inner">
+
+            <!-- Logo -->
+            <div class="logo-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-svg" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="lg1" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#818cf8"/>
+                            <stop offset="100%" stop-color="#38bdf8"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" stroke="url(#lg1)"/>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5" stroke="url(#lg1)"/>
+                </svg>
+                <div class="logo-text">
+                    <span class="logo-name">Exam Bank</span>
+                    <span class="logo-sub">Exam Bank</span>
+                </div>
+            </div>
+
+            <!-- Headline -->
+            <div class="brand-headline">
+                <h1>ثالثة ثانوي<br><span class="highlight">والامتحان مش مشكلة</span></h1>
+                <p>منصة متكاملة لطلاب الثانوية العامة — بنك أسئلة، امتحانات محاكاة، وتحليل أداء فوري.</p>
+            </div>
+
+            <!-- Stats Pills -->
+            <div class="stats-row">
+                <div class="stat-pill">
+                    <span class="stat-num">+5000</span>
+                    <span class="stat-lbl">سؤال</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-num">9</span>
+                    <span class="stat-lbl">مواد</span>
+                </div>
+                <div class="stat-pill">
+                    <span class="stat-num">AI</span>
+                    <span class="stat-lbl">مدرس ذكي</span>
+                </div>
+            </div>
+
+            <!-- Feature list -->
+            <ul class="feature-list">
+                <li><span class="feat-icon">🎯</span> امتحانات بالتوقيت الحقيقي</li>
+                <li><span class="feat-icon">📊</span> تحليل أداء تفصيلي</li>
+                <li><span class="feat-icon">🤖</span> شرح بالذكاء الاصطناعي</li>
+                <li><span class="feat-icon">👥</span> مجموعات دراسية</li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- RIGHT: Form Panel -->
+    <main class="form-panel">
+        <div class="form-card">
+
+            <!-- Mobile Logo -->
+            <div class="mobile-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="mlg1" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#818cf8"/>
+                            <stop offset="100%" stop-color="#38bdf8"/>
+                        </linearGradient>
+                    </defs>
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" stroke="url(#mlg1)"/>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5" stroke="url(#mlg1)"/>
+                </svg>
+                <span>إيجزام بنك</span>
+            </div>
+
+            <!-- Tab Switch: Login / Register -->
+            <div class="tab-switch">
+                <button class="tab-btn active" id="tab-login">تسجيل الدخول</button>
+                <button class="tab-btn" id="tab-register">حساب جديد</button>
+                <div class="tab-slider"></div>
+            </div>
+
+            <!-- PWA Install Button -->
+            <button type="button" id="btn-install-pwa" class="submit-btn" style="display:none; margin-bottom:15px; background: #10b981; color: #fff;">
+                <span class="btn-label">تثبيت التطبيق (PWA)</span>
+            </button>
+
+            <!-- LOGIN FORM -->
+            <form id="login-form" class="auth-form active-form" novalidate>
+                <div class="field-group">
+                    <label for="login-email">البريد الإلكتروني</label>
+                    <div class="field-wrap">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+                        <input type="email" id="login-email" placeholder="example@gmail.com" autocomplete="email">
+                    </div>
+                    <span class="field-error" id="err-login-email"></span>
+                </div>
+
+                <div class="field-group">
+                    <label for="login-password">كلمة المرور</label>
+                    <div class="field-wrap">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input type="password" id="login-password" placeholder="كلمة المرور" autocomplete="current-password">
+                        <button type="button" class="eye-btn" id="eye-login" aria-label="إظهار كلمة المرور">
+                            <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
+                    <span class="field-error" id="err-login-password"></span>
+                </div>
+
+                <div class="form-meta">
+                    <label class="check-label">
+                        <input type="checkbox" id="remember-me">
+                        <span class="checkmark"></span>
+                        تذكرني
+                    </label>
+                    <button type="button" class="link-btn" id="forgot-btn">نسيت كلمة المرور؟</button>
+                </div>
+
+                <button type="submit" class="submit-btn" id="btn-login">
+                    <span class="btn-label">تسجيل الدخول</span>
+                    <span class="btn-spinner"></span>
+                </button>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="register-form" class="auth-form" novalidate style="display:none">
+                <div class="field-group">
+                    <label for="reg-name">الاسم الكامل</label>
+                    <div class="field-wrap">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                        <input type="text" id="reg-name" placeholder="مثال: أحمد محمد" autocomplete="name">
+                    </div>
+                    <span class="field-error" id="err-reg-name"></span>
+                </div>
+
+                <div class="field-group">
+                    <label for="reg-email">البريد الإلكتروني</label>
+                    <div class="field-wrap">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+                        <input type="email" id="reg-email" placeholder="example@gmail.com" autocomplete="email">
+                    </div>
+                    <span class="field-error" id="err-reg-email"></span>
+                </div>
+
+                <div class="field-group">
+                    <label for="reg-password">كلمة المرور</label>
+                    <div class="field-wrap">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input type="password" id="reg-password" placeholder="6 أحرف على الأقل" autocomplete="new-password">
+                        <button type="button" class="eye-btn" id="eye-reg" aria-label="إظهار كلمة المرور">
+                            <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                            <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        </button>
+                    </div>
+                    <div class="password-strength" id="pwd-strength">
+                        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+                        <span id="strength-label"></span>
+                    </div>
+                    <span class="field-error" id="err-reg-password"></span>
+                </div>
+
+                <div class="field-group">
+                    <label for="reg-confirm">تأكيد كلمة المرور</label>
+                    <div class="field-wrap">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <input type="password" id="reg-confirm" placeholder="أعد كتابة كلمة المرور" autocomplete="new-password">
+                    </div>
+                    <span class="field-error" id="err-reg-confirm"></span>
+                </div>
+
+                <button type="submit" class="submit-btn" id="btn-register">
+                    <span class="btn-label">إنشاء الحساب</span>
+                    <span class="btn-spinner"></span>
+                </button>
+            </form>
+
+            <!-- Forgot Password Form -->
+            <form id="forgot-form" class="auth-form" novalidate style="display:none">
+                <button type="button" class="back-btn" id="back-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="m15 18-6-6 6-6"/></svg>
+                    رجوع
+                </button>
+                <div class="forgot-header">
+                    <h3>استعادة كلمة المرور</h3>
+                    <p>أدخل بريدك وهنبعتلك رابط الاستعادة</p>
+                </div>
+                <div class="field-group">
+                    <label for="forgot-email">البريد الإلكتروني</label>
+                    <div class="field-wrap">
+                        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+                        <input type="email" id="forgot-email" placeholder="example@gmail.com">
+                    </div>
+                    <span class="field-error" id="err-forgot-email"></span>
+                </div>
+                <button type="submit" class="submit-btn" id="btn-forgot">
+                    <span class="btn-label">إرسال رابط الاستعادة</span>
+                    <span class="btn-spinner"></span>
+                </button>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script type="module">
+import apiObj, { fetchAPI } from "./assets/js/api-client.js";
+
+/* ======================================
+   إيجزام بنك — Login / Register Logic
+   ====================================== */
+
+// ── Toast ──────────────────────────────────────────
+function toast(msg, type = 'error') {
+    const wrap = document.getElementById('toast-wrap');
+    const t = document.createElement('div');
+    t.className = 'toast toast-' + type;
+    const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+    t.innerHTML = `<span class="t-icon">${icons[type] || '💬'}</span><span>${msg}</span>`;
+    wrap.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 400);
+    }, 3500);
+}
+
+// ── Field validation helpers ──────────────────────
+function setError(id, msg) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
+}
+function clearErrors(...ids) { ids.forEach(id => setError(id, '')); }
+function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+// ── Password eye toggle ───────────────────────────
+function setupEye(eyeId, inputId) {
+    const btn = document.getElementById(eyeId);
+    const inp = document.getElementById(inputId);
+    if (!btn || !inp) return;
+    btn.addEventListener('click', () => {
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        btn.querySelector('.eye-open').style.display = show ? 'none' : '';
+        btn.querySelector('.eye-closed').style.display = show ? '' : 'none';
+    });
+}
+setupEye('eye-login', 'login-password');
+setupEye('eye-reg', 'reg-password');
+
+// ── Tab switching ─────────────────────────────────
+const tabLogin = document.getElementById('tab-login');
+const tabReg   = document.getElementById('tab-register');
+const slider   = document.querySelector('.tab-slider');
+
+function showForm(which) {
+    document.getElementById('login-form').style.display    = which === 'login'  ? '' : 'none';
+    document.getElementById('register-form').style.display = which === 'reg'    ? '' : 'none';
+    document.getElementById('forgot-form').style.display   = which === 'forgot' ? '' : 'none';
+    tabLogin.classList.toggle('active', which === 'login');
+    tabReg.classList.toggle('active', which === 'reg');
+    slider.style.transform = which === 'reg' ? 'translateX(-100%)' : 'translateX(0)';
+    // RTL: reg tab is on the left physically
+}
+tabLogin.addEventListener('click', () => showForm('login'));
+tabReg.addEventListener('click',   () => showForm('reg'));
+
+// ── Forgot password ───────────────────────────────
+document.getElementById('forgot-btn').addEventListener('click', () => showForm('forgot'));
+document.getElementById('back-btn').addEventListener('click',   () => showForm('login'));
+
+// ── Password strength ─────────────────────────────
+document.getElementById('reg-password').addEventListener('input', function() {
+    const val = this.value;
+    const fill = document.getElementById('strength-fill');
+    const label = document.getElementById('strength-label');
+    if (!val) { fill.style.width = '0'; fill.className = 'strength-fill'; label.textContent = ''; return; }
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const levels = ['', 'ضعيفة', 'مقبولة', 'جيدة', 'قوية'];
+    const cls    = ['', 'weak', 'fair', 'good', 'strong'];
+    const pct    = ['0%', '25%', '50%', '75%', '100%'];
+    fill.style.width = pct[score];
+    fill.className = 'strength-fill ' + cls[score];
+    label.textContent = levels[score];
+    label.className = cls[score];
+});
+
+// ── Remember me pre-fill ──────────────────────────
+const savedEmail = localStorage.getItem('userEmail');
+if (savedEmail) {
+    document.getElementById('login-email').value = savedEmail;
+    document.getElementById('remember-me').checked = true;
+}
+
+// ── Loading state ─────────────────────────────────
+function setLoading(btnId, on) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.disabled = on;
+    btn.classList.toggle('loading', on);
+}
+
+function persistSessionUser(name, email, photoUrl = '') {
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userName', name);
+    localStorage.setItem('userEmail', email);
+
+    if (photoUrl) {
+        localStorage.setItem('userPhoto', photoUrl);
+    } else {
+        localStorage.removeItem('userPhoto');
+    }
+}
+
+function clearPersistedSession({ preserveEmail = true } = {}) {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userPhoto');
+    localStorage.removeItem('authUser');
+    localStorage.removeItem('userStats');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('authMode');
+    localStorage.removeItem('appStateOwnerEmail');
+    if (!preserveEmail) {
+        localStorage.removeItem('userEmail');
+    }
+}
+
+function syncPersistedSession(user) {
+    if (!user) {
+        clearPersistedSession();
+        return;
+    }
+
+    const email = user.email || localStorage.getItem('userEmail') || '';
+    const name = (user.displayName || '').trim() || (email ? email.split('@')[0] : 'Student');
+    persistSessionUser(name, email, user.photoURL || '');
+}
+
+(async () => {
+    if (typeof apiObj.waitForAuthState === 'function') {
+        await apiObj.waitForAuthState();
+    }
+    syncPersistedSession(apiObj.auth.currentUser);
+})();
+
+// ── LOGIN ─────────────────────────────────────────
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErrors('err-login-email', 'err-login-password');
+
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-password').value;
+    let ok = true;
+
+    if (!email) { setError('err-login-email', 'البريد الإلكتروني مطلوب'); ok = false; }
+    else if (!isValidEmail(email)) { setError('err-login-email', 'صيغة البريد الإلكتروني غير صحيحة'); ok = false; }
+
+    if (!pass) { setError('err-login-password', 'كلمة المرور مطلوبة'); ok = false; }
+    else if (pass.length < 6) { setError('err-login-password', 'كلمة المرور 6 أحرف على الأقل'); ok = false; }
+
+    if (!ok) return;
+
+    if ((email === 'test@gmail.com' && pass === 'test123') || (email === 'example@gmail.com' && pass === 'password123')) {
+        setLoading('btn-login', true);
+        setTimeout(() => {
+            setLoading('btn-login', false);
+            const btn = document.getElementById('btn-login');
+            if (btn) {
+                btn.classList.add('success');
+                const label = btn.querySelector('.btn-label');
+                if (label) label.textContent = 'تم الدخول (Demo) ✓';
+            }
+            
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('authMode', 'demo');
+            localStorage.setItem('userName', 'Demo Student');
+            localStorage.setItem('userEmail', 'test@gmail.com');
+            
+            setTimeout(() => { window.location.href = 'index.html?source=demo'; }, 900);
+        }, 600);
+        return;
+    }
+
+    setLoading('btn-login', true);
+    try {
+        clearPersistedSession();
+
+        const res = await fetchAPI("/auth/login", {
+            method: "POST",
+            body: JSON.stringify({ email, password: pass })
+        });
+
+        const user = res.data.user;
+        const resolvedName = user.name || email.split('@')[0];
+        setLoading('btn-login', false);
+        const btn = document.getElementById('btn-login');
+        btn.classList.add('success');
+        btn.querySelector('.btn-label').textContent = 'تم الدخول ✓';
+
+        localStorage.setItem("accessToken", res.data.accessToken);
+        localStorage.setItem("authUser", JSON.stringify(user));
+        persistSessionUser(resolvedName, email, user.avatar || '');
+
+        setTimeout(() => { window.location.href = 'index.html'; }, 900);
+    } catch (error) {
+        setLoading('btn-login', false);
+        console.error("Login Error:", error);
+        clearPersistedSession();
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+            setError('err-login-password', 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
+            toast('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+        } else {
+            setError('err-login-password', 'تعذر تسجيل الدخول الآن. حاول مرة أخرى.');
+            toast('حدث خطأ أثناء الدخول، يرجى المحاولة مرة أخرى');
+        }
+    }
+});
+
+// ── REGISTER ──────────────────────────────────────
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErrors('err-reg-name', 'err-reg-email', 'err-reg-password', 'err-reg-confirm');
+
+    const name    = document.getElementById('reg-name').value.trim();
+    const email   = document.getElementById('reg-email').value.trim();
+    const pass    = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-confirm').value;
+    let ok = true;
+
+    if (!name || name.length < 2) { setError('err-reg-name', 'الاسم مطلوب (حرفان على الأقل)'); ok = false; }
+    if (!email) { setError('err-reg-email', 'البريد الإلكتروني مطلوب'); ok = false; }
+    else if (!isValidEmail(email)) { setError('err-reg-email', 'صيغة البريد الإلكتروني غير صحيحة'); ok = false; }
+    if (!pass) { setError('err-reg-password', 'كلمة المرور مطلوبة'); ok = false; }
+    else if (pass.length < 6) { setError('err-reg-password', 'كلمة المرور 6 أحرف على الأقل'); ok = false; }
+    if (pass && confirm !== pass) { setError('err-reg-confirm', 'كلمتا المرور غير متطابقتان'); ok = false; }
+
+    if (!ok) return;
+
+    setLoading('btn-register', true);
+    try {
+        const res = await fetchAPI("/auth/register", {
+            method: "POST",
+            body: JSON.stringify({ name, email, password: pass })
+        });
+        
+        setLoading('btn-register', false);
+        toast('تم إنشاء الحساب بنجاح! جاري تسجيل الدخول...', 'success');
+
+        localStorage.setItem("accessToken", res.data.accessToken);
+        localStorage.setItem("authUser", JSON.stringify(res.data.user));
+        persistSessionUser(name, email);
+
+        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+    } catch (error) {
+        setLoading('btn-register', false);
+        console.error("Register Error:", error);
+        if (error.code === 'auth/email-already-in-use') {
+            toast('البريد الإلكتروني مسجل بالفعل');
+        } else {
+            toast('حدث خطأ أثناء الإنشاء، يرجى المحاولة مرة أخرى');
+        }
+    }
+});
+
+// ── FORGOT PASSWORD ────────────────────────────────
+document.getElementById('forgot-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErrors('err-forgot-email');
+    const email = document.getElementById('forgot-email').value.trim();
+    if (!email) { setError('err-forgot-email', 'البريد الإلكتروني مطلوب'); return; }
+    if (!isValidEmail(email)) { setError('err-forgot-email', 'صيغة البريد الإلكتروني غير صحيحة'); return; }
+
+    setLoading('btn-forgot', true);
+    try {
+        await fetchAPI("/auth/forgot-password", {
+            method: "POST",
+            body: JSON.stringify({ email })
+        });
+        setLoading('btn-forgot', false);
+        toast('تم إرسال رابط الاستعادة على بريدك الإلكتروني ✅', 'success');
+        setTimeout(() => showForm('login'), 2000);
+    } catch (error) {
+        setLoading('btn-forgot', false);
+        toast('حدث خطأ أثناء الإرسال، تأكد من صحة البريد الإلكتروني');
+    }
+});
+
+// ── Particles ─────────────────────────────────────
+(function() {
+    const container = document.getElementById('particles');
+    for (let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.cssText = `
+            left: ${Math.random() * 100}%;
+            top: ${Math.random() * 100}%;
+            width: ${2 + Math.random() * 3}px;
+            height: ${2 + Math.random() * 3}px;
+            animation-delay: ${Math.random() * 8}s;
+            animation-duration: ${6 + Math.random() * 10}s;
+            opacity: ${0.1 + Math.random() * 0.3};
+        `;
+        container.appendChild(p);
+    }
+})();
+
+// ── Service Worker & PWA Installation ───────────────
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+            .then(reg => console.log('Service Worker registered successfully:', reg.scope))
+            .catch(err => console.error('Service Worker registration failed:', err));
+    });
+}
+
+let deferredPrompt;
+const installBtn = document.getElementById('btn-install-pwa');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.style.display = 'flex';
+});
+
+if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        }
+    });
+}
+</script>
+</body>
+</html>

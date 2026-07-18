@@ -39,6 +39,7 @@ class ApiClient {
     // Build fetch options
     let fetchOptions = {
       method: options.method || 'GET',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,

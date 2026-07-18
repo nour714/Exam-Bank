@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة المطور - Exam Bank</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#0b1120;--bg2:#111827;--card:#1a2336;--card2:#1e2d45;
+            --border:rgba(99,179,237,0.15);--accent:#3b82f6;--accent2:#8b5cf6;
+            --success:#10b981;--warning:#f59e0b;--error:#ef4444;
+            --text:#e2e8f0;--text2:#94a3b8;--r:14px;
+        }
+        body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+        /* LOGIN */
+        #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;
+            background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,.15) 0%,transparent 70%),var(--bg)}
+        .login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;
+            padding:48px 40px;width:100%;max-width:420px;text-align:center;
+            box-shadow:0 25px 60px rgba(0,0,0,.5)}
+        .login-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+            border-radius:18px;display:flex;align-items:center;justify-content:center;
+            font-size:28px;margin:0 auto 20px}
+        .login-box h1{font-size:1.5rem;margin-bottom:6px}
+        .login-box p{color:var(--text2);font-size:.9rem;margin-bottom:32px}
+        .login-box input{width:100%;background:var(--bg2);border:1px solid var(--border);
+            border-radius:10px;padding:14px 18px;font-family:'Cairo',sans-serif;font-size:1rem;
+            color:var(--text);margin-bottom:16px;text-align:center;letter-spacing:4px;
+            transition:border-color .2s}
+        .login-box input:focus{outline:none;border-color:var(--accent)}
+        .login-box .btn-login{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));
+            border:none;border-radius:10px;padding:14px;color:#fff;font-family:'Cairo',sans-serif;
+            font-size:1rem;font-weight:700;cursor:pointer;transition:opacity .2s}
+        .login-error{color:var(--error);font-size:.85rem;margin-top:12px;display:none}
+
+        /* APP */
+        #admin-app{display:none}
+        header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 32px;
+            display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+        .hdr-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+            border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+        header h1{font-size:1.05rem;flex:1}
+        .hdr-badge{background:rgba(239,68,68,.15);color:var(--error);border:1px solid rgba(239,68,68,.3);
+            border-radius:6px;padding:4px 12px;font-size:.75rem;font-weight:700}
+        .fb-status{font-size:.78rem;padding:4px 12px;border-radius:6px;font-weight:700}
+        .fb-ok{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3)}
+        .fb-loading{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+        .fb-err{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+
+        main{max-width:1200px;margin:0 auto;padding:28px 20px}
+
+        /* STATS */
+        .stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+        .s-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+            padding:16px;text-align:center}
+        .s-num{font-size:1.7rem;font-weight:800;
+            background:linear-gradient(135deg,var(--accent),var(--accent2));
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .s-label{color:var(--text2);font-size:.76rem;margin-top:3px}
+
+        /* UPLOAD ZONE */
+        .upload-zone{background:var(--card);border:2px dashed var(--border);border-radius:18px;
+            padding:40px;text-align:center;cursor:pointer;transition:all .2s;
+            margin-bottom:20px;position:relative}
+        .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:rgba(59,130,246,.05)}
+        .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+        .upload-icon{font-size:40px;margin-bottom:12px}
+        .upload-zone h2{font-size:1.1rem;margin-bottom:7px}
+        .upload-zone p{color:var(--text2);font-size:.84rem}
+        .upload-note{display:inline-flex;align-items:center;gap:6px;margin-top:12px;
+            background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);
+            border-radius:8px;padding:5px 14px;font-size:.78rem;color:#60a5fa}
+
+        /* CONTROLS */
+        .ctrl-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+        .spacer{flex:1}
+        .btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:10px;
+            border:none;font-family:'Cairo',sans-serif;font-size:.86rem;font-weight:700;
+            cursor:pointer;transition:all .2s;white-space:nowrap}
+        .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+        .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+        .btn-primary:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}
+        .btn-success{background:linear-gradient(135deg,#059669,#10b981);color:#fff}
+        .btn-success:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}
+        .btn-danger{background:rgba(239,68,68,.15);color:var(--error);border:1px solid rgba(239,68,68,.3)}
+        .btn-danger:hover:not(:disabled){background:rgba(239,68,68,.25)}
+        .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+        .btn-outline:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+        .btn-sm{padding:7px 12px;font-size:.78rem}
+
+        /* PROGRESS */
+        .prog-wrap{display:none;background:var(--card);border:1px solid var(--border);
+            border-radius:12px;padding:16px 20px;margin-bottom:20px}
+        .prog-wrap.visible{display:block}
+        .prog-label{display:flex;justify-content:space-between;font-size:.84rem;margin-bottom:8px}
+        .prog-bg{background:var(--bg2);border-radius:99px;height:10px;overflow:hidden}
+        .prog-fill{background:linear-gradient(90deg,var(--accent),var(--accent2));height:100%;
+            border-radius:99px;width:0%;transition:width .4s ease}
+        .prog-status{color:var(--text2);font-size:.78rem;margin-top:7px}
+
+        /* PAGE CARDS */
+        .pages-list{display:flex;flex-direction:column;gap:18px}
+        .page-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;
+            animation:fadeIn .3s ease}
+        .page-card.status-processing{border-color:var(--accent)}
+        .page-card.status-done{border-color:var(--success)}
+        .page-card.status-error{border-color:var(--error)}
+
+        .page-header{display:flex;align-items:center;gap:14px;padding:14px 18px;
+            background:var(--bg2);border-bottom:1px solid var(--border);flex-wrap:wrap}
+        .page-thumb{width:56px;height:56px;object-fit:cover;border-radius:8px;flex-shrink:0;cursor:pointer;
+            transition:transform .2s}
+        .page-thumb:hover{transform:scale(1.06)}
+        .page-info{flex:1;min-width:0}
+        .page-filename{font-size:.8rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .page-q-count{font-size:.86rem;font-weight:700;margin-top:3px}
+        .page-actions{display:flex;gap:7px;flex-wrap:wrap}
+
+        .badge{font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:99px;white-space:nowrap}
+        .badge-pending{background:rgba(148,163,184,.15);color:var(--text2)}
+        .badge-processing{background:rgba(59,130,246,.2);color:#60a5fa}
+        .badge-done{background:rgba(16,185,129,.2);color:#34d399}
+        .badge-error{background:rgba(239,68,68,.2);color:#f87171}
+
+        .spinner{width:22px;height:22px;border:3px solid rgba(59,130,246,.2);
+            border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .loading-row{display:flex;align-items:center;gap:12px;padding:22px 18px;
+            color:var(--text2);font-size:.86rem}
+
+        /* QUESTIONS TABLE */
+        .qs-table{width:100%}
+        .q-row{display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:start;
+            padding:14px 18px;border-bottom:1px solid rgba(99,179,237,.07)}
+        .q-row:last-child{border-bottom:none}
+        .q-row.added-row{opacity:.55}
+        .q-num{font-weight:800;color:var(--accent);font-size:.88rem;padding-top:2px}
+        .q-text-main{font-size:.88rem;font-weight:600;line-height:1.55;margin-bottom:8px}
+        .q-meta-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+        .q-chip{background:rgba(99,179,237,.1);border:1px solid rgba(99,179,237,.2);
+            border-radius:6px;padding:2px 9px;font-size:.72rem;color:#93c5fd}
+        .q-chip.diagram{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.25);color:#fbbf24}
+        .q-opts{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:10px}
+        .q-opt{background:var(--bg2);border:1px solid var(--border);border-radius:7px;
+            padding:5px 9px;font-size:.77rem;display:flex;align-items:center;gap:5px}
+        .q-opt.correct{background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.4);color:#34d399}
+        .opt-ltr{font-weight:700;font-size:.7rem;min-width:15px}
+        .q-side{display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0}
+        .added-check{color:var(--success);font-size:.83rem;font-weight:700}
+
+        .error-box{padding:14px 18px;color:var(--error);font-size:.84rem;
+            background:rgba(239,68,68,.07);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+        .empty{text-align:center;padding:56px;color:var(--text2)}
+        .empty .e-icon{font-size:50px;margin-bottom:14px}
+
+        /* LIGHTBOX */
+        .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:300;
+            align-items:center;justify-content:center;cursor:zoom-out}
+        .lightbox.open{display:flex}
+        .lightbox img{max-width:90vw;max-height:90vh;border-radius:12px;
+            box-shadow:0 30px 80px rgba(0,0,0,.8)}
+
+        /* EXPORT MODAL */
+        .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+            align-items:center;justify-content:center}
+        .modal-overlay.open{display:flex}
+        .modal-box{background:var(--card);border:1px solid var(--border);border-radius:20px;
+            padding:26px;max-width:620px;width:90%;max-height:80vh;overflow-y:auto}
+        .modal-box h3{font-size:.98rem;margin-bottom:14px}
+        .modal-box textarea{width:100%;height:260px;background:var(--bg2);border:1px solid var(--border);
+            border-radius:10px;padding:12px;color:var(--text);font-family:monospace;font-size:.74rem;direction:ltr}
+        .modal-actions{display:flex;gap:10px;margin-top:12px;justify-content:flex-end;flex-wrap:wrap}
+
+        @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+        /* TABS */
+        .tabs-bar{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);
+            border-radius:14px;padding:5px;margin-bottom:24px}
+        .tab-btn{flex:1;padding:12px 10px;border:none;border-radius:10px;font-family:'Cairo',sans-serif;
+            font-size:.88rem;font-weight:700;cursor:pointer;background:transparent;color:var(--text2);
+            transition:all .2s;text-align:center}
+        .tab-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
+            box-shadow:0 4px 15px rgba(59,130,246,.3)}
+        .tab-btn:hover:not(.active){background:rgba(99,179,237,.08);color:var(--text)}
+        .tab-content{display:none}
+        .tab-content.active{display:block}
+
+        /* SERVER MANAGER */
+        .mgr-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+        .mgr-select{background:var(--card);border:1px solid var(--border);border-radius:10px;
+            padding:11px 16px;font-family:'Cairo',sans-serif;font-size:.9rem;color:var(--text);
+            cursor:pointer;flex:1;min-width:200px}
+        .mgr-select:focus{outline:none;border-color:var(--accent)}
+        .subject-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:24px}
+        .subj-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+            padding:18px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+        .subj-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+        .subj-card.selected{border-color:var(--accent);background:rgba(59,130,246,.08)}
+        .subj-card .subj-name{font-weight:700;font-size:.92rem;margin-bottom:4px}
+        .subj-card .subj-count{font-size:1.3rem;font-weight:800;
+            background:linear-gradient(135deg,var(--accent),var(--accent2));
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .subj-card .subj-label{font-size:.7rem;color:var(--text2)}
+        .mgr-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+        .mgr-title{font-size:1rem;font-weight:700;flex:1}
+        .mgr-q-row{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:start;
+            padding:12px 16px;border-bottom:1px solid rgba(99,179,237,.07);
+            background:var(--card);animation:fadeIn .2s ease}
+        .mgr-q-row:last-child{border-bottom:none}
+        .mgr-q-row:hover{background:var(--card2)}
+        .mgr-q-num{font-weight:800;color:var(--accent);font-size:.85rem;padding-top:3px}
+        .mgr-q-text{font-size:.85rem;font-weight:600;line-height:1.5;margin-bottom:5px}
+        .mgr-q-opts{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
+        .mgr-q-opt{background:var(--bg2);border:1px solid var(--border);border-radius:5px;
+            padding:3px 8px;font-size:.72rem}
+        .mgr-q-opt.correct{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.4);color:#34d399}
+        .mgr-q-del{background:rgba(239,68,68,.15);color:var(--error);border:1px solid rgba(239,68,68,.3);
+            border-radius:8px;padding:6px 10px;cursor:pointer;font-size:.75rem;font-weight:700;
+            white-space:nowrap;transition:all .2s;flex-shrink:0}
+        .mgr-q-del:hover{background:rgba(239,68,68,.3)}
+        .mgr-q-edit{background:rgba(59,130,246,.15);color:var(--accent);border:1px solid rgba(59,130,246,.3);
+            border-radius:8px;padding:6px 10px;cursor:pointer;font-size:.75rem;font-weight:700;
+            white-space:nowrap;transition:all .2s;flex-shrink:0}
+        .mgr-q-edit:hover{background:rgba(59,130,246,.3)}
+        .mgr-list{border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+        .mgr-empty{text-align:center;padding:56px;color:var(--text2)}
+        .mgr-loading{display:flex;align-items:center;gap:12px;padding:24px;color:var(--text2);font-size:.85rem}
+
+        @media(max-width:700px){
+            .stats-bar{grid-template-columns:repeat(3,1fr)}
+            .q-opts{grid-template-columns:1fr}
+            .q-row{grid-template-columns:20px 1fr}
+            .q-side{flex-direction:row;grid-column:span 2}
+            .subject-cards{grid-template-columns:repeat(3,1fr)}
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN / CHECKING -->
+<div id="login-screen">
+    <div class="login-box" id="checking-box">
+        <div class="login-icon">🔐</div>
+        <h1>لوحة المطور</h1>
+        <p>جاري التحقق من الصلاحيات...</p>
+        <div class="spinner" style="margin: 20px auto; border-top-color: var(--accent);"></div>
+    </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="admin-app">
+    <header>
+        <div class="hdr-icon">⚡</div>
+        <h1>لوحة تحكم المطور</h1>
+        <span class="fb-status fb-loading" id="fb-status">⏳ جاري الاتصال بـ Firebase...</span>
+        <span class="hdr-badge">ADMIN ONLY</span>
+    </header>
+    <main>
+        <!-- TABS -->
+        <div class="tabs-bar">
+            <button class="tab-btn active" id="tab-extract-btn" onclick="switchTab('extract')">📷 استخراج الأسئلة</button>
+            <button class="tab-btn" id="tab-manage-btn" onclick="switchTab('manage')">🗄️ إدارة الخادم</button>
+        </div>
+
+        <!-- TAB 1: EXTRACT -->
+        <div class="tab-content active" id="tab-extract">
+            <div class="stats-bar">
+                <div class="s-card"><div class="s-num" id="s-pages">0</div><div class="s-label">صفحات</div></div>
+                <div class="s-card"><div class="s-num" id="s-found">0</div><div class="s-label">أسئلة مستخرجة</div></div>
+                <div class="s-card"><div class="s-num" id="s-diagrams">0</div><div class="s-label">معها رسومات</div></div>
+                <div class="s-card"><div class="s-num" id="s-added">0</div><div class="s-label">أُضيفت للموقع</div></div>
+                <div class="s-card"><div class="s-num" id="s-errors">0</div><div class="s-label">أخطاء</div></div>
+            </div>
+
+            <div class="upload-zone" id="drop-zone">
+                <input type="file" id="file-input" accept="image/*,.pdf" multiple>
+                <div class="upload-icon">📷</div>
+                <h2>ارفع صفحات الكتاب هنا (صور أو PDF)</h2>
+                <p>يمكنك رفع ملف PDF كامل وسيقوم النظام باستخراج كافة صفحاته كأسئلة</p>
+                <span class="upload-note">✅ ملفات كبيرة · PDF · PNG · JPG · صفحات متعددة دفعة واحدة</span>
+            </div>
+
+            <div class="ctrl-bar">
+                <button class="btn btn-primary" id="btn-start" disabled onclick="startAll()">🚀 ابدأ الاستخراج</button>
+                <button class="btn btn-success" id="btn-add-all" disabled onclick="addAllQuestions()">✅ أضف كل الأسئلة للموقع</button>
+                <button class="btn btn-outline" id="btn-export" disabled onclick="openExport()">📤 تصدير JSON</button>
+                <div class="spacer"></div>
+                <button class="btn btn-danger" id="btn-clear" disabled onclick="clearAll()">🗑️ مسح</button>
+            </div>
+
+            <div class="prog-wrap" id="prog-wrap">
+                <div class="prog-label">
+                    <span id="prog-text">جاري الاستخراج...</span>
+                    <span id="prog-pct">0%</span>
+                </div>
+                <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+                <div class="prog-status" id="prog-status"></div>
+            </div>
+
+            <div class="pages-list" id="pages-list">
+                <div class="empty"><div class="e-icon">📚</div><p>ارفع صور صفحات الكتاب لتبدأ</p></div>
+            </div>
+        </div>
+
+        <!-- TAB 2: MANAGE -->
+        <div class="tab-content" id="tab-manage">
+            <!-- Subject Cards -->
+            <div id="mgr-subject-cards" class="subject-cards">
+                <div class="mgr-loading"><div class="spinner"></div>جاري تحميل إحصائيات المواد...</div>
+            </div>
+
+            <!-- Selected Subject Panel -->
+            <div id="mgr-panel" style="display:none">
+                <div class="mgr-header">
+                    <div class="mgr-title" id="mgr-panel-title">اختر مادة</div>
+                    <button class="btn btn-outline btn-sm" onclick="loadSubjectStats()">🔄 تحديث</button>
+                    <button class="btn btn-danger" id="mgr-del-all-btn" onclick="deleteSubjectAll()">🗑️ حذف جميع أسئلة هذه المادة</button>
+                </div>
+                <div id="mgr-list" class="mgr-list">
+                    <div class="mgr-empty">اختر مادة من الأعلى لعرض أسئلتها</div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="this.classList.remove('open')">
+    <img id="lb-img" src="" alt="">
+</div>
+
+<div class="modal-overlay" id="export-modal">
+    <div class="modal-box">
+        <h3>📤 تصدير الأسئلة بصيغة JSON</h3>
+        <textarea id="export-ta" readonly></textarea>
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="copyExport()">📋 نسخ</button>
+            <button class="btn btn-primary" onclick="dlExport()">⬇️ تحميل</button>
+            <button class="btn btn-danger" onclick="closeExport()">إغلاق</button>
+        </div>
+    </div>
+</div>
+
+<!-- PDF.js SDK -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+</script>
+
+<!-- API Client -->
+<script type="module">
+import apiObj, { fetchAPI } from "./assets/js/api-client.js";
+
+window._fbReady = false;
+window._fbUserId = null;
+
+// Try to load user to verify admin session
+async function checkAdmin() {
+    const statusEl = document.getElementById("fb-status");
+    try {
+        statusEl.className = "fb-status fb-loading";
+        statusEl.textContent = "⏳ جاري الاتصال بالخادم...";
+        
+        await apiObj.waitForAuthState();
+        const user = apiObj.auth.currentUser;
+        
+        if (user && user.role === "ADMIN") {
+            window._fbUserId = user.id;
+            window._fbReady = true;
+            statusEl.className = "fb-status fb-ok";
+            statusEl.textContent = `✅ متصل كـ المشرف: ${user.name || user.email}`;
+        } else {
+            window._fbReady = false;
+            statusEl.className = "fb-status fb-err";
+            statusEl.textContent = "⚠️ يجب تسجيل الدخول كمسؤول أولاً";
+            alert("يرجى تسجيل الدخول بحساب مسؤول (Admin) عبر صفحة الدخول.");
+        }
+    } catch (e) {
+        statusEl.className = "fb-status fb-err";
+        statusEl.textContent = "⚠️ خطأ في الاتصال بالخادم";
+    }
+}
+checkAdmin();
+
+window._saveQuestionsToFirebase = async function(newQuestions) {
+    if (!window._fbReady) throw new Error("يجب تسجيل الدخول كمسؤول أولاً");
+    
+    try {
+        const res = await fetchAPI("/questions/global/bulk", {
+            method: "POST",
+            body: JSON.stringify({ questions: newQuestions })
+        });
+        return res?.data?.count || 0;
+    } catch (error) {
+        console.error("Bulk save failed:", error);
+        throw error;
+    }
+};
+
+window.clearFirebaseDB = async function() {
+    if (!window._fbReady) {
+        alert("يرجى تسجيل الدخول كمسؤول أولاً.");
+        return;
+    }
+    if (!confirm("⚠️ هل أنت متأكد من حذف جميع الأسئلة من قاعدة البيانات للجميع؟ لا يمكن التراجع عن هذا!")) return;
+    
+    try {
+        const res = await fetchAPI("/questions/global", { method: "DELETE" });
+        const count = res?.data?.count || 0;
+        alert(`✅ تم حذف ${count} سؤال من الخادم بنجاح.`);
+        showNotif(`تم تنظيف الخادم (${count} سؤال)`, false);
+    } catch (e) {
+        console.error("Clear DB failed:", e);
+        alert(`❌ حدث خطأ أثناء الحذف: ${e.message}`);
+    }
+};
+</script>
+
+<script>
+// ===== CONFIG =====
+const API_KEY     = "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";
+const API_URL     = "https://api.groq.com/openai/v1";
+const MODEL       = "llama-3.2-90b-vision-preview";
+const GEMINI_API_KEY = "AQ.Ab8RN6ITcTRv8JAoW_J3wovLkUzspHrvhZrewpKSkqDoUd_clw";
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/openai";
+const GEMINI_MODEL   = "gemini-2.5-flash";
+const CONCURRENCY = 1;
+const MAX_PX      = 1400;
+const IMG_QUALITY = 0.85;
+
+let pages = [];
+let isRunning = false;
+
+// ===== VERIFY ADMIN ROLE =====
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) {
+            window.location.replace("login.html");
+            return;
+        }
+
+        const res = await fetch("/api/auth/me", {
+            headers: {
+                "Authorization": `Bearer ${accessToken}`
+            }
+        });
+
+        const data = await res.json();
+        if (data.success && data.data && data.data.role === "ADMIN") {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("admin-app").style.display = "block";
+            loadGlobalStats();
+            loadGlobalBank();
+        } else {
+            document.getElementById("checking-box").innerHTML = `
+                <div class="login-icon" style="background:rgba(239,68,68,0.15); color:var(--error);">❌</div>
+                <h1>غير مصرح لك</h1>
+                <p>هذه الصفحة مخصصة للمطورين فقط.</p>
+                <button class="btn-login" style="margin-top:20px" onclick="window.location.replace('index.html')">العودة للرئيسية</button>
+            `;
+        }
+    } catch (error) {
+        document.getElementById("checking-box").innerHTML = `
+            <div class="login-icon" style="background:rgba(239,68,68,0.15); color:var(--error);">❌</div>
+            <h1>خطأ في الاتصال</h1>
+            <p>يرجى تسجيل الدخول أولاً.</p>
+            <button class="btn-login" style="margin-top:20px" onclick="window.location.replace('login.html')">تسجيل الدخول</button>
+        `;
+    }
+});
+
+// ===== FILE INPUT =====
+const fi = document.getElementById("file-input");
+const dz = document.getElementById("drop-zone");
+fi.addEventListener("change", () => handleFiles([...fi.files]));
+dz.addEventListener("dragover",  e => { e.preventDefault(); dz.classList.add("drag-over"); });
+dz.addEventListener("dragleave", () => dz.classList.remove("drag-over"));
+dz.addEventListener("drop", e => {
+    e.preventDefault(); dz.classList.remove("drag-over");
+    handleFiles([...e.dataTransfer.files].filter(f => f.type.startsWith("image/") || f.type === "application/pdf"));
+});
+
+async function handleFiles(files) {
+    if (!files.length) return;
+    const list = document.getElementById("pages-list");
+    const emp = list.querySelector(".empty");
+    if (emp) emp.remove();
+
+    for (const file of files) {
+        if (file.type === "application/pdf") {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const id = Math.random().toString(36).slice(2);
+                    const pageObj = { 
+                        id, 
+                        file: { name: `${file.name} - صـ ${i}` },
+                        dataUrl: null, 
+                        status: "pending", 
+                        questions: [], 
+                        error: null 
+                    };
+                    pages.push(pageObj);
+                    const div = document.createElement("div");
+                    div.id = `page-${id}`;
+                    div.className = "page-card status-pending";
+                    list.appendChild(div);
+                    refreshCard(id);
+
+                    // Render PDF page to canvas async
+                    pdf.getPage(i).then(async (pageInfo) => {
+                        const viewport = pageInfo.getViewport({ scale: 2.0 });
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+                        await pageInfo.render({ canvasContext: ctx, viewport: viewport }).promise;
+                        
+                        // Convert to file then compress to limit size
+                        const blob = await new Promise(r => canvas.toBlob(r, "image/jpeg", 0.95));
+                        const tempFile = new File([blob], `page.jpg`, { type: "image/jpeg" });
+                        pageObj.dataUrl = await compressImage(tempFile);
+                        refreshCard(id);
+                    }).catch(err => {
+                        pageObj.status = "error";
+                        pageObj.error = "تعذر قراءة الـ PDF";
+                        refreshCard(id);
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                alert("حدث خطأ أثناء فتح ملف الـ PDF");
+            }
+        } else if (file.type.startsWith("image/")) {
+            const id   = Math.random().toString(36).slice(2);
+            const page = { id, file, dataUrl: null, status: "pending", questions: [], error: null };
+            pages.push(page);
+            const div = document.createElement("div");
+            div.id        = `page-${id}`;
+            div.className = "page-card status-pending";
+            list.appendChild(div);
+            refreshCard(id);
+            compressImage(file).then(url => { page.dataUrl = url; refreshCard(page.id); });
+        }
+    }
+    updateStats(); updateButtons();
+}
+
+// ===== COMPRESS =====
+function compressImage(file) {
+    return new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const img = new Image();
+            img.onload = () => {
+                const scale = Math.min(1, MAX_PX / Math.max(img.width, img.height));
+                const c = document.createElement("canvas");
+                c.width  = Math.max(1, Math.round(img.width  * scale));
+                c.height = Math.max(1, Math.round(img.height * scale));
+                c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+                res(c.toDataURL("image/jpeg", IMG_QUALITY));
+            };
+            img.onerror = rej; img.src = reader.result;
+        };
+        reader.onerror = rej; reader.readAsDataURL(file);
+    });
+}
+
+// ===== RENDER =====
+function refreshCard(id) {
+    const page = pages.find(p => p.id === id);
+    if (!page) return;
+    const div = document.getElementById(`page-${id}`);
+    if (!div) return;
+    div.className = `page-card status-${page.status}`;
+
+    const badgeMap = {
+        pending:    ["badge-pending",    "في الانتظار"],
+        processing: ["badge-processing", "⏳ يعالج..."],
+        done:       ["badge-done",       "✅ تم"],
+        error:      ["badge-error",      "❌ خطأ"],
+    };
+    const [bc, bt] = badgeMap[page.status] || badgeMap.pending;
+    const addedQs  = page.questions.filter(q => q.added).length;
+    const totalQs  = page.questions.length;
+    const doneQs   = page.questions.filter(q => !q.added).length;
+
+    let bodyHtml = "";
+    if (page.status === "processing") {
+        bodyHtml = `<div class="loading-row"><div class="spinner"></div>يحلل الصفحة ويستخرج كل الأسئلة...</div>`;
+    } else if (page.status === "error") {
+        bodyHtml = `<div class="error-box">⚠️ ${esc(page.error || "تعذر الاستخراج")}
+            <button class="btn btn-outline btn-sm" style="margin-right:auto" onclick="retryPage('${id}')">🔄 إعادة</button></div>`;
+    } else if (page.status === "done") {
+        bodyHtml = totalQs > 0 ? buildTable(page) :
+            `<div class="error-box">⚠️ لم يُعثر على أسئلة في هذه الصفحة.</div>`;
+    }
+
+    div.innerHTML = `
+        <div class="page-header">
+            ${page.dataUrl
+                ? `<img class="page-thumb" src="${page.dataUrl}" onclick="showLightbox('${id}')" title="اضغط للتكبير">`
+                : `<div class="page-thumb" style="background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:22px">📷</div>`}
+            <div class="page-info">
+                <div class="page-filename">${esc(page.file.name)}</div>
+                <div class="page-q-count">${
+                    page.status === "pending"     ? "في انتظار الاستخراج" :
+                    page.status === "processing"  ? "⏳ يستخرج الأسئلة..." :
+                    page.status === "done"        ? `${totalQs} سؤال${addedQs ? ` · ✅ ${addedQs} أُضيف` : ""}` :
+                    "تعذر الاستخراج"
+                }</div>
+            </div>
+            <div class="page-actions">
+                <span class="badge ${bc}">${bt}</span>
+                ${page.status === "done" && doneQs > 0
+                    ? `<button class="btn btn-success btn-sm" onclick="addPageQs('${id}')">➕ أضف ${doneQs} للموقع</button>` : ""}
+                ${page.status !== "processing"
+                    ? `<button class="btn btn-danger btn-sm" onclick="removePage('${id}')">🗑️</button>` : ""}
+            </div>
+        </div>
+        ${bodyHtml}`;
+    updateStats(); updateButtons();
+}
+
+function buildTable(page) {
+    const letters  = ["أ","ب","ج","د"];
+    const lettersE = ["A","B","C","D"];
+    const rows = page.questions.map((q, i) => {
+        const cIdx   = lettersE.indexOf(q.correct);
+        const optsHtml = (q.options || []).map((o, j) =>
+            `<div class="q-opt ${j === cIdx ? "correct" : ""}">
+                <span class="opt-ltr">${letters[j]}</span><span>${esc(o)}</span></div>`
+        ).join("");
+        return `<div class="q-row ${q.added ? "added-row" : ""}" id="qrow-${page.id}-${i}">
+            <div class="q-num">${i+1}</div>
+            <div class="q-body">
+                <div class="q-text-main">${esc(q.text)}</div>
+                ${q.croppedUrl ? `<div style="display:flex;align-items:start;gap:10px;margin-bottom:10px;"><img src="${q.croppedUrl}" style="max-height:120px; border-radius:6px; border:1px solid var(--border);" alt="رسمة السؤال"> <button class="btn btn-danger btn-sm" onclick="removeCrop('${page.id}', ${i})" style="padding:4px 8px; font-size:0.7rem;">حذف الرسمة</button></div>` : ''}
+                <div class="q-meta-row">
+                    <span class="q-chip">📚 ${esc(q.subject)}</span>
+                    ${q.topic ? `<span class="q-chip">📌 ${esc(q.topic)}</span>` : ""}
+                    ${q.hasDiagram ? `<span class="q-chip diagram">🖼️ معها رسمة</span>` : ""}
+                </div>
+                <div class="q-opts">${optsHtml}</div>
+            </div>
+            <div class="q-side">
+                <button class="btn btn-outline btn-sm" onclick="openCropModal('${page.id}', ${i})" style="margin-bottom:5px;width:100%;justify-content:center;">✂️ قص الرسمة</button>
+                ${q.added
+                    ? `<span class="added-check">✓ أُضيف</span>`
+                    : `<button class="btn btn-success btn-sm" onclick="addOneQ('${page.id}',${i})">➕ أضف</button>`}
+            </div>
+        </div>`;
+    }).join("");
+    return `<div class="qs-table">${rows}</div>`;
+}
+
+// ===== EXTRACTION =====
+async function startAll() {
+    if (isRunning) return;
+    isRunning = true; updateButtons();
+
+    // Reset duplicate tracking based on already extracted questions to allow re-extracting deleted pages
+    extractedNormTexts = new Set();
+    pages.forEach(p => {
+        if (p.status === "done" && Array.isArray(p.questions)) {
+            p.questions.forEach(q => {
+                const norm = String(q.text || "").replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '');
+                extractedNormTexts.add(norm);
+            });
+        }
+    });
+
+    const pending = pages.filter(p => p.status === "pending" || p.status === "error");
+    let done = 0; const total = pending.length;
+
+    document.getElementById("prog-wrap").classList.add("visible");
+    setProgress(0, total, "جاري الاستخراج...");
+
+    for (let i = 0; i < pending.length; i += CONCURRENCY) {
+        const batch = pending.slice(i, i + CONCURRENCY);
+        await Promise.all(batch.map(async page => {
+            if (!page.dataUrl) page.dataUrl = await compressImage(page.file);
+            page.status = "processing"; refreshCard(page.id);
+            try {
+                page.questions = await extractAllQuestions(page.dataUrl);
+                page.status    = "done"; page.error = null;
+            } catch (e) {
+                page.status = "error"; page.error = e.message || "تعذر الاستخراج";
+            }
+            refreshCard(page.id);
+            done++; setProgress(done, total, `صفحة ${done}/${total}: ${page.file.name}`);
+        }));
+    }
+
+    isRunning = false;
+    const totalQ = pages.reduce((s,p) => s + p.questions.length, 0);
+    setProgress(total, total, `✅ انتهى! ${totalQ} سؤال من ${total} صفحة`);
+    updateButtons();
+}
+
+function setProgress(done, total, status) {
+    const pct = total > 0 ? Math.round((done/total)*100) : 0;
+    document.getElementById("prog-fill").style.width = pct + "%";
+    document.getElementById("prog-pct").textContent  = pct + "%";
+    document.getElementById("prog-text").textContent = `معالجة: ${done}/${total}`;
+    document.getElementById("prog-status").textContent = status;
+}
+
+let extractedNormTexts = new Set();
+
+function cleanJsonString(content) {
+    let cleaned = content.replace(/^```json/mi, '').replace(/```$/mi, '').trim();
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1) {
+        cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+    }
+    return cleaned;
+}
+
+function findMatchingQuestion(groqQuestions, geminiDiagram) {
+    const geminiSnippet = (geminiDiagram.snippet || "").trim();
+    if (!geminiSnippet) return null;
+    
+    const normalize = (txt) => {
+        return txt
+            .replace(/[\u064B-\u065F]/g, "") // Remove Arabic diacritics
+            .replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "") // Keep only letters and numbers
+            .toLowerCase();
+    };
+    
+    const normalizedSnippet = normalize(geminiSnippet);
+    if (!normalizedSnippet) return null;
+    
+    // 1. Check exact substring match
+    for (const q of groqQuestions) {
+        const normalizedQText = normalize(q.text);
+        if (normalizedQText.includes(normalizedSnippet) || normalizedSnippet.includes(normalizedQText)) {
+            return q;
+        }
+    }
+    
+    // 2. Check word overlap (fallback)
+    const snippetWords = geminiSnippet.split(/\s+/).map(normalize).filter(w => w.length > 1);
+    if (snippetWords.length >= 2) {
+        let bestMatch = null;
+        let maxOverlap = 0;
+        for (const q of groqQuestions) {
+            const qWords = q.text.split(/\s+/).map(normalize).filter(w => w.length > 1);
+            const overlap = snippetWords.filter(w => qWords.includes(w)).length;
+            if (overlap > maxOverlap && overlap >= 2) {
+                maxOverlap = overlap;
+                bestMatch = q;
+            }
+        }
+        if (bestMatch && (maxOverlap / snippetWords.length) >= 0.5) {
+            return bestMatch;
+        }
+    }
+    
+    return null;
+}
+
+async function extractAllQuestions(dataUrl) {
+        const img = new Image();
+        img.src = dataUrl;
+        await new Promise(r => img.onload = r);
+
+        const tryQuestionExtract = async (retries = 4, attempt = 1) => {
+            try {
+                const res = await fetch(`${GEMINI_API_URL}/chat/completions`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${GEMINI_API_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: GEMINI_MODEL, temperature: 0.1,
+                        response_format: { type: "json_object" },
+                        messages: [
+                            { role: "system", content: [
+                                "أنت نظام استخراج أسئلة من صفحات كتب الثانوية العامة المصرية.",
+                                "استخرج جميع أسئلة الاختيار من متعدد الموجودة في الصورة بدقة، بغض النظر عن عددها.",
+                                "لكل سؤال: text, options (array 4), correct (A/B/C/D), subject, topic, hasDiagram (true إذا كان السؤال يحتوي على رسمة أو شكل توضيحي خاص به أو يشير إليه).",
+                                "تأكد من عدم تكرار نفس السؤال في الرد.",
+                                "أعد JSON بالمفتاح: questions (array).",
+                                "إذا لا توجد أسئلة: {\"questions\":[]}",
+                                "المواد: الفيزياء, الكيمياء, الأحياء, الرياضيات, اللغة العربية, اللغة الإنجليزية, الجيولوجيا, التاريخ, الجغرافيا."
+                            ].join(" ")},
+                            { role: "user", content: [
+                                { type: "text", text: "استخرج جميع أسئلة الاختيار من متعدد من هذه الصفحة." },
+                                { type: "image_url", image_url: { url: dataUrl } }
+                            ]}
+                        ]
+                    })
+                });
+
+                const textResponse = await res.text();
+                let data = {};
+                try { data = JSON.parse(textResponse); } catch(e) {}
+
+                if (!res.ok) {
+                    if (res.status === 429) {
+                        let delay = 30000;
+                        const match = textResponse.match(/"retryDelay":\s*"(\d+)s"/);
+                        if (match) delay = parseInt(match[1], 10) * 1000 + 2000;
+                        throw new Error(`RATELIMIT:${delay}`);
+                    }
+                    throw new Error(data.error?.message || `خطأ HTTP ${res.status}`);
+                }
+
+                let content = data.choices?.[0]?.message?.content || "";
+                content = cleanJsonString(content);
+
+                let parsed;
+                try { 
+                    parsed = JSON.parse(content); 
+                } catch (e) { 
+                    throw new Error("رد غير مفهوم من Gemini (الأسئلة) - فشل في تحويل JSON"); 
+                }
+
+                if (Array.isArray(parsed.questions)) return parsed.questions;
+                if (Array.isArray(parsed)) return parsed;
+                return [];
+            } catch (e) {
+                if (retries > 0) {
+                    let delay = 5000;
+                    if (e.message.startsWith("RATELIMIT:")) {
+                        delay = parseInt(e.message.split(":")[1], 10) || 30000;
+                        console.warn(`Gemini question extraction failed (attempt ${attempt}), retrying in ${delay}ms...`);
+                    } else {
+                        console.warn(`Gemini question extraction failed (attempt ${attempt}), retrying in ${delay}ms...`, e);
+                    }
+                    await new Promise(r => setTimeout(r, delay));
+                    return tryQuestionExtract(retries - 1, attempt + 1);
+                }
+                throw new Error(`فشل استخراج الأسئلة من Gemini: ${e.message}`);
+            }
+        };
+
+        const tryGeminiExtract = async (retries = 4, attempt = 1) => {
+            try {
+                const res = await fetch(`${GEMINI_API_URL}/chat/completions`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${GEMINI_API_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: GEMINI_MODEL, temperature: 0.1,
+                        response_format: { type: "json_object" },
+                        messages: [
+                            { role: "system", content: [
+                                "أنت نظام خبير في تحديد وقص الرسومات البيانية والأشكال التوضيحية لأسئلة امتحانات الثانوية العامة المصرية.",
+                                "مهمتك هي تحليل الصورة واستخراج إحداثيات صناديق الإحاطة (bounding boxes) لجميع الرسومات أو الأشكال التوضيحية المرتبطة بالأسئلة.",
+                                "لكل رسمة أو شكل توضيحي، حدد صندوق الإحاطة الخاص بها بدقة عالية كـ [ymin, xmin, ymax, xmax] بقيم صحيحة من 0 إلى 1000 تغطي الرسمة بالكامل.",
+                                "لكل رسمة، استخرج أيضاً أول 5 كلمات من نص السؤال المرتبط بها كـ snippet لمساعدتنا في ربط الرسمة بالسؤال المناسب.",
+                                "يجب أن تعيد النتيجة بصيغة JSON فقط كالتالي: {\"diagrams\": [ {\"snippet\": \"أول خمس كلمات من السؤال\", \"diagramBox\": [ymin, xmin, ymax, xmax]} ]}.",
+                                "إذا لم يكن هناك أي رسومات أو أشكال توضيحية في الصورة، أعد: {\"diagrams\": []}."
+                            ].join(" ")},
+                            { role: "user", content: [
+                                { type: "text", text: "استخرج إحداثيات الرسومات التوضيحية والـ snippets للأسئلة المرتبطة بها من هذه الصفحة." },
+                                { type: "image_url", image_url: { url: dataUrl } }
+                            ]}
+                        ]
+                    })
+                });
+
+                const textResponse = await res.text();
+                let data = {};
+                try { data = JSON.parse(textResponse); } catch(e) {}
+
+                if (!res.ok) {
+                    if (res.status === 429) {
+                        let delay = 30000;
+                        const match = textResponse.match(/"retryDelay":\s*"(\d+)s"/);
+                        if (match) delay = parseInt(match[1], 10) * 1000 + 2000;
+                        throw new Error(`RATELIMIT:${delay}`);
+                    }
+                    throw new Error(data.error?.message || `خطأ HTTP ${res.status}`);
+                }
+
+                let content = data.choices?.[0]?.message?.content || "";
+                content = cleanJsonString(content);
+
+                let parsed;
+                try { 
+                    parsed = JSON.parse(content); 
+                } catch (e) { 
+                    throw new Error("رد غير مفهوم من Gemini - فشل في تحويل JSON"); 
+                }
+
+                if (Array.isArray(parsed.diagrams)) return parsed.diagrams;
+                return [];
+            } catch (e) {
+                if (retries > 0) {
+                    let delay = 5000;
+                    if (e.message.startsWith("RATELIMIT:")) {
+                        delay = parseInt(e.message.split(":")[1], 10) || 30000;
+                        console.warn(`Gemini extraction failed (attempt ${attempt}), retrying in ${delay}ms...`);
+                    } else {
+                        console.warn(`Gemini extraction failed (attempt ${attempt}), retrying in ${delay}ms...`, e);
+                    }
+                    await new Promise(r => setTimeout(r, delay));
+                    return tryGeminiExtract(retries - 1, attempt + 1);
+                }
+                throw new Error(`فشل Gemini: ${e.message}`);
+            }
+        };
+
+        let groqQuestions = [];
+        let geminiDiagrams = [];
+
+        // Run extraction concurrently
+        try {
+            const [gQs, gDiags] = await Promise.all([
+                tryQuestionExtract(4),
+                tryGeminiExtract(4).catch(err => {
+                    console.warn("Gemini extraction failed, continuing with empty diagrams list:", err);
+                    return [];
+                })
+            ]);
+            groqQuestions = gQs;
+            geminiDiagrams = gDiags;
+        } catch (e) {
+            throw new Error(`فشل استخراج الأسئلة: ${e.message}`);
+        }
+
+        // Merge Gemini diagram boxes into Groq questions
+        if (geminiDiagrams.length > 0) {
+            for (const diag of geminiDiagrams) {
+                if (diag.diagramBox && Array.isArray(diag.diagramBox) && diag.diagramBox.length === 4) {
+                    const matchedQ = findMatchingQuestion(groqQuestions, diag);
+                    if (matchedQ) {
+                        matchedQ.diagramBox = diag.diagramBox;
+                        matchedQ.hasDiagram = true;
+                    }
+                }
+            }
+        }
+
+        return groqQuestions.map(q => {
+            const opts = Array.isArray(q.options) ? q.options.map(o => String(o||"").trim()) : [];
+            while (opts.length < 4) opts.push(`اختيار ${opts.length+1}`);
+            const correct = ["A","B","C","D"].includes(String(q.correct||"").toUpperCase())
+                ? String(q.correct).toUpperCase() : "A";
+            
+            let croppedUrl = null;
+            if (q.hasDiagram && Array.isArray(q.diagramBox) && q.diagramBox.length === 4) {
+                try {
+                    const [ymin, xmin, ymax, xmax] = q.diagramBox;
+                    const sx = (xmin / 1000) * img.width;
+                    const sy = (ymin / 1000) * img.height;
+                    const sW = ((xmax - xmin) / 1000) * img.width;
+                    const sH = ((ymax - ymin) / 1000) * img.height;
+                    
+                    if (sW > 0 && sH > 0) {
+                        const canvas = document.createElement("canvas");
+                        const pad = 10;
+                        canvas.width = sW + pad*2;
+                        canvas.height = sH + pad*2;
+                        const ctx = canvas.getContext("2d");
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillRect(0,0, canvas.width, canvas.height);
+                        ctx.drawImage(img, Math.max(0, sx - pad), Math.max(0, sy - pad), sW + pad*2, sH + pad*2, 0, 0, sW + pad*2, sH + pad*2);
+                        croppedUrl = canvas.toDataURL("image/jpeg", 0.9);
+                    }
+                } catch(e) { console.error("Crop failed", e); }
+            }
+
+            return { text: String(q.text||"").trim(), options: opts.slice(0,4), correct,
+                subject: String(q.subject||"الفيزياء").trim(), topic: String(q.topic||"").trim(),
+                hasDiagram: !!q.hasDiagram, croppedUrl: croppedUrl, added: false };
+        }).filter(q => {
+            if (q.text.length <= 3) return false;
+            // Prevent duplicates
+            const norm = q.text.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '');
+            if (extractedNormTexts.has(norm)) return false;
+            extractedNormTexts.add(norm);
+            return true;
+        });
+}
+
+// ===== ADD TO BANK =====
+async function addOneQ(pageId, qIdx) {
+    const page = pages.find(p => p.id === pageId);
+    if (!page) return;
+    const q = page.questions[qIdx];
+    if (!q || q.added) return;
+    const ok = await pushToFirebase([q], page.dataUrl);
+    if (ok) { q.added = true; refreshCard(page.id); showNotif("✅ تمت الإضافة للموقع!"); }
+}
+
+async function addPageQs(pageId) {
+    const page = pages.find(p => p.id === pageId);
+    if (!page) return;
+    const toAdd = page.questions.filter(q => !q.added);
+    if (!toAdd.length) return;
+    const ok = await pushToFirebase(toAdd, page.dataUrl);
+    if (ok) { toAdd.forEach(q => q.added = true); refreshCard(page.id);
+        showNotif(`✅ تمت إضافة ${toAdd.length} سؤال للموقع!`); }
+}
+
+async function addAllQuestions() {
+    let count = 0;
+    for (const page of pages) {
+        if (page.status !== "done") continue;
+        const toAdd = page.questions.filter(q => !q.added);
+        if (!toAdd.length) continue;
+        const ok = await pushToFirebase(toAdd, page.dataUrl);
+        if (ok) { toAdd.forEach(q => q.added = true); count += toAdd.length; refreshCard(page.id); }
+    }
+    if (count) showNotif(`✅ تمت إضافة ${count} سؤال للموقع!`);
+    updateButtons();
+}
+
+async function pushToFirebase(questions, pageDataUrl) {
+    // Build question objects matching app.js format
+    const qObjs = questions.map(q => {
+        // نولّد ID ثابت بناءً على نص السؤال + المادة — هدف: منع التكرار لو اترفعت نفس الصورة مرتين
+        const rawKey = (q.text + "__" + q.subject + "__" + (q.options || []).join("|")).toLowerCase().replace(/\s+/g, "");
+        let hash = 0;
+        for (let i = 0; i < rawKey.length; i++) {
+            hash = (Math.imul(31, hash) + rawKey.charCodeAt(i)) | 0;
+        }
+        const stableId = "q-" + Math.abs(hash).toString(36);
+        return {
+            id:           stableId,
+            text:         q.text,
+            subject:      q.subject,
+            topic:        q.topic,
+            options:      q.options,
+            correct:      q.correct,
+            hasDiagram:   q.hasDiagram,
+            imageDataUrl: q.hasDiagram ? (q.croppedUrl || pageDataUrl || "") : "",
+            source:       "globalQuestion",
+            createdDate:  new Date().toLocaleDateString("ar-EG")
+        };
+    });
+
+    // Also save to localStorage as backup
+    try {
+        let bank = [];
+        try { bank = JSON.parse(localStorage.getItem("customQuestions") || "[]"); } catch {}
+        if (!Array.isArray(bank)) bank = [];
+        const existIds = new Set(bank.map(q => q.id));
+        bank.push(...qObjs.filter(q => !existIds.has(q.id)));
+        localStorage.setItem("customQuestions", JSON.stringify(bank));
+    } catch (e) { console.warn("localStorage save failed", e); }
+
+    // Save to Firebase
+    if (window._fbReady && typeof window._saveQuestionsToFirebase === "function") {
+        try {
+            const total = await window._saveQuestionsToFirebase(qObjs);
+            console.log(`✅ Saved to Firebase. Total questions: ${total}`);
+            return true;
+        } catch (e) {
+            console.error("Firebase save failed:", e);
+            showNotif(`⚠️ حُفظ محلياً فقط — Firebase: ${e.message}`, true);
+            return true; // Still succeeded locally
+        }
+    }
+    showNotif("⚠️ Firebase غير متصل — حُفظ محلياً فقط", true);
+    return true;
+}
+
+// ===== OTHER =====
+function retryPage(id) {
+    const page = pages.find(p => p.id === id);
+    if (!page) return;
+    page.status = "pending"; page.error = null; page.questions = [];
+    refreshCard(id); updateButtons();
+}
+
+function removePage(id) {
+    pages = pages.filter(p => p.id !== id);
+    const el = document.getElementById(`page-${id}`);
+    if (el) el.remove();
+    if (!pages.length)
+        document.getElementById("pages-list").innerHTML =
+            `<div class="empty"><div class="e-icon">📚</div><p>ارفع صور صفحات الكتاب لتبدأ</p></div>`;
+    updateStats(); updateButtons();
+}
+
+function clearAll() {
+    if (!confirm("هتمسح كل الصفحات والأسئلة من القائمة؟")) return;
+    pages = [];
+    extractedNormTexts.clear();
+    document.getElementById("pages-list").innerHTML =
+        `<div class="empty"><div class="e-icon">📚</div><p>ارفع صور صفحات الكتاب لتبدأ</p></div>`;
+    updateStats(); updateButtons();
+}
+
+function updateStats() {
+    const allQ = pages.flatMap(p => p.questions);
+    document.getElementById("s-pages").textContent    = pages.length;
+    document.getElementById("s-found").textContent    = allQ.length;
+    document.getElementById("s-diagrams").textContent = allQ.filter(q => q.hasDiagram).length;
+    document.getElementById("s-added").textContent    = allQ.filter(q => q.added).length;
+    document.getElementById("s-errors").textContent   = pages.filter(p => p.status === "error").length;
+}
+
+function updateButtons() {
+    const hasPending = pages.some(p => p.status === "pending" || p.status === "error");
+    const hasDone    = pages.some(p => p.status === "done" && p.questions.some(q => !q.added));
+    const hasAny     = pages.length > 0;
+    document.getElementById("btn-start").disabled   = !hasPending || isRunning;
+    document.getElementById("btn-add-all").disabled = !hasDone;
+    document.getElementById("btn-export").disabled  = !pages.some(p => p.questions.length > 0);
+    document.getElementById("btn-clear").disabled   = !hasAny || isRunning;
+}
+
+function showLightbox(pageId) {
+    const page = pages.find(p => p.id === pageId);
+    if (!page?.dataUrl) return;
+    document.getElementById("lb-img").src = page.dataUrl;
+    document.getElementById("lightbox").classList.add("open");
+}
+
+function openExport() {
+    const out = pages.flatMap(p => p.questions.map(q => ({
+        text: q.text, options: q.options, correct: q.correct,
+        subject: q.subject, topic: q.topic, hasDiagram: q.hasDiagram
+    })));
+    document.getElementById("export-ta").value = JSON.stringify(out, null, 2);
+    document.getElementById("export-modal").classList.add("open");
+}
+function closeExport() { document.getElementById("export-modal").classList.remove("open"); }
+function copyExport()  { navigator.clipboard.writeText(document.getElementById("export-ta").value); showNotif("📋 تم النسخ!"); }
+function dlExport() {
+    const blob = new Blob([document.getElementById("export-ta").value], { type:"application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = `exam-bank-${Date.now()}.json`; a.click();
+}
+
+function showNotif(msg, warn = false) {
+    const n = document.createElement("div");
+    const color = warn ? "#f59e0b" : "#34d399";
+    const border = warn ? "rgba(245,158,11,.4)" : "rgba(16,185,129,.4)";
+    n.style.cssText = `position:fixed;bottom:28px;right:28px;background:#1e2d45;border:1px solid ${border};border-radius:12px;padding:14px 20px;color:${color};font-family:'Cairo',sans-serif;font-weight:700;z-index:999;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:fadeIn .3s ease;max-width:340px`;
+    n.textContent = msg; document.body.appendChild(n);
+    setTimeout(() => n.remove(), 4000);
+}
+
+function esc(s) { return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// ===== TABS =====
+function switchTab(tab) {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    document.getElementById(`tab-${tab}`).classList.add("active");
+    document.getElementById(`tab-${tab}-btn`).classList.add("active");
+    if (tab === "manage") loadSubjectStats();
+}
+
+// ===== SERVER MANAGER =====
+const SUBJECTS = [
+    { name: "الفيزياء",       icon: "⚡" },
+    { name: "الكيمياء",       icon: "🧪" },
+    { name: "الأحياء",        icon: "🌱" },
+    { name: "الرياضيات",      icon: "📐" },
+    { name: "اللغة العربية",  icon: "📖" },
+    { name: "اللغة الإنجليزية", icon: "🇬🇧" },
+    { name: "الجيولوجيا",     icon: "🪨" },
+    { name: "التاريخ",        icon: "🏛️" },
+    { name: "الجغرافيا",      icon: "🗺️" },
+];
+
+let mgrSelectedSubject = null;
+let mgrSubjectCounts = {};
+
+async function loadSubjectStats() {
+    if (!window._fbReady) {
+        showNotif("⚠️ انتظر حتى يتم الاتصال بفايربيس...", true);
+        return;
+    }
+    const cardsEl = document.getElementById("mgr-subject-cards");
+    cardsEl.innerHTML = `<div class="mgr-loading"><div class="spinner"></div>جاري تحميل الإحصائيات...</div>`;
+
+    try {
+        const res = await fetchAPI("/questions/global?limit=5000");
+        const questions = res?.data || [];
+        
+        // Count per subject
+        mgrSubjectCounts = {};
+        questions.forEach(q => {
+            const subj = q.subject || "غير محدد";
+            mgrSubjectCounts[subj] = (mgrSubjectCounts[subj] || 0) + 1;
+        });
+
+        // Also include known subjects with 0 count
+        SUBJECTS.forEach(s => {
+            if (!(s.name in mgrSubjectCounts)) mgrSubjectCounts[s.name] = 0;
+        });
+
+        // Render cards
+        const entries = Object.entries(mgrSubjectCounts).sort((a,b) => b[1] - a[1]);
+        cardsEl.innerHTML = "";
+        entries.forEach(([name, count]) => {
+            const subj = SUBJECTS.find(s => s.name === name);
+            const icon = subj ? subj.icon : "📚";
+            const card = document.createElement("div");
+            card.className = `subj-card${mgrSelectedSubject === name ? " selected" : ""}`;
+            card.innerHTML = `
+                <div style="font-size:1.6rem;margin-bottom:8px">${icon}</div>
+                <div class="subj-name">${esc(name)}</div>
+                <div class="subj-count">${count}</div>
+                <div class="subj-label">سؤال</div>`;
+            card.onclick = () => selectSubject(name);
+            cardsEl.appendChild(card);
+        });
+
+        if (mgrSelectedSubject) selectSubject(mgrSelectedSubject);
+
+    } catch (e) {
+        cardsEl.innerHTML = `<div class="mgr-loading" style="color:var(--error)">❌ فشل التحميل: ${esc(e.message)}</div>`;
+    }
+}
+
+async function selectSubject(name) {
+    mgrSelectedSubject = name;
+    // Highlight selected card
+    document.querySelectorAll(".subj-card").forEach(c => {
+        c.classList.toggle("selected", c.querySelector(".subj-name")?.textContent === name);
+    });
+
+    const panel = document.getElementById("mgr-panel");
+    const list = document.getElementById("mgr-list");
+    const title = document.getElementById("mgr-panel-title");
+    
+    panel.style.display = "block";
+    title.textContent = `أسئلة مادة: ${name} (${mgrSubjectCounts[name] || 0} سؤال)`;
+    list.innerHTML = `<div class="mgr-loading"><div class="spinner"></div>جاري تحميل الأسئلة...</div>`;
+
+    try {
+        const res = await fetchAPI(`/questions/global?subject=${encodeURIComponent(name)}&limit=1000`);
+        const questions = res?.data || [];
+        
+        if (questions.length === 0) {
+            list.innerHTML = `<div class="mgr-empty">📭 لا توجد أسئلة لهذه المادة على الخادم</div>`;
+            return;
+        }
+
+        const letters = ["أ","ب","ج","د"];
+        const lettersE = ["A","B","C","D"];
+        let html = "";
+        let idx = 0;
+        window._mgrCurrentQuestions = {};
+        questions.forEach(q => {
+            idx++;
+            const docId = q.id;
+            window._mgrCurrentQuestions[docId] = q;
+            const opts = Array.isArray(q.options) ? q.options : [];
+            const cIdx = lettersE.indexOf(String(q.correct||"").toUpperCase());
+            const optsHtml = opts.map((o,j) =>
+                `<span class="mgr-q-opt${j===cIdx?" correct":""}">${letters[j]}: ${esc(o)}</span>`
+            ).join("");
+            html += `
+            <div class="mgr-q-row" id="mgr-row-${docId}">
+                <div class="mgr-q-num">${idx}</div>
+                <div>
+                    <div class="mgr-q-text">${esc(q.text||"")}</div>
+                    <div class="mgr-q-opts">${optsHtml}</div>
+                    ${q.topic ? `<span style="font-size:.72rem;color:var(--text2)">📌 ${esc(q.topic)}</span>` : ""}
+                </div>
+                <div style="display:flex; flex-direction:column; gap:5px;">
+                    <button class="mgr-q-edit" onclick="editSingleQuestion('${docId}', '${name}')">✏️ تعديل</button>
+                    <button class="mgr-q-del" onclick="deleteSingleQuestion('${docId}', '${name}')">🗑️ حذف</button>
+                </div>
+            </div>`;
+        });
+        list.innerHTML = html;
+
+    } catch (e) {
+        list.innerHTML = `<div class="mgr-loading" style="color:var(--error)">❌ فشل: ${esc(e.message)}</div>`;
+    }
+}
+
+async function deleteSingleQuestion(docId, subject) {
+    if (!window._fbReady) return;
+    try {
+        await fetchAPI(`/questions/global/${docId}`, { method: "DELETE" });
+        const row = document.getElementById(`mgr-row-${docId}`);
+        if (row) row.remove();
+        if (mgrSubjectCounts[subject]) mgrSubjectCounts[subject]--;
+        document.getElementById("mgr-panel-title").textContent = `أسئلة مادة: ${subject} (${mgrSubjectCounts[subject] || 0} سؤال)`;
+        // Update card count
+        document.querySelectorAll(".subj-card").forEach(c => {
+            if (c.querySelector(".subj-name")?.textContent === subject) {
+                const el = c.querySelector(".subj-count");
+                if (el) el.textContent = mgrSubjectCounts[subject] || 0;
+            }
+        });
+        showNotif(`✅ تم حذف السؤال من مادة ${subject}`);
+        const listEl = document.getElementById("mgr-list");
+        if (listEl && listEl.querySelectorAll(".mgr-q-row").length === 0) {
+            listEl.innerHTML = `<div class="mgr-empty">📭 لا توجد أسئلة لهذه المادة على الخادم</div>`;
+        }
+    } catch(e) {
+        showNotif(`❌ فشل الحذف: ${e.message}`, true);
+    }
+}
+
+async function deleteSubjectAll() {
+    if (!mgrSelectedSubject) return;
+    const name = mgrSelectedSubject;
+    const count = mgrSubjectCounts[name] || 0;
+    if (!confirm(`⚠️ هل أنت متأكد من حذف جميع (${count}) سؤال من مادة "${name}"؟ لا يمكن التراجع!`)) return;
+
+    document.getElementById("mgr-list").innerHTML = `<div class="mgr-loading"><div class="spinner"></div>جاري الحذف...</div>`;
+    try {
+        const res = await fetchAPI(`/questions/global?subject=${encodeURIComponent(name)}&limit=1000`);
+        const questions = res?.data || [];
+        let deleted = 0;
+        for (const q of questions) {
+            await fetchAPI(`/questions/global/${q.id}`, { method: "DELETE" });
+            deleted++;
+        }
+        mgrSubjectCounts[name] = 0;
+        document.getElementById("mgr-panel-title").textContent = `أسئلة مادة: ${name} (0 سؤال)`;
+        document.getElementById("mgr-list").innerHTML = `<div class="mgr-empty">📭 لا توجد أسئلة لهذه المادة على الخادم</div>`;
+        // Update card
+        document.querySelectorAll(".subj-card").forEach(c => {
+            if (c.querySelector(".subj-name")?.textContent === name) {
+                const el = c.querySelector(".subj-count");
+                if (el) el.textContent = "0";
+            }
+        });
+        showNotif(`✅ تم حذف ${deleted} سؤال من مادة ${name} بنجاح`);
+    } catch(e) {
+        showNotif(`❌ فشل الحذف: ${e.message}`, true);
+        selectSubject(name);
+    }
+}
+
+// ===== MANUAL CROP =====
+let cropState = { pageId: null, qIdx: null, startX: 0, startY: 0, endX: 0, endY: 0, isDragging: false };
+
+function openCropModal(pageId, qIdx) {
+    const page = pages.find(p => p.id === pageId);
+    if (!page || !page.dataUrl) return;
+    cropState.pageId = pageId;
+    cropState.qIdx = qIdx;
+    
+    const img = document.getElementById("crop-img");
+    img.src = page.dataUrl;
+    document.getElementById("crop-box").style.display = "none";
+    document.getElementById("crop-modal").classList.add("open");
+}
+
+function closeCropModal() {
+    document.getElementById("crop-modal").classList.remove("open");
+    cropState.isDragging = false;
+}
+
+function removeCrop(pageId, qIdx) {
+    const page = pages.find(p => p.id === pageId);
+    if (!page) return;
+    const q = page.questions[qIdx];
+    q.croppedUrl = null;
+    q.hasDiagram = false;
+    refreshCard(pageId);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const cropContainer = document.getElementById("crop-container");
+    const cropBox = document.getElementById("crop-box");
+
+    cropContainer.addEventListener("mousedown", e => {
+        const rect = cropContainer.getBoundingClientRect();
+        cropState.startX = e.clientX - rect.left;
+        cropState.startY = e.clientY - rect.top;
+        cropState.isDragging = true;
+        cropBox.style.left = cropState.startX + "px";
+        cropBox.style.top = cropState.startY + "px";
+        cropBox.style.width = "0px";
+        cropBox.style.height = "0px";
+        cropBox.style.display = "block";
+    });
+
+    window.addEventListener("mousemove", e => {
+        if (!cropState.isDragging) return;
+        const rect = cropContainer.getBoundingClientRect();
+        cropState.endX = e.clientX - rect.left;
+        cropState.endY = e.clientY - rect.top;
+        
+        // Clamp to container bounds
+        cropState.endX = Math.max(0, Math.min(cropState.endX, rect.width));
+        cropState.endY = Math.max(0, Math.min(cropState.endY, rect.height));
+
+        const x = Math.min(cropState.startX, cropState.endX);
+        const y = Math.min(cropState.startY, cropState.endY);
+        const w = Math.abs(cropState.endX - cropState.startX);
+        const h = Math.abs(cropState.endY - cropState.startY);
+        
+        cropBox.style.left = x + "px";
+        cropBox.style.top = y + "px";
+        cropBox.style.width = w + "px";
+        cropBox.style.height = h + "px";
+    });
+
+    window.addEventListener("mouseup", () => {
+        cropState.isDragging = false;
+    });
+});
+
+function applyCrop() {
+    const page = pages.find(p => p.id === cropState.pageId);
+    if (!page) return;
+    const q = page.questions[cropState.qIdx];
+    
+    const img = document.getElementById("crop-img");
+    const rect = img.getBoundingClientRect();
+    
+    const x = Math.min(cropState.startX, cropState.endX);
+    const y = Math.min(cropState.startY, cropState.endY);
+    const w = Math.abs(cropState.endX - cropState.startX);
+    const h = Math.abs(cropState.endY - cropState.startY);
+    
+    if (w < 15 || h < 15) {
+        showNotif("التحديد صغير جداً، قم برسم مربع أو مستطيل واضح.", true);
+        return;
+    }
+    
+    const scaleX = img.naturalWidth / rect.width;
+    const scaleY = img.naturalHeight / rect.height;
+    
+    const sx = x * scaleX;
+    const sy = y * scaleY;
+    const sW = w * scaleX;
+    const sH = h * scaleY;
+    
+    const canvas = document.createElement("canvas");
+    canvas.width = sW;
+    canvas.height = sH;
+    const ctx = canvas.getContext("2d");
+    
+    const originalImg = new Image();
+    originalImg.onload = () => {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0,0, canvas.width, canvas.height);
+        ctx.drawImage(originalImg, sx, sy, sW, sH, 0, 0, sW, sH);
+        q.croppedUrl = canvas.toDataURL("image/jpeg", 0.9);
+        q.hasDiagram = true;
+        closeCropModal();
+        refreshCard(page.id);
+        showNotif("✅ تم قص الرسمة وحفظها بنجاح!");
+    };
+    originalImg.src = img.src;
+}
+
+// Edit functionality
+let editingDocId = null;
+let editingSubject = null;
+
+function editSingleQuestion(docId, subject) {
+    const q = window._mgrCurrentQuestions[docId];
+    if (!q) return;
+    editingDocId = docId;
+    editingSubject = subject;
+    
+    document.getElementById("edit-q-text").value = q.text || "";
+    document.getElementById("edit-q-topic").value = q.topic || "";
+    document.getElementById("edit-q-optA").value = (q.options && q.options[0]) || "";
+    document.getElementById("edit-q-optB").value = (q.options && q.options[1]) || "";
+    document.getElementById("edit-q-optC").value = (q.options && q.options[2]) || "";
+    document.getElementById("edit-q-optD").value = (q.options && q.options[3]) || "";
+    document.getElementById("edit-q-correct").value = String(q.correct || "A").toUpperCase();
+    
+    document.getElementById("edit-modal").classList.add("open");
+}
+
+function closeEditModal() {
+    document.getElementById("edit-modal").classList.remove("open");
+    editingDocId = null;
+    editingSubject = null;
+}
+
+async function saveEditedQuestion() {
+    if (!editingDocId || !window._fbReady) return;
+    const btn = document.getElementById("btn-save-edit");
+    btn.disabled = true;
+    btn.textContent = "جاري الحفظ...";
+    
+    try {
+        const newText = document.getElementById("edit-q-text").value.trim();
+        const newTopic = document.getElementById("edit-q-topic").value.trim();
+        const newOpts = [
+            document.getElementById("edit-q-optA").value.trim(),
+            document.getElementById("edit-q-optB").value.trim(),
+            document.getElementById("edit-q-optC").value.trim(),
+            document.getElementById("edit-q-optD").value.trim()
+        ];
+        const newCorrect = document.getElementById("edit-q-correct").value;
+
+        await fetchAPI(`/questions/global/${editingDocId}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                text: newText,
+                topic: newTopic,
+                options: newOpts,
+                correct: newCorrect
+            })
+        });
+
+        showNotif("✅ تم تحديث السؤال بنجاح!");
+        closeEditModal();
+        if (editingSubject) selectSubject(editingSubject);
+
+    } catch (e) {
+        showNotif(`❌ فشل التحديث: ${e.message}`, true);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "💾 حفظ التعديلات";
+    }
+}
+</script>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="edit-modal">
+    <div class="modal-box">
+        <h3 style="color:var(--accent);font-size:1.2rem;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:10px;">✏️ تعديل السؤال</h3>
+        
+        <div style="margin-bottom: 12px;">
+            <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">نص السؤال:</label>
+            <textarea id="edit-q-text" style="width:100%;height:80px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-family:inherit;font-size:0.9rem;"></textarea>
+        </div>
+        
+        <div style="margin-bottom: 12px;">
+            <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">الدرس / الموضوع:</label>
+            <input type="text" id="edit-q-topic" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-family:inherit;font-size:0.9rem;">
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div>
+                <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">اختيار أ (A):</label>
+                <input type="text" id="edit-q-optA" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-family:inherit;font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">اختيار ب (B):</label>
+                <input type="text" id="edit-q-optB" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-family:inherit;font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">اختيار ج (C):</label>
+                <input type="text" id="edit-q-optC" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-family:inherit;font-size:0.85rem;">
+            </div>
+            <div>
+                <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">اختيار د (D):</label>
+                <input type="text" id="edit-q-optD" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-family:inherit;font-size:0.85rem;">
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display:block;font-size:0.85rem;color:var(--text2);margin-bottom:5px;">الإجابة الصحيحة:</label>
+            <select id="edit-q-correct" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-family:inherit;font-size:0.9rem;outline:none;">
+                <option value="A">أ (A)</option>
+                <option value="B">ب (B)</option>
+                <option value="C">ج (C)</option>
+                <option value="D">د (D)</option>
+            </select>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeEditModal()">إلغاء</button>
+            <button class="btn btn-success" id="btn-save-edit" onclick="saveEditedQuestion()">💾 حفظ التعديلات</button>
+        </div>
+    </div>
+</div>
+
+<!-- Crop Modal -->
+<div class="modal-overlay" id="crop-modal">
+    <div class="modal-box" style="max-width:95vw; max-height:95vh; text-align:center; padding:15px; display:flex; flex-direction:column; align-items:center;">
+        <h3 style="margin-bottom:15px; color:var(--accent);">✂️ قم برسم مربع حول الرسمة فقط لقصها</h3>
+        
+        <div style="position:relative; display:inline-block; user-select:none; max-width:100%; flex:1; overflow:auto; border:2px solid var(--border); border-radius:10px; background:var(--bg2);" id="crop-container">
+            <img id="crop-img" style="max-width:100%; max-height:70vh; display:block; pointer-events:none;" draggable="false">
+            <div id="crop-box" style="position:absolute; border:2px dashed #fbbf24; background:rgba(245,158,11,0.2); display:none; pointer-events:none;"></div>
+        </div>
+        
+        <div class="modal-actions" style="margin-top:20px; width:100%; justify-content:center; gap:15px;">
+            <button class="btn btn-outline" onclick="closeCropModal()">إلغاء</button>
+            <button class="btn btn-success" onclick="applyCrop()" style="padding:10px 30px; font-size:1.1rem;">✅ حفظ الرسمة</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

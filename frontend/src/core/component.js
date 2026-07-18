@@ -5,8 +5,10 @@
 export class BaseComponent {
   constructor(props = {}) {
     this.props = props;
+    this.state = {};
     this.element = null;
     this._cleanups = [];
+    this._children = [];
     this._isMounted = false;
   }
 
@@ -42,10 +44,20 @@ export class BaseComponent {
 
   /**
    * 5. Called to completely destroy the component.
-   * Cleans up event listeners, timers, subscriptions, and DOM nodes.
+   * Cleans up event listeners, timers, subscriptions, children, and DOM nodes.
    */
   destroy() {
     this.beforeUnmount();
+
+    // Destroy all registered children first
+    for (const child of this._children) {
+      try {
+        child.destroy();
+      } catch (e) {
+        console.error('[BaseComponent] Error destroying child:', e);
+      }
+    }
+    this._children = [];
 
     // Execute all registered cleanup functions
     for (const cleanup of this._cleanups) {
@@ -67,6 +79,38 @@ export class BaseComponent {
   }
 
   // ─── Lifecycle Helpers ─────────────────────────────
+
+  /**
+   * Register a child component for lifecycle management.
+   * The child will be automatically destroyed when this component is destroyed.
+   * @param {BaseComponent} child
+   */
+  registerChild(child) {
+    this._children.push(child);
+  }
+
+  /**
+   * Update component state and re-render in place.
+   * Shallow merges newState into this.state, then swaps the DOM element.
+   * @param {Object} newState
+   */
+  setState(newState) {
+    this.state = { ...this.state, ...newState };
+    if (this._isMounted && this.element && this.element.parentNode) {
+      const parent = this.element.parentNode;
+      const oldEl = this.element;
+
+      // Destroy old children before re-render
+      for (const child of this._children) {
+        try { child.destroy(); } catch(e) { /* ignore */ }
+      }
+      this._children = [];
+
+      const newEl = this.render();
+      parent.replaceChild(newEl, oldEl);
+      this._isMounted = true;
+    }
+  }
 
   /**
    * Register a cleanup function to be called on destroy().
@@ -102,3 +146,4 @@ export class BaseComponent {
     return id;
   }
 }
+

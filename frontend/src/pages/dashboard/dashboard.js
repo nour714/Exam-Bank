@@ -1,144 +1,80 @@
-import { store } from '../../core/state-store.js';
-import { ChartView } from '../../design-system/components/charts/chart-view.js';
-import { DataGrid } from '../../design-system/components/data-display/data-grid.js';
-import { dbService } from '../../services/indexeddb.service.js';
+import { BaseComponent } from '../../core/component.js';
+import { eventBus } from '../../core/event-bus.js';
+import { measure } from '../../core/observability.js';
+import { widgetRegistry } from '../../core/widget-registry.js';
+import { ErrorBoundary } from '../../core/error-boundary.js';
 
-export async function DashboardPage() {
-  const container = document.createElement('div');
-  container.className = 'container py-6 flex-col gap-6';
+// Import widgets to register them (in a real app, this might happen in a separate bootstrap file)
+import { WelcomeCard } from './components/welcome-card.js';
+import { StatsRow } from './components/stats-row.js';
+import { QuickActions } from './components/quick-actions.js';
+import { PerformanceChart } from './components/performance-chart.js';
+import { ActivityTimeline } from './components/activity-timeline.js';
+import { RecentExams } from './components/recent-exams.js';
 
-  const user = store.get('user');
+// Register default widgets
+widgetRegistry.register('dashboard', 'welcome', WelcomeCard, { order: 1 });
+widgetRegistry.register('dashboard', 'actions', QuickActions, { order: 2 });
+widgetRegistry.register('dashboard', 'stats', StatsRow, { order: 3 });
+widgetRegistry.register('dashboard', 'chart', PerformanceChart, { order: 4 });
+widgetRegistry.register('dashboard', 'exams', RecentExams, { order: 5 });
+widgetRegistry.register('dashboard', 'timeline', ActivityTimeline, { order: 6 });
 
-  // Header
-  const header = document.createElement('div');
-  header.innerHTML = `
-    <h2 class="font-bold">Dashboard</h2>
-    <p class="text-secondary mt-1">Welcome back, ${user?.firstName}. Here is your overview.</p>
-  `;
-  container.appendChild(header);
+/**
+ * DashboardPage — Pure composition layer dynamically using WidgetRegistry.
+ */
+export default class DashboardPage extends BaseComponent {
+  constructor(props = {}) {
+    super(props);
+    this.widgetBoundaries = [];
 
-  // Stats Row
-  const statsRow = document.createElement('div');
-  statsRow.className = 'grid grid-cols-4 gap-4';
-  
-  const stats = [
-    { label: 'Active Exams', value: '12' },
-    { label: 'Completed', value: '45' },
-    { label: 'Average Score', value: '82%' },
-    { label: 'Study Groups', value: '3' }
-  ];
-
-  stats.forEach(stat => {
-    const card = document.createElement('div');
-    card.className = 'card p-4 text-center';
-    card.innerHTML = `
-      <p class="text-sm text-secondary">${stat.label}</p>
-      <h3 class="text-2xl font-bold mt-2 text-primary-600">${stat.value}</h3>
-    `;
-    statsRow.appendChild(card);
-  });
-  container.appendChild(statsRow);
-
-  // Charts Row
-  const chartsRow = document.createElement('div');
-  chartsRow.className = 'grid grid-cols-2 gap-4 mt-6';
-
-  const activityChartCard = document.createElement('div');
-  activityChartCard.className = 'card p-4';
-  activityChartCard.innerHTML = '<h4 class="font-semibold mb-4">Activity Overview</h4>';
-  
-  // Dummy Data for Chart
-  const chartWrapper = document.createElement('div');
-  chartWrapper.style.height = '250px';
-  chartWrapper.appendChild(ChartView({
-    id: 'activity-chart',
-    type: 'line',
-    data: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      datasets: [{
-        label: 'Exams Taken',
-        data: [2, 5, 3, 8, 4, 1, 0],
-        borderColor: '#6C5CE7',
-        backgroundColor: 'rgba(108, 92, 231, 0.1)',
-        fill: true,
-        tension: 0.4
-      }]
-    }
-  }));
-  activityChartCard.appendChild(chartWrapper);
-  chartsRow.appendChild(activityChartCard);
-
-  const breakdownChartCard = document.createElement('div');
-  breakdownChartCard.className = 'card p-4';
-  breakdownChartCard.innerHTML = '<h4 class="font-semibold mb-4">Performance Breakdown</h4>';
-  
-  const pieWrapper = document.createElement('div');
-  pieWrapper.style.height = '250px';
-  pieWrapper.appendChild(ChartView({
-    id: 'breakdown-chart',
-    type: 'doughnut',
-    data: {
-      labels: ['Mathematics', 'Science', 'History', 'Languages'],
-      datasets: [{
-        data: [30, 25, 20, 25],
-        backgroundColor: ['#6C5CE7', '#00BCD4', '#F59E0B', '#10B981']
-      }]
-    }
-  }));
-  breakdownChartCard.appendChild(pieWrapper);
-  chartsRow.appendChild(breakdownChartCard);
-
-  container.appendChild(chartsRow);
-
-  // Recent Exams Grid
-  const gridCard = document.createElement('div');
-  gridCard.className = 'card p-0 mt-6';
-  
-  const gridHeader = document.createElement('div');
-  gridHeader.className = 'card-header';
-  gridHeader.innerHTML = '<h4 class="font-semibold">Recent Exams</h4>';
-  gridCard.appendChild(gridHeader);
-
-  const gridData = [
-    { id: '1', title: 'Calculus Midterm', date: '2026-07-15', score: '88%', status: 'Completed' },
-    { id: '2', title: 'World History Quiz', date: '2026-07-14', score: '92%', status: 'Completed' },
-    { id: '3', title: 'Biology Final', date: '2026-07-18', score: '-', status: 'Scheduled' },
-  ];
-
-  const grid = DataGrid({
-    columns: [
-      { id: 'title', title: 'Exam Title' },
-      { id: 'date', title: 'Date' },
-      { id: 'score', title: 'Score' },
-      { 
-        id: 'status', 
-        title: 'Status',
-        render: (row) => {
-          const color = row.status === 'Completed' ? 'var(--color-success-500)' : 'var(--color-warning-500)';
-          return `<span style="color: ${color}; font-weight: 500;">${row.status}</span>`;
-        }
-      }
-    ],
-    data: gridData
-  });
-  gridCard.appendChild(grid);
-  container.appendChild(gridCard);
-
-  // Check Offline Sync Queue (example logic)
-  try {
-    const syncQueue = await dbService.getSyncQueue();
-    if (syncQueue && syncQueue.length > 0) {
-      const alert = document.createElement('div');
-      alert.className = 'p-4 mt-6 rounded';
-      alert.style.backgroundColor = 'var(--color-warning-50)';
-      alert.style.color = 'var(--color-warning-600)';
-      alert.style.border = '1px solid var(--color-warning-500)';
-      alert.innerHTML = `<strong>Offline Sync Pending:</strong> You have ${syncQueue.length} actions waiting to sync to the server.`;
-      container.insertBefore(alert, container.firstChild);
-    }
-  } catch (err) {
-    console.error('Error checking sync queue', err);
+    const widgets = widgetRegistry.getWidgets('dashboard');
+    widgets.forEach(({ componentClass }) => {
+      const widgetInstance = new componentClass();
+      const boundary = new ErrorBoundary({ child: widgetInstance, fallbackMessage: 'تعذر تحميل هذه الأداة' });
+      this.widgetBoundaries.push(boundary);
+      this.registerChild(boundary);
+    });
   }
 
-  return container;
+  render() {
+    return measure('DashboardPage', 'render', () => {
+      this.element = document.createElement('div');
+      this.element.className = 'container mx-auto px-4 py-8 max-w-7xl';
+      this.element.style.animation = 'fadeIn 0.4s ease-out';
+
+      this.element.innerHTML = `
+        <div class="flex flex-col gap-8">
+          <div id="slot-0"></div>
+          <div id="slot-1"></div>
+          <div id="slot-2"></div>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 flex flex-col gap-6">
+              <div id="slot-3"></div>
+              <div id="slot-4"></div>
+            </div>
+            <div class="lg:col-span-1">
+              <div id="slot-5" class="h-full"></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Mount boundaries into slots dynamically
+      this.widgetBoundaries.forEach((boundary, index) => {
+        const slot = this.element.querySelector(`#slot-${index}`);
+        if (slot) {
+          slot.appendChild(boundary.render());
+        }
+      });
+
+      return this.element;
+    });
+  }
+
+  mount() {
+    super.mount();
+    this.widgetBoundaries.forEach(boundary => boundary.mount());
+  }
 }
+

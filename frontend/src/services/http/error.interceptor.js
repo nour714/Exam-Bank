@@ -29,7 +29,7 @@ export function errorInterceptor(response) {
 
   // Dispatch a toast notification for non-401 errors (401 is handled by auth interceptor)
   if (response.status !== 401) {
-    eventBus.emit('toast:show', {
+    eventBus.emit('toast.show', {
       type: 'error',
       title: mapped.title,
       message: mapped.message,

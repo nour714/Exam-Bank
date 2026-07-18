@@ -1,68 +1,87 @@
-/**
- * Chart Component wrapping Chart.js.
- * Ensure Chart.js is loaded in the global scope (e.g. via CDN in index.html) before using.
- * @param {Object} props
- * @param {string} props.id
- * @param {string} props.type - 'line' | 'bar' | 'doughnut' | 'pie'
- * @param {Object} props.data - Chart.js data object
- * @param {Object} [props.options] - Chart.js options
- * @returns {HTMLCanvasElement}
- */
-export function ChartView({ id, type, data, options = {} }) {
-  const container = document.createElement('div');
-  container.className = 'chart-container';
-  container.style.position = 'relative';
-  container.style.width = '100%';
-  container.style.height = '100%';
+import { BaseComponent } from '../../../../core/component.js';
 
-  const canvas = document.createElement('canvas');
-  canvas.id = id;
-  container.appendChild(canvas);
+export class ChartView extends BaseComponent {
+  constructor(props = {}) {
+    super(props);
+    this.chartInstance = null;
+  }
 
-  // Defer initialization until the element is in the DOM
-  setTimeout(() => {
-    if (!window.Chart) {
-      console.error('[ChartView] Chart.js is not loaded.');
-      return;
-    }
+  render() {
+    const { id, type, data, options = {} } = this.props;
 
-    const ctx = canvas.getContext('2d');
-    
-    // Auto-detect theme colors for text if not specified
-    const defaultOptions = {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          labels: {
-            color: getComputedStyle(document.body).getPropertyValue('--text-secondary').trim()
+    this.element = document.createElement('div');
+    this.element.className = 'chart-container';
+    this.element.style.position = 'relative';
+    this.element.style.width = '100%';
+    this.element.style.height = '100%';
+
+    const canvas = document.createElement('canvas');
+    canvas.id = id;
+    this.element.appendChild(canvas);
+
+    // Initialize chart
+    setTimeout(() => {
+      if (!window.Chart) {
+        console.error('[ChartView] Chart.js is not loaded.');
+        return;
+      }
+
+      // If already initialized or element detached, abort
+      if (this.chartInstance || !document.body.contains(this.element)) return;
+
+      const ctx = canvas.getContext('2d');
+      
+      const defaultOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: getComputedStyle(document.body).getPropertyValue('--text-secondary').trim() || '#9ca3af'
+            }
           }
-        }
-      },
-      scales: type !== 'pie' && type !== 'doughnut' ? {
-        x: {
-          ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-muted').trim() },
-          grid: { color: getComputedStyle(document.body).getPropertyValue('--border-color').trim() }
         },
-        y: {
-          ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-muted').trim() },
-          grid: { color: getComputedStyle(document.body).getPropertyValue('--border-color').trim() }
-        }
-      } : {}
-    };
+        scales: type !== 'pie' && type !== 'doughnut' ? {
+          x: {
+            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-muted').trim() || '#6b7280' },
+            grid: { color: getComputedStyle(document.body).getPropertyValue('--border-color').trim() || '#374151' }
+          },
+          y: {
+            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-muted').trim() || '#6b7280' },
+            grid: { color: getComputedStyle(document.body).getPropertyValue('--border-color').trim() || '#374151' }
+          }
+        } : {}
+      };
 
-    // Deep merge options
-    const mergedOptions = { ...defaultOptions, ...options };
+      const mergedOptions = { ...defaultOptions, ...options };
 
-    // Instantiate Chart.js and bind to element for later destruction
-    const chartInstance = new window.Chart(ctx, {
-      type,
-      data,
-      options: mergedOptions,
-    });
+      this.chartInstance = new window.Chart(ctx, {
+        type,
+        data,
+        options: mergedOptions,
+      });
 
-    container.__chartInstance = chartInstance;
-  }, 0);
+    }, 0);
 
-  return container;
+    return this.element;
+  }
+
+  // Used by parent to update data without re-rendering the whole canvas
+  updateData(newData) {
+    if (this.chartInstance) {
+      this.chartInstance.data = newData;
+      this.chartInstance.update();
+    } else {
+      // Not initialized yet, update props for when it mounts
+      this.props.data = newData;
+    }
+  }
+
+  destroy() {
+    if (this.chartInstance) {
+      this.chartInstance.destroy();
+      this.chartInstance = null;
+    }
+    super.destroy();
+  }
 }

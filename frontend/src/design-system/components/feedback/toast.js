@@ -2,7 +2,7 @@ import { eventBus } from '../../../core/event-bus.js';
 
 /**
  * Toast Component.
- * Listens to 'toast:show' events.
+ * Listens to 'toast.show' events.
  */
 export function initToastSystem() {
   const container = document.getElementById('toast-container');
@@ -17,7 +17,7 @@ export function initToastSystem() {
   container.style.gap = 'var(--space-2)';
   container.style.zIndex = 'var(--z-toast)';
 
-  eventBus.on('toast:show', ({ type = 'info', title, message, duration = 5000 }) => {
+  eventBus.on('toast.show', ({ type = 'info', title, message, duration = 5000 }) => {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     

@@ -2,10 +2,14 @@ import { api } from './http/api-client.js';
 import { store } from '../core/state-store.js';
 import { router } from '../core/router.js';
 import { eventBus } from '../core/event-bus.js';
+import { TokenManager } from './http/token-manager.js';
 
 /**
  * Authentication Service.
  * Manages login, register, token lifecycle, and session recovery.
+ * Fully compliant with security requirements:
+ * - Access token is kept in memory only via TokenManager.
+ * - Refresh token is handled natively by the browser via HTTP-Only cookies.
  */
 export const authService = {
   async login(email, password) {
@@ -29,15 +33,15 @@ export const authService = {
   },
 
   /**
-   * Attempt to recover session on app load using stored refresh token.
+   * Attempt to recover session on app load using the HTTP-only refresh token cookie.
+   * We just make the call, and the browser attaches the cookie.
    */
   async recoverSession() {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken) return false;
-
     try {
-      const res = await api.post('/auth/refresh', { refreshToken });
+      // The API client is configured with credentials: true to send cookies
+      const res = await api.post('/auth/refresh');
       this._setSession(res.data);
+      eventBus.emit('auth.session.restored', res.data.user);
       return true;
     } catch {
       this._clearSession();
@@ -46,7 +50,11 @@ export const authService = {
   },
 
   isAuthenticated() {
-    return !!localStorage.getItem('access_token');
+    return !!TokenManager.getToken();
+  },
+  
+  getAccessToken() {
+    return TokenManager.getToken();
   },
 
   hasPermission(permission) {
@@ -60,26 +68,24 @@ export const authService = {
   },
 
   _setSession(data) {
-    localStorage.setItem('access_token', data.accessToken);
-    localStorage.setItem('refresh_token', data.refreshToken);
+    TokenManager.setToken(data.accessToken);
     store.set('user', data.user);
     store.set('permissions', data.permissions || []);
     store.set('tenant', data.tenant || null);
-    eventBus.emit('auth:logged_in', data.user);
+    eventBus.emit('auth.login', data.user); // Switched to auth.login as requested
   },
 
   _clearSession() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    TokenManager.clearToken();
     store.set('user', null);
     store.set('permissions', []);
     store.set('tenant', null);
-    eventBus.emit('auth:logged_out');
+    eventBus.emit('auth.logout'); // Switched to auth.logout as requested
   },
 };
 
 // Listen for session expiry from interceptor
-window.addEventListener('auth:session_expired', () => {
+eventBus.on('auth:expired', () => {
   authService._clearSession();
   router.navigate('/login');
 });

@@ -54,25 +54,38 @@
   --gray-900: #111827;
   --gray-950: #0A0E17;
 
-  /* ─── Semantic Tokens ──────────────────────────────── */
-  --bg-primary:    #FFFFFF;
+  /* ─── Semantic Tokens (Merged with Legacy) ─────────── */
+  --bg-primary:    #f8fafc; /* Legacy --bg-color */
   --bg-secondary:  var(--gray-50);
   --bg-tertiary:   var(--gray-100);
   --bg-inverse:    var(--gray-900);
-  --bg-sidebar:    var(--gray-950);
+  --bg-sidebar:    #ffffff; /* Sidebar usually white in light mode unless specified */
 
-  --text-primary:   var(--gray-900);
-  --text-secondary: var(--gray-600);
+  --text-primary:   #0f172a; /* Legacy --text-color */
+  --text-secondary: #64748b; /* Legacy --text-muted */
   --text-muted:     var(--gray-400);
   --text-inverse:   #FFFFFF;
-  --text-link:      var(--color-primary-600);
+  --text-link:      #3b82f6; /* Legacy --info-color */
 
-  --border-color:   var(--gray-200);
-  --border-focus:   var(--color-primary-400);
+  --border-color:   #e2e8f0; /* Legacy --border-color */
+  --border-focus:   #0f2963; /* Legacy --primary-color */
 
-  --surface-card:   #FFFFFF;
+  --surface-card:   rgba(255, 255, 255, 0.8); /* Legacy --card-bg */
   --surface-hover:  var(--gray-50);
-  --surface-active: var(--color-primary-50);
+  --surface-active: #eef2ff; /* Legacy --primary-light */
+  
+  --input-bg:       #f1f5f9; /* Legacy --input-bg */
+
+  /* Legacy Specific Colors */
+  --color-legacy-primary: #0f2963;
+  --color-legacy-primary-hover: #081d4a;
+  --color-legacy-secondary: #1e3a8a;
+  --color-legacy-accent: #d97706;
+  --color-legacy-accent-hover: #b45309;
+
+  /* Theme-specific Gradients */
+  --hero-grad: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  --accent-grad: linear-gradient(135deg, #1e3a8a 0%, #0f2963 100%);
 
   /* ─── Typography ───────────────────────────────────── */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -112,20 +125,21 @@
   --space-16: 4rem;     /* 64px */
   --space-20: 5rem;     /* 80px */
 
-  /* ─── Border Radius ────────────────────────────────── */
-  --radius-sm:   0.25rem;
-  --radius-md:   0.5rem;
-  --radius-lg:   0.75rem;
-  --radius-xl:   1rem;
+  /* ─── Border Radius (Legacy Mapped) ────────────────── */
+  --radius-sm:   8px;
+  --radius-md:   16px;
+  --radius-lg:   24px;
+  --radius-xl:   32px;
   --radius-2xl:  1.5rem;
   --radius-full: 9999px;
 
-  /* ─── Shadows ──────────────────────────────────────── */
+  /* ─── Shadows (Legacy Mapped) ──────────────────────── */
   --shadow-xs:   0 1px 2px rgba(0,0,0,0.05);
-  --shadow-sm:   0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-  --shadow-md:   0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-  --shadow-lg:   0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  --shadow-sm:   0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg:   0 10px 15px -3px rgba(15, 41, 99, 0.08), 0 4px 6px -4px rgba(15, 41, 99, 0.03);
   --shadow-xl:   0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.15);
   --shadow-inner: inset 0 2px 4px rgba(0,0,0,0.06);
 
   /* ─── Z-Index Scale ────────────────────────────────── */
@@ -136,16 +150,17 @@
   --z-toast:    1400;
   --z-tooltip:  1500;
 
-  /* ─── Transitions ──────────────────────────────────── */
-  --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base:   200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow:   300ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* ─── Transitions (Legacy Mapped) ──────────────────── */
+  --transition-fast:   0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow:   0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base:   var(--transition-normal);
   --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* ─── Layout ───────────────────────────────────────── */
-  --sidebar-width:    260px;
+  --sidebar-width:    250px;
   --sidebar-collapsed: 72px;
-  --header-height:    64px;
+  --header-height:    70px;
   --container-max:    1280px;
 
   /* ─── Breakpoints (reference, CSS uses media queries) ─ */
@@ -153,29 +168,33 @@
 }
 
 /* ─── Dark Mode ──────────────────────────────────────── */
-[data-theme="dark"] {
-  --bg-primary:    var(--gray-900);
+[data-theme="dark"], body.dark-theme {
+  --bg-primary:    #05070c;
   --bg-secondary:  var(--gray-800);
   --bg-tertiary:   var(--gray-700);
   --bg-inverse:    #FFFFFF;
   --bg-sidebar:    #0D1117;
 
-  --text-primary:   var(--gray-100);
-  --text-secondary: var(--gray-400);
+  --text-primary:   #f8fafc;
+  --text-secondary: #94a3b8;
   --text-muted:     var(--gray-500);
   --text-inverse:   var(--gray-900);
   --text-link:      var(--color-primary-300);
 
-  --border-color:   var(--gray-700);
+  --border-color:   rgba(59, 130, 246, 0.12);
   --border-focus:   var(--color-primary-400);
 
-  --surface-card:   var(--gray-800);
+  --surface-card:   rgba(13, 20, 35, 0.7);
   --surface-hover:  var(--gray-700);
   --surface-active: rgba(108, 92, 231, 0.15);
+  
+  --input-bg:       #0f172a;
+  
+  --hero-grad:      linear-gradient(135deg, #0f172a 0%, #05070c 100%);
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,0.4);
+  --shadow-sm:      0 1px 3px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md:      0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg:      0 12px 24px -3px rgba(0, 0, 0, 0.8);
 }
 
 /* ─── High Contrast Mode ─────────────────────────────── */

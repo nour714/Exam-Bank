@@ -3,6 +3,8 @@
  * Injects the JWT access token into outgoing requests.
  * Handles 401 responses by silently refreshing the token and retrying.
  */
+import { TokenManager } from './token-manager.js';
+import { eventBus } from '../../core/event-bus.js';
 
 let isRefreshing = false;
 let pendingQueue = [];
@@ -22,7 +24,7 @@ function processQueue(error, token) {
  * Request interceptor: attach Authorization header.
  */
 export function authRequestInterceptor(options) {
-  const token = localStorage.getItem('access_token');
+  const token = TokenManager.getToken();
   if (token) {
     options.headers = options.headers || {};
     options.headers['Authorization'] = `Bearer ${token}`;
@@ -39,13 +41,6 @@ export function authRequestInterceptor(options) {
 export async function authResponseInterceptor(response, retryFn) {
   if (response.status !== 401) return response;
 
-  const refreshToken = localStorage.getItem('refresh_token');
-  if (!refreshToken) {
-    // No refresh token, force login
-    window.dispatchEvent(new CustomEvent('auth:session_expired'));
-    return response;
-  }
-
   if (isRefreshing) {
     // Another request is already refreshing — queue this one
     return new Promise((resolve, reject) => {
@@ -58,8 +53,9 @@ export async function authResponseInterceptor(response, retryFn) {
   try {
     const refreshResponse = await fetch('/api/v1/auth/refresh', {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify({}), // refreshToken is sent via cookie
     });
 
     if (!refreshResponse.ok) {
@@ -67,18 +63,19 @@ export async function authResponseInterceptor(response, retryFn) {
     }
 
     const data = await refreshResponse.json();
-    localStorage.setItem('access_token', data.data.accessToken);
-    localStorage.setItem('refresh_token', data.data.refreshToken);
+    TokenManager.setToken(data.data.accessToken);
+    eventBus.emit('auth.token.refreshed');
 
     processQueue(null, data.data.accessToken);
     return retryFn();
   } catch (error) {
     processQueue(error, null);
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    window.dispatchEvent(new CustomEvent('auth:session_expired'));
+    TokenManager.clearToken();
+    eventBus.emit('auth:expired');
     return response;
   } finally {
     isRefreshing = false;
   }
 }
+
+

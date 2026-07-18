@@ -112,3 +112,8 @@ store.set('notifications', []);
 store.set('activeExams', []);
 store.set('studyGroups', []);
 store.set('sidebarCollapsed', false);
+
+// Question Bank Hierarchy Selection
+store.set('qbSelectedSubject', null);
+store.set('qbSelectedUnit', null);
+store.set('qbSelectedLesson', null);
