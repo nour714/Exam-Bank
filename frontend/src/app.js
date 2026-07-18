@@ -44,6 +44,12 @@ async function bootstrap() {
 
   // 3. Register Routes using ModuleLoader for lazy loading
   router
+    .on('/', () => {
+      // Redirect based on auth
+      const target = authService.isAuthenticated() ? '/dashboard' : '/login';
+      setTimeout(() => router.navigate(target, { replace: true }), 0);
+      return ''; // Empty while redirecting
+    })
     .on('/login', (params) => {
       return moduleLoader.load('login', () => import('./pages/auth/login.js'), params);
     }, { guard: GuestOnlyRoute, title: 'تسجيل الدخول' })
@@ -76,7 +82,19 @@ async function bootstrap() {
     }, { guard: ProtectedRoute, title: 'بنك الأسئلة | تفاصيل السؤال' })
     .notFound(() => {
       const div = document.createElement('div');
-      div.innerHTML = '<div class="container py-8 text-center"><h1>404 Not Found</h1><p class="text-muted mt-2">The page you requested does not exist.</p></div>';
+      div.innerHTML = `
+        <div class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4 animate-fade-in">
+          <h1 class="text-6xl font-black text-gray-200 mb-4 tracking-tight">404</h1>
+          <h2 class="text-2xl font-bold text-gray-400 mb-4">الصفحة غير موجودة</h2>
+          <p class="text-gray-500 mb-8 max-w-md mx-auto">عذراً، لم نتمكن من العثور على الصفحة التي تبحث عنها. قد تكون حذفت أو نقلت.</p>
+          <button onclick="window.history.back()" class="btn btn-primary px-8 py-3 shadow-lg shadow-primary/20">
+            <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i> العودة للصفحة السابقة
+          </button>
+        </div>
+      `;
+      if (window.lucide) {
+        setTimeout(() => window.lucide.createIcons({ root: div }), 0);
+      }
       return div;
     });
 
@@ -99,11 +117,6 @@ async function bootstrap() {
 
   // 5. Start router
   router.start();
-
-  // If root URL, redirect based on auth
-  if (window.location.pathname === '/') {
-    router.navigate(authService.isAuthenticated() ? '/dashboard' : '/login', { replace: true });
-  }
 
   // 6. Register Service Worker for PWA
   if ('serviceWorker' in navigator) {
