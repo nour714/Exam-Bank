@@ -1,6 +1,7 @@
 import { BaseComponent } from '../../../core/component.js';
 import { StateMachine } from '../../../core/state-machine.js';
 import { measure } from '../../../core/observability.js';
+import { eventBus } from '../../../core/event-bus.js';
 
 /**
  * Generic Hierarchical Browser
@@ -41,7 +42,6 @@ export class HierarchyBrowser extends BaseComponent {
 
     // Optional: listen for background refreshes
     if (props.updateEventName) {
-      const { eventBus } = require('../../../core/event-bus.js');
       this.onCleanup(
         eventBus.on(props.updateEventName, (data) => {
           if (!this.stateMachine.is('error')) {

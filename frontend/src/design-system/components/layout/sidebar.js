@@ -43,7 +43,7 @@ export class Sidebar extends BaseComponent {
                     <i data-lucide="home"></i>
                     <span>الرئيسية</span>
                 </li>
-                <li class="menu-item" data-route="/qbank">
+                <li class="menu-item" data-route="/question-bank">
                     <i data-lucide="book-open"></i>
                     <span>بنك الأسئلة</span>
                 </li>

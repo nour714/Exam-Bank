@@ -7,12 +7,11 @@ import { eventBus } from '../../core/event-bus.js';
 export default class QuestionEditorPage extends BaseComponent {
   /**
    * @param {Object} props
-   * @param {Object} props.routeParams
-   * @param {string} [props.routeParams.id] - Optional ID for edit mode
+   * @param {string} [props.id] - Optional ID for edit mode
    */
   constructor(props) {
     super(props);
-    this.questionId = props.routeParams.id;
+    this.questionId = props.id;
     this.isEditMode = !!this.questionId;
     
     // Check permission for permanent delete
@@ -67,10 +66,10 @@ export default class QuestionEditorPage extends BaseComponent {
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
   }
 
-  unmount() {
+  destroy() {
     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
     if (this.autosaveTimer) clearTimeout(this.autosaveTimer);
-    super.unmount();
+    super.destroy();
   }
 
   async loadData() {

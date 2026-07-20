@@ -1,4 +1,4 @@
-import { BaseComponent } from '../../../../core/component.js';
+import { BaseComponent } from '../../../core/component.js';
 
 export class AuthLayout extends BaseComponent {
   constructor(props = {}) {

@@ -1,5 +1,4 @@
 const express = require('express');
-const helmet = require('helmet');
 const cors = require('cors');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
@@ -20,8 +19,7 @@ function setupGateway(app) {
   // 2. Structured HTTP logging
   app.use(httpLogger);
 
-  // 3. Security headers
-  app.use(helmet());
+  // 3. Security headers - handled by security.js middleware (no duplicate helmet() here)
 
   // 4. CORS
   app.use(cors({

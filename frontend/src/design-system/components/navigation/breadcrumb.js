@@ -1,5 +1,5 @@
-import { BaseComponent } from '../../core/component.js';
-import { router } from '../../core/router.js';
+import { BaseComponent } from '../../../core/component.js';
+import { router } from '../../../core/router.js';
 
 /**
  * Generic Breadcrumb Navigation.

@@ -15,6 +15,9 @@ const ERROR_MAP = {
   500: { title: 'Server Error', message: 'An unexpected error occurred. Please try again.' },
 };
 
+// Endpoints that should not show error toasts (expected failures)
+const SILENT_ENDPOINTS = ['/auth/refresh'];
+
 /**
  * @param {Response} response
  * @returns {Response} The same response (for chaining)
@@ -27,8 +30,12 @@ export function errorInterceptor(response) {
     message: `Request failed with status ${response.status}`,
   };
 
-  // Dispatch a toast notification for non-401 errors (401 is handled by auth interceptor)
-  if (response.status !== 401) {
+  // Check if this is a silent endpoint (expected failure)
+  const url = response.url || '';
+  const isSilentEndpoint = SILENT_ENDPOINTS.some(endpoint => url.includes(endpoint));
+
+  // Dispatch a toast notification for non-401 errors and non-silent endpoints
+  if (response.status !== 401 && !isSilentEndpoint) {
     eventBus.emit('toast.show', {
       type: 'error',
       title: mapped.title,

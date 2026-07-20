@@ -1,5 +1,4 @@
 import { BaseComponent } from './component.js';
-import { measure } from './observability.js';
 
 /**
  * ErrorBoundary Component

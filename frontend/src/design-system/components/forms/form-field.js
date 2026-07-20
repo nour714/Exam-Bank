@@ -1,5 +1,5 @@
-import { BaseComponent } from '../../../../core/component.js';
-import { validate } from '../../../../core/validation.js';
+import { BaseComponent } from '../../../core/component.js';
+import { validate } from '../../../core/validation.js';
 
 export class FormField extends BaseComponent {
   constructor(props = {}) {

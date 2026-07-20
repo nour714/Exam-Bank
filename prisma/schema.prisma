@@ -21,9 +21,18 @@ model Tenant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users    User[]
-  settings AppSetting[]
-  flags    FeatureFlag[]
+  users              User[]
+  settings           AppSetting[]
+  flags              FeatureFlag[]
+  curriculums        Curriculum[]
+  subjects           Subject[]
+  questions          Question[]
+  exams              Exam[]
+  attempts           ExamAttempt[]
+  subscription       TenantSubscription?
+  pluginInstallations TenantPlugin[]
+  webhookEndpoints   WebhookEndpoint[]
+  studyGroups        StudyGroup[]
 }
 
 // -----------------------------------------
@@ -53,6 +62,8 @@ model User {
   sessions      Session[]
   loginHistory  LoginHistory[]
   auditLogs     AuditLog[]
+  attempts      ExamAttempt[]
+  studyGroupMembers StudyGroupMember[]
 
   @@index([tenantId])
   @@index([email])
@@ -357,6 +368,7 @@ model Question {
 
   choices       Choice[]
   examQuestions ExamQuestion[]
+  answers       ExamAnswer[]
 
   @@index([tenantId])
   @@index([subjectId])
@@ -412,6 +424,7 @@ model Exam {
   curriculum Curriculum? @relation(fields: [curriculumId], references: [id], onDelete: SetNull)
 
   questions ExamQuestion[]
+  attempts  ExamAttempt[]
 
   @@index([tenantId])
   @@index([subjectId])

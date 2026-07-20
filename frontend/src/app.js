@@ -44,12 +44,9 @@ async function bootstrap() {
 
   // 3. Register Routes using ModuleLoader for lazy loading
   router
-    .on('/', () => {
-      // Redirect based on auth
-      const target = authService.isAuthenticated() ? '/dashboard' : '/login';
-      setTimeout(() => router.navigate(target, { replace: true }), 0);
-      return ''; // Empty while redirecting
-    })
+    .on('/home', (params) => {
+      return moduleLoader.load('home', () => import('./pages/home/home.js'), params);
+    }, { title: 'الرئيسية' })
     .on('/login', (params) => {
       return moduleLoader.load('login', () => import('./pages/auth/login.js'), params);
     }, { guard: GuestOnlyRoute, title: 'تسجيل الدخول' })
@@ -115,10 +112,19 @@ async function bootstrap() {
     wsClient.disconnect();
   });
 
-  // 5. Start router
-  router.start();
+  // 5. Pre-router initialization: Route resolution
+  // If the user visits the root path, rewrite the browser history to the appropriate starting page
+  // *before* the router executes its initial evaluation.
+  if (window.location.pathname === '/') {
+    const target = authService.isAuthenticated() ? '/dashboard' : '/home';
+    window.history.replaceState(null, '', target);
+  }
 
-  // 6. Register Service Worker for PWA
+  // 6. Start router
+  router.start();
+  window.router = router;
+
+  // 7. Register Service Worker for PWA
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/service-worker.js').catch(err => {

@@ -47,11 +47,11 @@ export class AIGeneratorModal extends BaseComponent {
     eventBus.on('ai.generation.failed', this.failedHandler);
   }
 
-  unmount() {
+  destroy() {
     eventBus.off('ai.generation.progress', this.progressHandler);
     eventBus.off('ai.generation.completed', this.completedHandler);
     eventBus.off('ai.generation.failed', this.failedHandler);
-    super.unmount();
+    super.destroy();
   }
 
   open() {

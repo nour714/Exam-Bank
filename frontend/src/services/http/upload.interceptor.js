@@ -2,6 +2,7 @@
  * Upload Interceptor.
  * Provides progress tracking for file uploads using XMLHttpRequest.
  */
+import { TokenManager } from './token-manager.js';
 
 /**
  * Upload a file with progress tracking.
@@ -40,7 +41,7 @@ export function uploadWithProgress(url, formData, onProgress = () => {}) {
     xhr.open('POST', url);
 
     // Attach auth token
-    const token = localStorage.getItem('access_token');
+    const token = TokenManager.getToken();
     if (token) {
       xhr.setRequestHeader('Authorization', `Bearer ${token}`);
     }

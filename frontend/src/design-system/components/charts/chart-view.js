@@ -1,4 +1,4 @@
-import { BaseComponent } from '../../../../core/component.js';
+import { BaseComponent } from '../../../core/component.js';
 
 export class ChartView extends BaseComponent {
   constructor(props = {}) {

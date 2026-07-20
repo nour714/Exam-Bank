@@ -5,12 +5,11 @@ import { StateMachine } from '../../core/state-machine.js';
 export default class QuestionDetailsPage extends BaseComponent {
   /**
    * @param {Object} props
-   * @param {Object} props.routeParams
-   * @param {string} props.routeParams.id
+   * @param {string} props.id
    */
   constructor(props) {
     super(props);
-    this.questionId = props.routeParams.id;
+    this.questionId = props.id;
     this.question = null;
 
     this.stateMachine = new StateMachine({

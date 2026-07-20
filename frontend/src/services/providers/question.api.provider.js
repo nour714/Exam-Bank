@@ -1,4 +1,4 @@
-import { api } from '../http/api.js';
+import { api } from '../http/api-client.js';
 
 export const QuestionApiProvider = {
   async search(criteria) {

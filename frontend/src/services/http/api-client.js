@@ -119,7 +119,8 @@ class ApiClient {
    * Download a file.
    */
   async download(path, filename) {
-    const token = localStorage.getItem('access_token');
+    const { TokenManager } = await import('./token-manager.js');
+    const token = TokenManager.getToken();
     const response = await fetch(`${this.baseUrl}${path}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });

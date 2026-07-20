@@ -279,7 +279,7 @@ class BrowserContent extends BaseComponent {
   render() {
     this.element = document.createElement('div');
     this.element.className = 'question-browser flex flex-col gap-4 animate-fade-in';
-    this._renderState(this.stateMachine.currentState);
+    this._renderState(this.stateMachine.state);
     return this.element;
   }
 
