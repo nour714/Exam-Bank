@@ -96,7 +96,7 @@ app.use((err, req, res, next) => {
       success: false,
       error: {
         message: req.t ? req.t('common.validation_error') : 'Validation error',
-        details: err.errors.map((e) => ({
+        details: err.issues.map((e) => ({
           field: e.path.join('.'),
           message: e.message,
         })),

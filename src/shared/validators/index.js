@@ -18,7 +18,7 @@ function validate(schema) {
           success: false,
           error: {
             message: 'Validation error',
-            details: err.errors.map((e) => ({
+            details: err.issues.map((e) => ({
               field: e.path.join('.'),
               message: e.message,
             })),
@@ -46,7 +46,7 @@ function validateParams(schema) {
           success: false,
           error: {
             message: 'Invalid parameters',
-            details: err.errors.map((e) => ({
+            details: err.issues.map((e) => ({
               field: e.path.join('.'),
               message: e.message,
             })),
@@ -74,7 +74,7 @@ function validateQuery(schema) {
           success: false,
           error: {
             message: 'Invalid query parameters',
-            details: err.errors.map((e) => ({
+            details: err.issues.map((e) => ({
               field: e.path.join('.'),
               message: e.message,
             })),
