@@ -1,6 +1,6 @@
 // API Client to replace Firebase SDK
 
-const API_BASE = "/api";
+const API_BASE = "/api/v1";
 
 async function fetchAPI(endpoint, options = {}) {
     const defaultHeaders = {
