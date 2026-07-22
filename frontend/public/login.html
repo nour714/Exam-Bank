@@ -482,14 +482,19 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
 
         const res = await fetchAPI("/auth/register", {
             method: "POST",
-            body: JSON.stringify({ email, password: pass, firstName, lastName })
+            headers: { "x-tenant-id": "default-tenant" },
+            body: JSON.stringify({ email, password: pass, firstName, lastName, tenantId: "default-tenant" })
         });
         
         setLoading('btn-register', false);
         toast('تم إنشاء الحساب بنجاح! جاري تسجيل الدخول...', 'success');
 
-        localStorage.setItem("accessToken", res.data.accessToken);
-        localStorage.setItem("authUser", JSON.stringify(res.data.user));
+        if (res.data?.accessToken) {
+            localStorage.setItem("accessToken", res.data.accessToken);
+        }
+        if (res.data?.user) {
+            localStorage.setItem("authUser", JSON.stringify(res.data.user));
+        }
         persistSessionUser(name, email);
 
         setTimeout(() => { window.location.href = 'index.html'; }, 1500);
@@ -499,7 +504,7 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
         if (error.code === 'auth/email-already-in-use') {
             toast('البريد الإلكتروني مسجل بالفعل');
         } else {
-            toast('حدث خطأ أثناء الإنشاء، يرجى المحاولة مرة أخرى');
+            toast(error.message || 'حدث خطأ أثناء الإنشاء، يرجى المحاولة مرة أخرى');
         }
     }
 });

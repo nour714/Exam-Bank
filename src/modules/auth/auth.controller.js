@@ -29,14 +29,7 @@ class AuthController {
    */
   async register(req, res) {
     const data = registerSchema.parse(req.body);
-    const tenantId = req.tenantId || req.headers['x-tenant-id'];
-
-    if (!tenantId) {
-      return res.status(400).json({
-        success: false,
-        error: { message: 'Tenant ID is required' },
-      });
-    }
+    const tenantId = req.tenantId || req.headers['x-tenant-id'] || req.body?.tenantId || 'default-tenant';
 
     const user = await authService.register(data, tenantId);
 
