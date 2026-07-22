@@ -16,6 +16,7 @@ async function fetchAPI(endpoint, options = {}) {
     }
 
     const config = {
+        credentials: "same-origin",
         ...options,
         headers: {
             ...defaultHeaders,
@@ -28,7 +29,8 @@ async function fetchAPI(endpoint, options = {}) {
         const data = await response.json().catch(() => null);
 
         if (!response.ok) {
-            throw new Error(data?.message || "حدث خطأ أثناء الاتصال بالخادم");
+            const errorMessage = data?.error?.message || data?.message || "حدث خطأ أثناء الاتصال بالخادم";
+            throw new Error(errorMessage);
         }
         return data;
     } catch (error) {
@@ -96,6 +98,10 @@ async function waitForAuthState() {
     const localUser = localStorage.getItem("authUser");
     const token = localStorage.getItem("accessToken");
 
+    if (!localUser && !token) {
+        return null;
+    }
+
     const verifyAndRefresh = async () => {
         try {
             const res = await fetchAPI("/auth/me", { method: "GET" });
@@ -108,7 +114,9 @@ async function waitForAuthState() {
             try {
                 const refreshRes = await fetchAPI("/auth/refresh", { method: "POST" });
                 if (refreshRes && refreshRes.success) {
-                    localStorage.setItem("accessToken", refreshRes.data.accessToken);
+                    if (refreshRes.data?.accessToken) {
+                        localStorage.setItem("accessToken", refreshRes.data.accessToken);
+                    }
                     const meRes = await fetchAPI("/auth/me", { method: "GET" });
                     if (meRes && meRes.success) {
                         const userData = meRes.data.user || meRes.data;
