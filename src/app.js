@@ -89,7 +89,30 @@ apiRouter.use('/study-groups', studyGroupRoutes);
 
 app.use('/api/v1', apiRouter);
 
-// ─── 4. Zod Validation Error Handler ──────────────────────────
+// ─── 4. Frontend static serving (SPA) ──────────────────────────
+const path = require('path');
+const frontendPath = path.join(__dirname, '..', 'frontend');
+
+app.use(express.static(path.join(frontendPath, 'public')));
+app.use('/src', express.static(path.join(frontendPath, 'src')));
+
+// SPA fallback
+app.use((req, res, next) => {
+  if (req.method !== 'GET' || req.path.startsWith('/api')) {
+    return next();
+  }
+  res.sendFile(path.join(frontendPath, 'public', 'index.html'));
+});
+
+// ─── 5. 404 Handler (for API) ──────────────────────────────────
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: { message: req.t ? req.t('common.not_found') : 'Not Found' },
+  });
+});
+
+// ─── 6. Zod Validation Error Handler ──────────────────────────
 app.use((err, req, res, next) => {
   if (err instanceof ZodError) {
     return res.status(400).json({
@@ -106,7 +129,7 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
-// ─── 5. Global Error Handler ──────────────────────────────────
+// ─── 7. Global Error Handler (ALWAYS LAST) ────────────────────
 app.use((err, req, res, next) => {
   logger.error(err);
   const status = err.statusCode || 500;
@@ -120,29 +143,6 @@ app.use((err, req, res, next) => {
       message,
       ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
     },
-  });
-});
-
-// ─── 6. Frontend static serving (SPA) ──────────────────────────
-const path = require('path');
-const frontendPath = path.join(__dirname, '..', 'frontend');
-
-app.use(express.static(path.join(frontendPath, 'public')));
-app.use('/src', express.static(path.join(frontendPath, 'src')));
-
-// SPA fallback
-app.use((req, res, next) => {
-  if (req.method !== 'GET' || req.path.startsWith('/api')) {
-    return next();
-  }
-  res.sendFile(path.join(frontendPath, 'public', 'index.html'));
-});
-
-// ─── 7. 404 Handler (for API) ──────────────────────────────────
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: { message: req.t ? req.t('common.not_found') : 'Not Found' },
   });
 });
 

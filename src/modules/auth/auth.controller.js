@@ -11,6 +11,19 @@ const {
  * and formats HTTP responses. No business logic lives here.
  */
 class AuthController {
+  constructor() {
+    this.register = this.register.bind(this);
+    this.login = this.login.bind(this);
+    this.refresh = this.refresh.bind(this);
+    this.logout = this.logout.bind(this);
+    this.logoutAll = this.logoutAll.bind(this);
+    this.changePassword = this.changePassword.bind(this);
+    this.getSessions = this.getSessions.bind(this);
+    this.revokeSession = this.revokeSession.bind(this);
+    this.getLoginHistory = this.getLoginHistory.bind(this);
+    this.me = this.me.bind(this);
+  }
+
   /**
    * POST /api/v1/auth/register
    */

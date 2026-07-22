@@ -84,11 +84,15 @@ async function bootstrap() {
           <h1 class="text-6xl font-black text-gray-200 mb-4 tracking-tight">404</h1>
           <h2 class="text-2xl font-bold text-gray-400 mb-4">الصفحة غير موجودة</h2>
           <p class="text-gray-500 mb-8 max-w-md mx-auto">عذراً، لم نتمكن من العثور على الصفحة التي تبحث عنها. قد تكون حذفت أو نقلت.</p>
-          <button onclick="window.history.back()" class="btn btn-primary px-8 py-3 shadow-lg shadow-primary/20">
+          <button id="btn-404-back" class="btn btn-primary px-8 py-3 shadow-lg shadow-primary/20">
             <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i> العودة للصفحة السابقة
           </button>
         </div>
       `;
+      const backBtn = div.querySelector('#btn-404-back');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => window.history.back());
+      }
       if (window.lucide) {
         setTimeout(() => window.lucide.createIcons({ root: div }), 0);
       }

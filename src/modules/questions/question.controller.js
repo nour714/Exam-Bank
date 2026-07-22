@@ -2,6 +2,11 @@ const questionService = require('./question.service');
 const { createQuestionSchema, paginationQuery } = require('./question.validator');
 
 class QuestionController {
+  constructor() {
+    this.createQuestion = this.createQuestion.bind(this);
+    this.listQuestions = this.listQuestions.bind(this);
+  }
+
   async createQuestion(req, res) {
     const data = createQuestionSchema.parse(req.body);
     const question = await questionService.createQuestion(req.tenantId, data, req.user.userId);
