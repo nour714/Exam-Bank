@@ -14,7 +14,7 @@ const securityMiddleware = [
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "ws:", "wss:"], // Allow WebSocket
+        connectSrc: ["'self'", "ws:", "wss:", "https://fonts.googleapis.com", "https://fonts.gstatic.com"], // Allow WebSockets and Google Fonts
         upgradeInsecureRequests: [],
       },
     },

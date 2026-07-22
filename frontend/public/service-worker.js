@@ -41,16 +41,17 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// 3. Fetch Event (Cache-First for static assets, Network-First for APIs)
+// 3. Fetch Event (Cache-First for static assets, bypass for APIs and non-GET requests)
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Exclude non-GET requests and WebSocket upgrades
-  if (event.request.method !== 'GET' || url.protocol === 'ws:' || url.protocol === 'wss:') return;
-
-  // Handle API Requests (Network First, fallback to IndexedDB or Cache is handled by api-client/dbService)
-  if (url.pathname.startsWith('/api/v1')) {
-    event.respondWith(fetch(event.request));
+  // Bypass API requests, non-GET requests, and WebSockets completely
+  if (
+    event.request.method !== 'GET' ||
+    url.protocol === 'ws:' ||
+    url.protocol === 'wss:' ||
+    url.pathname.startsWith('/api')
+  ) {
     return;
   }
 
@@ -70,11 +71,21 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return networkResponse;
-      }).catch(() => {
-        // If offline and requesting a page route, return the SPA shell
-        if (event.request.mode === 'navigate') {
-          return caches.match(OFFLINE_URL);
+      });
+    }).catch(async () => {
+      // If offline and requesting a page route, return the SPA shell
+      if (event.request.mode === 'navigate') {
+        const offlineShell = await caches.match(OFFLINE_URL);
+        if (offlineShell) {
+          return offlineShell;
         }
+      }
+
+      // Fallback Response for offline/failed asset requests (never return undefined)
+      return new Response('Service Unavailable', {
+        status: 503,
+        statusText: 'Service Unavailable',
+        headers: new Headers({ 'Content-Type': 'text/plain; charset=utf-8' }),
       });
     })
   );
