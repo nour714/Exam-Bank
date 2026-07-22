@@ -1,4 +1,4 @@
-const CACHE_NAME = 'exambank-cache-v1';
+const CACHE_NAME = 'exambank-cache-v2';
 const OFFLINE_URL = '/index.html';
 
 const ASSETS_TO_CACHE = [
@@ -13,18 +13,18 @@ const ASSETS_TO_CACHE = [
   // Note: ES modules fetched dynamically will be cached at runtime
 ];
 
-// 1. Install Event (Pre-cache static assets)
+// 1. Install Event (Pre-cache static assets & immediate activation)
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Pre-caching offline assets');
+      console.log('[Service Worker] Pre-caching offline assets (v2)');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
   self.skipWaiting();
 });
 
-// 2. Activate Event (Clean up old caches)
+// 2. Activate Event (Clean up old caches & claim clients immediately)
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -36,9 +36,8 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 // 3. Fetch Event (Cache-First for static assets, bypass for APIs and non-GET requests)

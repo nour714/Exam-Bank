@@ -128,10 +128,23 @@ async function bootstrap() {
   router.start();
   window.router = router;
 
-  // 7. Register Service Worker for PWA
+  // 7. Register Service Worker for PWA with forced update & auto-refresh
   if ('serviceWorker' in navigator) {
+    let refreshing = false;
+
+    // Automatically refresh the page once a new SW takes control
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
+
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js').catch(err => {
+      navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+        // Force update check on page load to immediately pick up new SW versions
+        registration.update();
+      }).catch(err => {
         console.error('ServiceWorker registration failed: ', err);
       });
     });
