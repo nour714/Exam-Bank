@@ -34,7 +34,7 @@ export class WelcomeCard extends BaseComponent {
           <p class="text-blue-100 text-lg">أنت تبلي بلاءً حسناً. استمر في التدريب لتحقيق أهدافك.</p>
         </div>
         <div class="flex gap-4">
-          <a href="/exams" class="btn bg-white text-blue-600 hover:bg-gray-100" data-nav>بدء اختبار جديد</a>
+          <a href="/question-bank/questions" class="btn bg-white text-blue-600 hover:bg-gray-100" data-nav>بدء اختبار جديد</a>
         </div>
       </div>
     `;

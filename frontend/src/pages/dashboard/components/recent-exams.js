@@ -110,7 +110,7 @@ export class RecentExams extends BaseComponent {
         </div>
       `;
 
-      const navigate = () => router.navigate(`/exams/${exam.id}/result`);
+      const navigate = () => router.navigate('/question-bank/questions');
       card.addEventListener('click', navigate);
       card.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigate(); });
 

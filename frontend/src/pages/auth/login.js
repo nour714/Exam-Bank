@@ -96,7 +96,7 @@ export class LoginPage extends BaseComponent {
       id: 'login-remember',
       checked: this.state.rememberMe,
       onChange: (val) => this.setState({ rememberMe: val }, false),
-      onForgotClick: () => router.navigate('/forgot-password')
+      onForgotClick: () => eventBus.emit('toast.show', { type: 'info', message: 'يرجى التواصل مع مسؤول النظام لإعادة تعيين كلمة المرور.' })
     });
 
     this.submitBtn = new LoadingButton({

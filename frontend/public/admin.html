@@ -443,7 +443,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        const res = await fetch("/api/auth/me", {
+        const res = await fetch("/api/v1/auth/me", {
             headers: {
                 "Authorization": `Bearer ${accessToken}`
             }

@@ -47,20 +47,20 @@ export class Sidebar extends BaseComponent {
                     <i data-lucide="book-open"></i>
                     <span>بنك الأسئلة</span>
                 </li>
-                <li class="menu-item" data-route="/exams">
+                <li class="menu-item" data-route="/question-bank/questions">
                     <i data-lucide="file-text"></i>
                     <span>الامتحانات</span>
                 </li>
-                <li class="menu-item" data-route="/groups">
+                <li class="menu-item" data-route="/question-bank/subjects">
                     <i data-lucide="users"></i>
                     <span>مجموعات الدراسة</span>
                 </li>
-                <li class="menu-item" data-route="/settings">
+                <li class="menu-item" data-route="/dashboard">
                     <i data-lucide="settings"></i>
                     <span>الإعدادات</span>
                 </li>
                 ${authService.hasRole('ADMIN') ? `
-                <li class="menu-item" data-route="/admin">
+                <li class="menu-item" data-route="/question-bank/questions/editor">
                     <i data-lucide="shield"></i>
                     <span>لوحة المطور</span>
                 </li>

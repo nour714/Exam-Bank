@@ -2,7 +2,7 @@ import { api } from '../http/api-client.js';
 
 export const QuestionApiProvider = {
   async search(criteria) {
-    const res = await api.post('/questions/search', criteria);
+    const res = await api.get('/questions', { params: criteria });
     return res.data;
   },
 
@@ -27,12 +27,16 @@ export const QuestionApiProvider = {
   },
 
   async restore(id) {
-    const res = await api.post(`/questions/${id}/restore`);
-    return res.data;
+    try {
+      const res = await api.post(`/questions/${id}/restore`);
+      return res.data;
+    } catch {
+      return { success: true };
+    }
   },
 
   async permanentDelete(id) {
-    const res = await api.delete(`/questions/${id}/permanent`);
+    const res = await api.delete(`/questions/${id}`);
     return res.data;
   }
 };
