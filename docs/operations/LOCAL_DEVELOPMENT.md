@@ -2,31 +2,24 @@
 
 ## Prerequisites
 - Node.js (v20+)
-- Docker & Docker Compose
+- Supabase project (for PostgreSQL database)
+- Redis (v7+)
 - Git
 
 ## Initial Setup
 1. **Clone the repository.**
-2. **Environment Variables**: Copy `.env.example` to `.env`. Leave local defaults as-is unless testing external providers.
-3. **Install Dependencies**:
+2. **Environment Variables**: Copy `.env.example` to `.env`.
+3. **Database**: Set `DATABASE_URL` to your Supabase connection string (found in Supabase Dashboard → Settings → Database → Connection string).
+4. **Install Dependencies**:
    ```bash
    npm install
    ```
 
 ## Running the Application
-The easiest way to develop locally is utilizing Docker Compose to spin up your backing services (PostgreSQL & Redis) alongside the Node API.
-
-```bash
-# Start Database, Redis, and the API
-docker-compose up -d
-```
-
-If you prefer to run the Node API locally (for easier debugging/hot-reloading):
-1. Change `DATABASE_URL` and `REDIS_URL` in `.env` to point to `localhost`.
-2. Start infrastructure: `docker-compose up -d postgres redis`
-3. Generate Prisma client: `npx prisma generate`
-4. Run DB Migrations: `npx prisma migrate dev`
-5. Start Node: `npm run dev`
+1. Ensure Redis is running locally.
+2. Generate Prisma client: `npx prisma generate`
+3. Run DB Migrations: `npx prisma migrate dev`
+4. Start Node: `npm run dev`
 
 ## Accessing Services
 - **API**: `http://localhost:3000/api/v1`

@@ -1,24 +1,41 @@
 # Deployment Guide
 
 ## Production Environment
-The application is containerized utilizing a multi-stage `Dockerfile`. The final production image is extremely lightweight (Alpine Linux) and only contains runtime dependencies.
+The application runs on Node.js with PM2 for process management and clustering. The database is hosted on Supabase (managed PostgreSQL).
 
-## Building the Image
-```bash
-docker build --target production -t exambank-api:latest .
-```
+## Prerequisites
+- Node.js (v20+)
+- Supabase project (for PostgreSQL database)
+- Redis (v7+)
+- PM2 (installed globally: `npm install -g pm2`)
 
-## Deployment via Docker Compose
-For single-node VM deployments (e.g., AWS EC2, DigitalOcean Droplet):
-1. Copy `docker-compose.yml`, `.env.example`, and the `scripts/` directory to the server.
+## Deployment Steps
+1. Copy the project files to the server.
 2. Rename `.env.example` to `.env` and fill in secure production secrets (DO NOT commit this file).
-3. Start the stack:
+3. Set `DATABASE_URL` to your Supabase connection string (found in Supabase Dashboard → Settings → Database → Connection string).
+4. Install dependencies:
    ```bash
-   docker-compose up -d
+   npm ci --only=production
+   ```
+5. Generate Prisma client:
+   ```bash
+   npx prisma generate
+   ```
+6. Run database migrations:
+   ```bash
+   npx prisma migrate deploy
+   ```
+7. Start the application:
+   ```bash
+   pm2-runtime start src/app.js -i max
    ```
 
-## Kubernetes Deployment Notes
-- **Probes**: Use `/health/liveness` for container restarts and `/health/readiness` for traffic routing.
-- **Clustering**: PM2 is configured to run in cluster mode (`-i max`), which will spawn a Node process for every available CPU core on the pod/container.
-- **Secrets**: Provide `.env` variables via Kubernetes Secrets. 
-- **Database**: Do NOT run the production PostgreSQL database in a standard pod without persistent volume claims. It is highly recommended to use managed databases (e.g., AWS RDS).
+## Health Checks
+- **Liveness**: Use `/health/liveness` for process restarts.
+- **Readiness**: Use `/health/readiness` for traffic routing.
+
+## Clustering
+PM2 is configured to run in cluster mode (`-i max`), which will spawn a Node process for every available CPU core.
+
+## Secrets
+Provide environment variables via `.env` file or your platform's secret management system. Database credentials are managed through Supabase Dashboard.

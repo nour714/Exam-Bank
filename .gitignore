@@ -5,6 +5,8 @@ functions/.secret.local
 node_modules/
 functions/node_modules/
 *.log
+*.zip
+coverage/
 firebase-debug.log
 firestore-debug.log
 ui-debug.log

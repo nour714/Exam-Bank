@@ -2,8 +2,8 @@
 set -e
 
 echo "[Prod-Startup] Waiting for PostgreSQL..."
-# (Assuming postgres is ready via depends_on in docker-compose, 
-# but could add a pg_isready loop here for Kubernetes)
+# Ensure PostgreSQL is ready before proceeding
+# (consider adding a pg_isready loop for automated deployments)
 
 echo "[Prod-Startup] Running Database Migrations..."
 npx prisma migrate deploy

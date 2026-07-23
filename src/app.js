@@ -24,14 +24,14 @@ const { pluginRoutes } = require('./modules/plugins');
 const { webhookRoutes } = require('./modules/webhooks');
 const { studyGroupRoutes } = require('./modules/study-groups');
 
-const cors = require('cors');
+
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 
 const app = express();
 
 // ─── 0. Security & Observability ───────────────────────────────
-app.use(cors());
+// NOTE: CORS is configured in gateway/index.js with restricted origins
 app.use(compression());
 app.use(express.json());
 app.use(cookieParser());

@@ -17,14 +17,13 @@
 8. [Business Logic](#business-logic)
 9. [Security](#security)
 10. [Testing](#testing)
-11. [Docker](#docker)
-12. [Environment Variables](#environment-variables)
-13. [Scripts](#scripts)
-14. [Dependencies](#dependencies)
-15. [Release Notes](#release-notes)
-16. [Roadmap](#roadmap)
-17. [Technical Debt](#technical-debt)
-18. [Improvements](#improvements)
+11. [Environment Variables](#environment-variables)
+12. [Scripts](#scripts)
+13. [Dependencies](#dependencies)
+14. [Release Notes](#release-notes)
+15. [Roadmap](#roadmap)
+16. [Technical Debt](#technical-debt)
+17. [Improvements](#improvements)
 19. [Current Project State](#current-project-state)
 20. [Development Rules](#development-rules)
 21. [AI Context](#ai-context)
@@ -92,8 +91,8 @@ To become the definitive exam preparation and management platform for Egyptian s
 
 ## Database
 
-- **Primary**: PostgreSQL 15 (Alpine) via Prisma ORM
-- **Cache**: Redis 7 (Alpine) for BullMQ, sessions, and caching
+- **Primary**: PostgreSQL via Supabase (managed) + Prisma ORM
+- **Cache**: Redis 7 for BullMQ, sessions, and caching
 - **Client-Side**: IndexedDB for offline caching and sync queue
 
 ## Testing
@@ -108,9 +107,7 @@ To become the definitive exam preparation and management platform for Egyptian s
 
 | Component | Technology |
 |-----------|-----------|
-| Containerization | Docker (multi-stage, Alpine-based) |
 | Process Manager | PM2 (cluster mode) |
-| Orchestration | Docker Compose 3.8 |
 | Health Checks | HTTP liveness/readiness probes |
 
 ## Tools
@@ -209,8 +206,7 @@ project_fixed/
 │   └── setup.js                # Jest global setup
 ├── .env.example                # Environment variable template
 ├── .gitignore                  # Git ignore rules
-├── docker-compose.yml          # Docker Compose configuration
-├── Dockerfile                  # Multi-stage Docker build
+
 ├── jest.config.js              # Jest configuration
 ├── package.json                # Node.js package manifest
 ├── PRODUCT_ROADMAP.md          # Root-level product roadmap
@@ -1311,68 +1307,6 @@ tests/
 
 ---
 
-# Docker
-
-## Dockerfile
-
-Multi-stage build with two stages:
-
-### Stage 1: Builder
-- Base: `node:20-alpine`
-- Installs all dependencies (`npm ci`)
-- Copies source code
-- Generates Prisma Client
-
-### Stage 2: Production
-- Base: `node:20-alpine`
-- `NODE_ENV=production`
-- Installs only production dependencies
-- Copies Prisma client, source, prisma schema, frontend, scripts from builder
-- Installs PM2 globally for clustering
-- Exposes port 3000
-- Health check: `wget http://localhost:3000/health/liveness`
-- Start command: `pm2-runtime start src/app.js -i max`
-
-## Docker Compose
-
-Three services:
-
-### api
-- Builds from Dockerfile (production target)
-- Ports: 3000:3000
-- Environment: NODE_ENV, DATABASE_URL, REDIS_URL, JWT_SECRET
-- Depends on postgres (healthy) and redis (started)
-- Network: exambank_net
-- Restart: always
-
-### postgres
-- Image: `postgres:15-alpine`
-- Ports: 5432:5432
-- Persistent volume: postgres_data
-- Health check: `pg_isready`
-
-### redis
-- Image: `redis:7-alpine`
-- Ports: 6379:6379
-- Persistent volume: redis_data
-
-### Volumes
-- `postgres_data` — PostgreSQL data persistence
-- `redis_data` — Redis data persistence
-
-### Network
-- `exambank_net` — Bridge driver
-
-## Deployment Flow
-
-1. Build image: `docker build --target production -t exambank-api:latest .`
-2. Configure `.env` with production secrets
-3. Run: `docker-compose up -d`
-4. Apply migrations: `npx prisma migrate deploy` (handled by start-prod.sh)
-5. Health check: `GET /health/liveness`
-
----
-
 # Environment Variables
 
 | Variable | Purpose | Default | Required |
@@ -1583,7 +1517,7 @@ Completed (v1.1.0).
 
 3. **No Real-time Features**: WebSocket gateway is defined but not connected. Real-time exam proctoring and notifications are not functional.
 
-4. **Docker Compose Hardcoded Secrets**: `JWT_SECRET=super_secret_jwt_key` and database credentials are hardcoded in docker-compose.yml.
+
 
 ## Performance Issues
 
@@ -1623,7 +1557,7 @@ Completed (v1.1.0).
 
 ## Low Priority
 
-11. **Optimize Docker Secrets**: Remove hardcoded secrets from docker-compose.yml, use Docker secrets or environment files.
+
 
 12. **Add API Rate Limiting Per Tenant**: Implement tenant-level rate limits in addition to IP-based.
 
@@ -1667,8 +1601,7 @@ Completed (v1.1.0).
 - Question details page
 - Design system with form components
 - PWA with offline support
-- Docker multi-stage build
-- Docker Compose for local development
+
 - Operational documentation
 
 ## What Still Needs Work
@@ -1778,7 +1711,7 @@ Completed (v1.1.0).
 6. `requirePermission()` is a placeholder
 7. No database migration files exist
 8. Test coverage is minimal (2 test files)
-9. Docker Compose has hardcoded secrets
+
 10. Frontend exam-taking interface not built
 
 ## Pending Work
@@ -1797,7 +1730,7 @@ Completed (v1.1.0).
 
 1. Run `npx prisma generate` after schema changes
 2. Use `npm run dev` for development (nodemon hot-reload)
-3. Use `docker-compose up -d` for PostgreSQL and Redis
+3. Database is hosted on Supabase — set `DATABASE_URL` from Supabase Dashboard
 4. Frontend is served by Express at `http://localhost:3000/`
 5. API documentation at `http://localhost:3000/api-docs` (non-production)
 6. All API responses follow `{ success, data/error }` format
@@ -1807,7 +1740,7 @@ Completed (v1.1.0).
 
 ## Important Assumptions
 
-1. PostgreSQL is the primary database (no migration path to other databases)
+1. PostgreSQL is hosted on Supabase (managed PostgreSQL)
 2. Redis is required for production (queues, locks, caching)
 3. Node.js v20+ is required
 4. The platform targets Egyptian secondary education (Thanaweya Amma)
