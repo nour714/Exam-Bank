@@ -6,11 +6,8 @@ const registerSchema = z.object({
     .max(255, 'Email must be 255 characters or fewer')
     .transform((v) => v.toLowerCase().trim()),
   password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password must be 128 characters or fewer')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
+    .min(6, 'Password must be at least 6 characters')
+    .max(128, 'Password must be 128 characters or fewer'),
   firstName: z.string()
     .min(1, 'First name is required')
     .max(100, 'First name must be 100 characters or fewer')

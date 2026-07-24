@@ -15,7 +15,7 @@ const securityMiddleware = [
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:"],
         manifestSrc: ["'self'", "https:"],
-        connectSrc: ["'self'", "ws:", "wss:", "https://fonts.googleapis.com", "https://fonts.gstatic.com"], // Allow WebSockets and Google Fonts
+        connectSrc: ["'self'", "ws:", "wss:", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://unpkg.com", "https://*.supabase.co", "https://*.supabase.com"],
         upgradeInsecureRequests: [],
       },
     },

@@ -29,7 +29,8 @@ async function fetchAPI(endpoint, options = {}) {
         const data = await response.json().catch(() => null);
 
         if (!response.ok) {
-            const errorMessage = data?.error?.message || data?.message || "حدث خطأ أثناء الاتصال بالخادم";
+            const detailMsg = data?.error?.details?.map(d => d.message).join(' | ');
+            const errorMessage = detailMsg || data?.error?.message || data?.message || "حدث خطأ أثناء الاتصال بالخادم";
             throw new Error(errorMessage);
         }
         return data;
