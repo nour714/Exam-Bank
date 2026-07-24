@@ -10,7 +10,7 @@ const securityMiddleware = [
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"], // unsafe-inline for SPA mounting, unpkg for Lucide icons
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdn.socket.io"], // unsafe-inline for SPA mounting, unpkg for Lucide icons, cdn.socket.io for WebSockets
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:"],

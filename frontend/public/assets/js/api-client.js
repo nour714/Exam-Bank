@@ -59,7 +59,7 @@ function getUserId() {
 
 async function loadUserState() {
     try {
-        const res = await fetchAPI("/users/stats", { method: "GET" });
+        const res = await fetchAPI("/analytics/tenant", { method: "GET" }).catch(() => null);
         if (res && res.success) {
             return res.data;
         }
@@ -71,26 +71,24 @@ async function loadUserState() {
 
 async function saveUserState(state) {
     try {
-        // We only send the stats properties to the backend
         const { xp, solvedCount, streak, accuracy, lastActiveDate, weeklyActivity } = state.user || state;
-        await fetchAPI("/users/stats", {
+        await fetchAPI("/analytics/tenant", {
             method: "PUT",
             body: JSON.stringify({ xp, solvedCount, streak, accuracy, lastActiveDate, weeklyActivity }),
-        });
+        }).catch(() => null);
     } catch (error) {
-        console.warn("Failed to sync state to server, using local storage only");
+        // Silently use local storage fallback
     }
 }
 
 async function loadGlobalQuestions() {
     try {
-        const res = await fetchAPI("/questions/global?limit=1000", { method: "GET" });
+        const res = await fetchAPI("/questions?limit=1000", { method: "GET" });
         if (res && res.success) {
-            return res.data; // The backend returns an array inside data or data is the array
+            return res.data;
         }
         return [];
     } catch (error) {
-        console.error("Error loading global questions:", error);
         return [];
     }
 }
