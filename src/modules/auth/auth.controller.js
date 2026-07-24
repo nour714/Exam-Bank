@@ -22,6 +22,7 @@ class AuthController {
     this.revokeSession = this.revokeSession.bind(this);
     this.getLoginHistory = this.getLoginHistory.bind(this);
     this.me = this.me.bind(this);
+    this.updateProfile = this.updateProfile.bind(this);
   }
 
   /**
@@ -198,11 +199,38 @@ class AuthController {
     if (!user) {
       return res.status(404).json({
         success: false,
-        error: { message: req.t('user.not_found') },
+        error: { message: req.t ? req.t('user.not_found') : 'User not found' },
       });
     }
 
     const { passwordHash, ...safeUser } = user;
+
+    res.status(200).json({
+      success: true,
+      data: safeUser,
+    });
+  }
+
+  /**
+   * PUT /api/v1/auth/me or /api/v1/auth/profile
+   */
+  async updateProfile(req, res) {
+    const userRepository = require('../users/user.repository');
+    const { firstName, lastName, avatar, locale, name } = req.body;
+    
+    const updateData = {};
+    if (firstName !== undefined) updateData.firstName = firstName;
+    if (lastName !== undefined) updateData.lastName = lastName;
+    if (name && !firstName) {
+      const parts = name.trim().split(/\s+/);
+      updateData.firstName = parts[0];
+      updateData.lastName = parts.slice(1).join(' ') || parts[0];
+    }
+    if (avatar !== undefined) updateData.avatar = avatar;
+    if (locale !== undefined) updateData.locale = locale;
+
+    const updatedUser = await userRepository.update(req.user.userId, updateData);
+    const { passwordHash, ...safeUser } = updatedUser;
 
     res.status(200).json({
       success: true,
