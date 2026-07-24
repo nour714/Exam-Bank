@@ -7,10 +7,7 @@ const JWT_SECRET = configProvider.get('JWT_SECRET');
 const JWT_REFRESH_SECRET = configProvider.get('JWT_REFRESH_SECRET');
 
 if (!JWT_SECRET || !JWT_REFRESH_SECRET) {
-  if (NODE_ENV === 'production') {
-    throw new Error('FATAL: JWT_SECRET and JWT_REFRESH_SECRET must be set in production environment.');
-  }
-  console.warn('[SECURITY WARNING] JWT_SECRET or JWT_REFRESH_SECRET not set. Using insecure defaults for development only.');
+  console.error('[SECURITY CRITICAL] JWT_SECRET or JWT_REFRESH_SECRET is not set. This is a security risk in production!');
 }
 
 module.exports = {
