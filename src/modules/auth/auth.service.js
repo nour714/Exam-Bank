@@ -113,7 +113,7 @@ class AuthService {
       lastLoginAt: new Date(),
     });
 
-    const tokenFamily = uuidv4();
+    const tokenFamily = crypto.randomUUID();
     const { accessToken, refreshToken, refreshTokenRecord } = await this._generateTokenPair(user, tokenFamily, meta);
 
     // Create session
