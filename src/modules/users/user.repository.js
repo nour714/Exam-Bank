@@ -22,6 +22,13 @@ class UserRepository {
    * @returns {Promise<Object>}
    */
   async create(data) {
+    if (data.tenantId) {
+      await this.prisma.tenant.upsert({
+        where: { id: data.tenantId },
+        create: { id: data.tenantId, name: 'Default Tenant' },
+        update: {},
+      });
+    }
     return this.prisma.user.create({
       data,
       include: { roles: { include: { role: true } } },
