@@ -444,12 +444,13 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         setLoading('btn-login', false);
         console.error("Login Error:", error);
         clearPersistedSession();
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-            setError('err-login-password', 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
+        const errorMsg = error.message || '';
+        if (errorMsg.includes('Invalid email or password') || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+            setError('err-login-password', 'البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التأكد من البيانات أو إنشاء حساب جديد.');
             toast('البريد الإلكتروني أو كلمة المرور غير صحيحة');
         } else {
-            setError('err-login-password', 'تعذر تسجيل الدخول الآن. حاول مرة أخرى.');
-            toast('حدث خطأ أثناء الدخول، يرجى المحاولة مرة أخرى');
+            setError('err-login-password', errorMsg || 'تعذر تسجيل الدخول الآن. حاول مرة أخرى.');
+            toast(errorMsg || 'حدث خطأ أثناء الدخول، يرجى المحاولة مرة أخرى');
         }
     }
 });
@@ -480,31 +481,39 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
         const [firstName, ...remainingParts] = fullName.split(/\s+/);
         const lastName = remainingParts.join(' ') || firstName;
 
-        const res = await fetchAPI("/auth/register", {
+        await fetchAPI("/auth/register", {
             method: "POST",
             headers: { "x-tenant-id": "default-tenant" },
             body: JSON.stringify({ email, password: pass, firstName, lastName, tenantId: "default-tenant" })
         });
         
-        setLoading('btn-register', false);
-        toast('تم إنشاء الحساب بنجاح! جاري تسجيل الدخول...', 'success');
+        // Auto-login after successful registration
+        const loginRes = await fetchAPI("/auth/login", {
+            method: "POST",
+            body: JSON.stringify({ email, password: pass })
+        });
 
-        if (res.data?.accessToken) {
-            localStorage.setItem("accessToken", res.data.accessToken);
+        setLoading('btn-register', false);
+        toast('تم إنشاء الحساب بنجاح! جاري التوجيه...', 'success');
+
+        if (loginRes.data?.accessToken) {
+            localStorage.setItem("accessToken", loginRes.data.accessToken);
         }
-        if (res.data?.user) {
-            localStorage.setItem("authUser", JSON.stringify(res.data.user));
+        if (loginRes.data?.user) {
+            localStorage.setItem("authUser", JSON.stringify(loginRes.data.user));
         }
         persistSessionUser(name, email);
 
-        setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+        setTimeout(() => { window.location.href = 'index.html'; }, 1000);
     } catch (error) {
         setLoading('btn-register', false);
         console.error("Register Error:", error);
-        if (error.code === 'auth/email-already-in-use') {
+        const msg = error.message || '';
+        if (msg.includes('Email already in use') || error.code === 'auth/email-already-in-use') {
+            setError('err-reg-email', 'هذا البريد الإلكتروني مُسجل بالفعل. يرجى الانتقال إلى تبويب تسجيل الدخول.');
             toast('البريد الإلكتروني مسجل بالفعل');
         } else {
-            toast(error.message || 'حدث خطأ أثناء الإنشاء، يرجى المحاولة مرة أخرى');
+            toast(msg || 'حدث خطأ أثناء الإنشاء، يرجى المحاولة مرة أخرى');
         }
     }
 });
