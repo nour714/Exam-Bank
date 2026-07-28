@@ -44,6 +44,30 @@ class StudyGroupRepository {
     });
   }
 
+  /**
+   * Discover public groups the user hasn't joined yet.
+   */
+  async getPublicGroups(tenantId, userId) {
+    return this.prisma.studyGroup.findMany({
+      where: {
+        tenantId,
+        isPrivate: false,
+        members: { none: { userId } },
+      },
+      include: { _count: { select: { members: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /**
+   * Look up a group by its invite code (used to join private groups shared out-of-band).
+   */
+  async findByInviteCode(inviteCode, tenantId) {
+    return this.prisma.studyGroup.findFirst({
+      where: { inviteCode, tenantId },
+    });
+  }
+
   async joinGroup(groupId, userId, role = 'MEMBER') {
     return this.prisma.studyGroupMember.create({
       data: { groupId, userId, role },

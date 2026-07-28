@@ -216,7 +216,7 @@ class AuthController {
    */
   async updateProfile(req, res) {
     const userRepository = require('../users/user.repository');
-    const { firstName, lastName, avatar, locale, name } = req.body;
+    const { firstName, lastName, avatar, locale, name, grade, pathway, emailNotifications, examReminders } = req.body;
     
     const updateData = {};
     if (firstName !== undefined) updateData.firstName = firstName;
@@ -228,6 +228,10 @@ class AuthController {
     }
     if (avatar !== undefined) updateData.avatar = avatar;
     if (locale !== undefined) updateData.locale = locale;
+    if (grade !== undefined) updateData.grade = grade;
+    if (pathway !== undefined) updateData.pathway = pathway;
+    if (emailNotifications !== undefined) updateData.emailNotifications = !!emailNotifications;
+    if (examReminders !== undefined) updateData.examReminders = !!examReminders;
 
     const updatedUser = await userRepository.update(req.user.userId, updateData);
     const { passwordHash, ...safeUser } = updatedUser;

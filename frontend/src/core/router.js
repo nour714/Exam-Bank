@@ -3,6 +3,8 @@
  * Uses the History API for clean URL navigation.
  * Supports route guards, lazy loading, and nested layouts.
  */
+import { eventBus } from './event-bus.js';
+
 class Router {
   constructor() {
     /** @type {Map<string, {handler: Function, guard?: Function, layout?: string}>} */
@@ -105,6 +107,7 @@ class Router {
         }
 
         this.currentRoute = path;
+        eventBus.emit('router.navigated', { path, params });
 
         // Set page title
         if (route.title) {

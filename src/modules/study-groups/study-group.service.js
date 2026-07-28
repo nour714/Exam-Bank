@@ -14,6 +14,21 @@ class StudyGroupService {
     return studyGroupRepository.getGroups(tenantId, userId);
   }
 
+  async getPublicGroups(tenantId, userId) {
+    return studyGroupRepository.getPublicGroups(tenantId, userId);
+  }
+
+  async joinByInviteCode(tenantId, inviteCode, userId) {
+    const group = await studyGroupRepository.findByInviteCode(inviteCode, tenantId);
+    if (!group) {
+      const { NotFoundError } = require('../../shared/errors');
+      throw new NotFoundError('Invalid invite code');
+    }
+    const member = await studyGroupRepository.joinGroup(group.id, userId);
+    eventBus.publish('study_group:member_joined', { groupId: group.id, userId, tenantId });
+    return { group, member };
+  }
+
   async getGroupDetails(groupId, userId) {
     // In production, ensure the user is a member of the group before returning details
     return studyGroupRepository.getGroupById(groupId);

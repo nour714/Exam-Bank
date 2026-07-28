@@ -126,7 +126,16 @@ export class LoginPage extends BaseComponent {
     
     form.appendChild(googleBtn.render());
 
+    const registerLink = document.createElement('p');
+    registerLink.className = 'text-center text-sm text-gray-400 mt-4';
+    registerLink.innerHTML = 'مستخدم جديد؟ <a href="/register" id="go-to-register" class="text-primary font-medium">أنشئ حساباً</a>';
+    form.appendChild(registerLink);
+
     form.addEventListener('submit', (e) => this.handleSubmit(e));
+    registerLink.querySelector('#go-to-register').addEventListener('click', (e) => {
+      e.preventDefault();
+      router.navigate('/register');
+    });
 
     // Mount children
     this.emailField.mount();

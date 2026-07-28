@@ -1,8 +1,8 @@
-import { BaseComponent } from '../../../../core/component.js';
-import { dashboardService } from '../../../../services/dashboard.service.js';
-import { eventBus } from '../../../../core/event-bus.js';
-import { measure } from '../../../../core/observability.js';
-import { StateMachine } from '../../../../core/state-machine.js';
+import { BaseComponent } from '../../../core/component.js';
+import { dashboardService } from '../../../services/dashboard.service.js';
+import { eventBus } from '../../../core/event-bus.js';
+import { measure } from '../../../core/observability.js';
+import { StateMachine } from '../../../core/state-machine.js';
 
 /**
  * ActivityTimeline — Independently fetches activity data.
@@ -74,6 +74,14 @@ export class ActivityTimeline extends BaseComponent {
     } catch (err) {
       console.error('[ActivityTimeline] Failed to load:', err);
       this.stateMachine.transition('error', err);
+    }
+  }
+
+  _renderActivities(activities) {
+    if (!activities || activities.length === 0) {
+      this.stateMachine.transition('empty');
+    } else {
+      this.stateMachine.transition('ready', activities);
     }
   }
 

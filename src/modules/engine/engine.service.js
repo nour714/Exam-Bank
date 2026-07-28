@@ -36,6 +36,20 @@ class EngineService {
   }
 
   /**
+   * Fetch an attempt (with exam + questions + existing answers) so a client
+   * can resume an in-progress session after a page refresh or reconnect.
+   */
+  async getAttempt(tenantId, attemptId, userId) {
+    const attempt = await engineRepository.getAttemptById(attemptId);
+
+    if (!attempt || attempt.tenantId !== tenantId || attempt.userId !== userId) {
+      throw new NotFoundError('Attempt not found');
+    }
+
+    return attempt;
+  }
+
+  /**
    * Auto-save a single answer. Evaluates objective questions on the fly.
    */
   async saveAnswer(tenantId, attemptId, questionId, answerData, userId) {

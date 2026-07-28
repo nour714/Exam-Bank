@@ -1,5 +1,6 @@
 import { Sidebar } from './sidebar.js';
 import { Header } from './header.js';
+import { MobileBottomNav } from './mobile-bottom-nav.js';
 
 /**
  * App Layout Component.
@@ -9,7 +10,8 @@ import { Header } from './header.js';
 export function initAppLayout() {
   const sidebarContainer = document.getElementById('app-sidebar');
   const headerContainer = document.getElementById('app-header-container');
-  
+  const mobileNavContainer = document.getElementById('mobile-bottom-nav-container');
+
   if (sidebarContainer) {
     const sidebar = new Sidebar();
     const el = sidebar.render();
@@ -22,5 +24,12 @@ export function initAppLayout() {
     const el = header.render();
     header.mount();
     headerContainer.replaceWith(el);
+  }
+
+  if (mobileNavContainer) {
+    const mobileNav = new MobileBottomNav();
+    const el = mobileNav.render();
+    mobileNav.mount();
+    mobileNavContainer.replaceWith(el);
   }
 }

@@ -20,7 +20,20 @@ export const authService = {
 
   async register(data) {
     const res = await api.post('/auth/register', data);
-    this._setSession(res.data);
+    // NOTE: /auth/register only creates the account and does not issue a session
+    // (no accessToken/refreshToken in the response). Callers should follow up
+    // with authService.login() for a seamless "register then sign in" flow.
+    return res.data;
+  },
+
+  async getProfile() {
+    const res = await api.get('/auth/me');
+    return res.data;
+  },
+
+  async updateProfile(payload) {
+    const res = await api.put('/auth/me', payload);
+    store.set('user', res.data);
     return res.data;
   },
 

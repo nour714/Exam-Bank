@@ -1,7 +1,7 @@
-import { BaseComponent } from '../../../../core/component.js';
-import { dashboardService } from '../../../../services/dashboard.service.js';
-import { eventBus } from '../../../../core/event-bus.js';
-import { measure } from '../../../../core/observability.js';
+import { BaseComponent } from '../../../core/component.js';
+import { dashboardService } from '../../../services/dashboard.service.js';
+import { eventBus } from '../../../core/event-bus.js';
+import { measure } from '../../../core/observability.js';
 import { StatisticCard } from './statistic-card.js';
 
 /**

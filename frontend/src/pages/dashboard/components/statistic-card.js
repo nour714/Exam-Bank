@@ -1,4 +1,4 @@
-import { BaseComponent } from '../../../../core/component.js';
+import { BaseComponent } from '../../../core/component.js';
 
 export class StatisticCard extends BaseComponent {
   constructor(props = {}) {

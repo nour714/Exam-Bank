@@ -2,6 +2,7 @@ import { BaseComponent } from '../../../core/component.js';
 import { store } from '../../../core/state-store.js';
 import { authService } from '../../../services/auth.service.js';
 import { router } from '../../../core/router.js';
+import { eventBus } from '../../../core/event-bus.js';
 
 export class Sidebar extends BaseComponent {
   constructor(props = {}) {
@@ -13,14 +14,14 @@ export class Sidebar extends BaseComponent {
     this.element.className = 'sidebar';
     this.element.id = 'main-sidebar';
     
-    this.element.style.display = 'none';
+    this.element.classList.add('hidden');
 
     this.onCleanup(store.subscribe('user', (user) => {
       if (!user) {
-        this.element.style.display = 'none';
+        this.element.classList.add('hidden');
         return;
       }
-      this.element.style.display = 'flex';
+      this.element.classList.remove('hidden');
       
       this.element.innerHTML = `
         <div class="sidebar-brand">
@@ -30,7 +31,7 @@ export class Sidebar extends BaseComponent {
         
         <div class="user-profile-widget">
             <div class="avatar-container">
-                <img src="${user.avatar || '/assets/images/default-avatar.png'}" alt="صورة المستخدم" class="user-avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22><circle cx=%2212%22 cy=%228%22 r=%225%22/><path d=%22M3 21v-2a7 7 0 0114 0v2%22/></svg>'">
+                <img src="${user.avatar || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22><circle cx=%2212%22 cy=%228%22 r=%225%22/><path d=%22M3 21v-2a7 7 0 0114 0v2%22/></svg>'}" alt="صورة المستخدم" class="user-avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22><circle cx=%2212%22 cy=%228%22 r=%225%22/><path d=%22M3 21v-2a7 7 0 0114 0v2%22/></svg>'">
                 <span class="status-indicator online"></span>
             </div>
             <h3 class="username">${user.name || user.firstName || 'طالب'}</h3>
@@ -39,7 +40,7 @@ export class Sidebar extends BaseComponent {
 
         <nav class="sidebar-menu">
             <ul>
-                <li class="menu-item active" data-route="/dashboard">
+                <li class="menu-item" data-route="/dashboard">
                     <i data-lucide="home"></i>
                     <span>الرئيسية</span>
                 </li>
@@ -47,20 +48,20 @@ export class Sidebar extends BaseComponent {
                     <i data-lucide="book-open"></i>
                     <span>بنك الأسئلة</span>
                 </li>
-                <li class="menu-item" data-route="/question-bank/questions">
+                <li class="menu-item" data-route="/exams">
                     <i data-lucide="file-text"></i>
                     <span>الامتحانات</span>
                 </li>
-                <li class="menu-item" data-route="/question-bank/subjects">
+                <li class="menu-item" data-route="/study-groups">
                     <i data-lucide="users"></i>
                     <span>مجموعات الدراسة</span>
                 </li>
-                <li class="menu-item" data-route="/dashboard">
+                <li class="menu-item" data-route="/settings">
                     <i data-lucide="settings"></i>
                     <span>الإعدادات</span>
                 </li>
                 ${authService.hasRole('ADMIN') ? `
-                <li class="menu-item" data-route="/question-bank/questions/editor">
+                <li class="menu-item" data-external-href="/admin.html">
                     <i data-lucide="shield"></i>
                     <span>لوحة المطور</span>
                 </li>
@@ -85,11 +86,16 @@ export class Sidebar extends BaseComponent {
         logoutBtn.addEventListener('click', () => authService.logout());
       }
 
+      this._updateActiveState(window.location.pathname);
+
       const menuItems = this.element.querySelectorAll('.menu-item');
       menuItems.forEach(item => {
         item.addEventListener('click', (e) => {
-          menuItems.forEach(i => i.classList.remove('active'));
-          item.classList.add('active');
+          const externalHref = item.getAttribute('data-external-href');
+          if (externalHref) {
+            window.location.href = externalHref;
+            return;
+          }
           const route = item.getAttribute('data-route');
           if (route) {
              router.navigate(route);
@@ -98,6 +104,26 @@ export class Sidebar extends BaseComponent {
       });
     }));
 
+    // Keep the active nav item in sync with the current route, regardless of
+    // whether navigation happened via a sidebar click, a link elsewhere in the
+    // app, or the browser back/forward buttons.
+    this.onCleanup(eventBus.on('router.navigated', ({ path }) => this._updateActiveState(path)));
+
     return this.element;
+  }
+
+  _updateActiveState(path) {
+    if (!this.element) return;
+    const menuItems = this.element.querySelectorAll('.menu-item[data-route]');
+    let bestMatch = null;
+    menuItems.forEach(item => {
+      const route = item.getAttribute('data-route');
+      if (path === route || path.startsWith(route + '/')) {
+        if (!bestMatch || route.length > bestMatch.getAttribute('data-route').length) {
+          bestMatch = item;
+        }
+      }
+    });
+    menuItems.forEach(item => item.classList.toggle('active', item === bestMatch));
   }
 }

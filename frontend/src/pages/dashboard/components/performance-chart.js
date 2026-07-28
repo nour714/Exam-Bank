@@ -1,8 +1,8 @@
-import { BaseComponent } from '../../../../core/component.js';
-import { dashboardService } from '../../../../services/dashboard.service.js';
-import { eventBus } from '../../../../core/event-bus.js';
-import { measure } from '../../../../core/observability.js';
-import { ChartView } from '../../../../design-system/components/charts/chart-view.js';
+import { BaseComponent } from '../../../core/component.js';
+import { dashboardService } from '../../../services/dashboard.service.js';
+import { eventBus } from '../../../core/event-bus.js';
+import { measure } from '../../../core/observability.js';
+import { ChartView } from '../../../design-system/components/charts/chart-view.js';
 
 /**
  * PerformanceChart — Independently fetches performance data.

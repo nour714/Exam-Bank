@@ -1,5 +1,5 @@
-import { BaseComponent } from '../../../../core/component.js';
-import { store } from '../../../../core/state-store.js';
+import { BaseComponent } from '../../../core/component.js';
+import { store } from '../../../core/state-store.js';
 
 export class WelcomeCard extends BaseComponent {
   constructor(props = {}) {

@@ -8,6 +8,10 @@ import { GuestOnlyRoute, ProtectedRoute } from './core/guards.js';
 import { setDashboardProvider } from './services/dashboard.service.js';
 import { setCurriculumProvider } from './services/curriculum.service.js';
 import { setQuestionProvider } from './services/question.service.js';
+import { setSettingsProvider } from './services/settings.service.js';
+import { setStudyGroupsProvider } from './services/study-groups.service.js';
+import { setExamsProvider } from './services/exams.service.js';
+import { setEngineProvider } from './services/engine.service.js';
 
 import { initAppLayout } from './design-system/components/layout/app-layout.js';
 import { initToastSystem } from './design-system/components/feedback/toast.js';
@@ -37,6 +41,31 @@ async function bootstrap() {
   const { setAiProvider } = await import('./services/ai.service.js');
   setAiProvider(AiMockProvider);
 
+  // NOTE: Real backend support added via new grade/pathway/emailNotifications/examReminders
+  // columns on User (prisma/schema.prisma) + PUT /auth/me. Swap to SettingsApiProvider
+  // (./services/providers/settings.api.provider.js) once `prisma db push` has been run
+  // against a live DB.
+  const { SettingsMockProvider } = await import('./services/providers/settings.mock.provider.js');
+  setSettingsProvider(SettingsMockProvider);
+
+  // NOTE: Real backend exists at src/modules/study-groups (+ the discover/join-by-code
+  // endpoints added alongside this frontend work). Swap to StudyGroupsApiProvider
+  // (./services/providers/study-groups.api.provider.js) once a live DB is connected.
+  const { StudyGroupsMockProvider } = await import('./services/providers/study-groups.mock.provider.js');
+  setStudyGroupsProvider(StudyGroupsMockProvider);
+
+  // NOTE: Exams/Engine ship with a REAL backend implementation already
+  // (src/modules/exams, src/modules/engine) matching this exact contract.
+  // Once a live Postgres DB is connected, switch these two lines to:
+  //   import { ExamsApiProvider } from './services/providers/exams.api.provider.js';
+  //   import { EngineApiProvider } from './services/providers/engine.api.provider.js';
+  // and pass those instead of the mock providers below — no other code changes needed.
+  const { ExamsMockProvider } = await import('./services/providers/exams.mock.provider.js');
+  setExamsProvider(ExamsMockProvider);
+
+  const { EngineMockProvider } = await import('./services/providers/engine.mock.provider.js');
+  setEngineProvider(EngineMockProvider);
+
   // 1. Recover session
   const isAuthenticated = await authService.recoverSession();
 
@@ -44,12 +73,18 @@ async function bootstrap() {
 
   // 3. Register Routes using ModuleLoader for lazy loading
   router
+    .on('/', (params) => {
+      return moduleLoader.load('home', () => import('./pages/home/home.js'), params);
+    }, { title: 'الرئيسية' })
     .on('/home', (params) => {
       return moduleLoader.load('home', () => import('./pages/home/home.js'), params);
     }, { title: 'الرئيسية' })
     .on('/login', (params) => {
       return moduleLoader.load('login', () => import('./pages/auth/login.js'), params);
     }, { guard: GuestOnlyRoute, title: 'تسجيل الدخول' })
+    .on('/register', (params) => {
+      return moduleLoader.load('register', () => import('./pages/auth/register.js'), params);
+    }, { guard: GuestOnlyRoute, title: 'إنشاء حساب' })
     .on('/dashboard', (params) => {
       return moduleLoader.load('dashboard', () => import('./pages/dashboard/dashboard.js'), params);
     }, { guard: ProtectedRoute, title: 'لوحة التحكم' })
@@ -77,6 +112,18 @@ async function bootstrap() {
     .on('/question-bank/questions/:id', (params) => {
       return moduleLoader.load(`question-bank.question-details.${params.id}`, () => import('./pages/question-bank/question-details.js'), params);
     }, { guard: ProtectedRoute, title: 'بنك الأسئلة | تفاصيل السؤال' })
+    .on('/exams', (params) => {
+      return moduleLoader.load('exams', () => import('./pages/exams/exams.js'), params);
+    }, { guard: ProtectedRoute, title: 'الامتحانات' })
+    .on('/exam-session/:attemptId', (params) => {
+      return moduleLoader.load(`exam-session.${params.attemptId}`, () => import('./pages/exam-session/exam-session.js'), params);
+    }, { guard: ProtectedRoute, title: 'جلسة الامتحان' })
+    .on('/study-groups', (params) => {
+      return moduleLoader.load('study-groups', () => import('./pages/study-groups/study-groups.js'), params);
+    }, { guard: ProtectedRoute, title: 'مجموعات الدراسة' })
+    .on('/settings', (params) => {
+      return moduleLoader.load('settings', () => import('./pages/settings/settings.js'), params);
+    }, { guard: ProtectedRoute, title: 'الإعدادات' })
     .notFound(() => {
       const div = document.createElement('div');
       div.innerHTML = `

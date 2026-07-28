@@ -49,6 +49,10 @@ model User {
   lastName       String
   avatar         String?
   locale         String    @default("ar")
+  grade          String?
+  pathway        String?
+  emailNotifications Boolean @default(true)
+  examReminders  Boolean   @default(true)
   isActive       Boolean   @default(true)
   isEmailVerified Boolean  @default(false)
   failedLoginAttempts Int  @default(0)

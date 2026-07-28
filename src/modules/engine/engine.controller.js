@@ -3,6 +3,12 @@ const { startAttemptSchema, saveAnswerSchema, submitAttemptSchema, reviewAnswerS
 const { z } = require('zod');
 
 class EngineController {
+  async getAttempt(req, res) {
+    const attemptId = z.string().uuid().parse(req.params.attemptId);
+    const attempt = await engineService.getAttempt(req.tenantId, attemptId, req.user.userId);
+    res.status(200).json({ success: true, data: attempt });
+  }
+
   async startAttempt(req, res) {
     const data = startAttemptSchema.parse(req.body);
     const attempt = await engineService.startAttempt(req.tenantId, data.examId, req.user.userId, data.metadata);

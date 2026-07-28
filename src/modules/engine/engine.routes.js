@@ -8,6 +8,7 @@ const router = Router();
 router.use(authenticate);
 
 // Student attempt routes
+router.get('/attempts/:attemptId', controller.getAttempt);
 router.post('/attempts', controller.startAttempt);
 router.post('/attempts/:attemptId/answers', controller.saveAnswer);
 router.post('/attempts/:attemptId/submit', controller.submitAttempt);

@@ -1,8 +1,8 @@
-import { BaseComponent } from '../../../../core/component.js';
-import { dashboardService } from '../../../../services/dashboard.service.js';
-import { eventBus } from '../../../../core/event-bus.js';
-import { measure } from '../../../../core/observability.js';
-import { router } from '../../../../core/router.js';
+import { BaseComponent } from '../../../core/component.js';
+import { dashboardService } from '../../../services/dashboard.service.js';
+import { eventBus } from '../../../core/event-bus.js';
+import { measure } from '../../../core/observability.js';
+import { router } from '../../../core/router.js';
 
 /**
  * RecentExams — Independently fetches recent exams from summary data.
