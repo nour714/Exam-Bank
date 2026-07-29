@@ -35,12 +35,12 @@ export class FormField extends BaseComponent {
 
     let iconHtml = '';
     if (icon) {
-      iconHtml = `<i data-lucide="${icon}" class="absolute right-3 top-[38px] text-gray-400 w-5 h-5" style="top: 38px;"></i>`;
+      iconHtml = `<i data-lucide="${icon}" class="absolute right-3 text-gray-400 w-5 h-5 pointer-events-none"></i>`;
     }
 
     this.element.innerHTML = `
       <label for="${id}" class="input-label">${label}${required ? ' *' : ''}</label>
-      <div style="position: relative;">
+      <div class="relative flex items-center">
           ${iconHtml}
           <input 
             type="${type}" 

@@ -120,8 +120,9 @@ export class LoginPage extends BaseComponent {
     form.appendChild(this.submitBtn.render());
     
     const divider = document.createElement('div');
-    divider.className = 'flex items-center my-4 gap-3 text-gray-500 text-sm';
-    divider.innerHTML = '<div class="h-px bg-gray-600 flex-1"></div><span>أو</span><div class="h-px bg-gray-600 flex-1"></div>';
+    divider.className = 'flex items-center my-4 gap-3 text-sm';
+    divider.style.color = 'var(--gray-500)';
+    divider.innerHTML = '<div class="h-px flex-1" style="background: var(--gray-600);"></div><span>أو</span><div class="h-px flex-1" style="background: var(--gray-600);"></div>';
     form.appendChild(divider);
     
     form.appendChild(googleBtn.render());

@@ -57,12 +57,69 @@
   border-width: 2px;
 }
 
+/* ─── Auth Card & Login Box ──────────────────────────── */
+
+/* Full-screen auth override: strip app shell when auth layout is active */
+#app-main:has(#login-screen) {
+  padding: 0;
+  overflow: hidden;
+}
+#app-root:has(#login-screen) > .sidebar,
+#app-root:has(#login-screen) > #main-sidebar,
+#app-root:has(#login-screen) .app-header {
+  display: none !important;
+}
+#app-root:has(#login-screen) .app-container {
+  width: 100%;
+  margin-right: 0;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: var(--space-8);
+  background-color: var(--surface-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg), 0 0 40px rgba(99, 102, 241, 0.12);
+  text-align: center;
+}
+
+.login-box h1 {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.login-box p {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-6);
+}
+
+.login-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto var(--space-4);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+}
+
 /* ─── Inputs ────────────────────────────────────────── */
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
   margin-bottom: var(--space-4);
+  text-align: right;
 }
 
 .input-label {
@@ -72,17 +129,24 @@
 }
 
 .input-control {
-  padding: var(--space-2) var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  background-color: var(--bg-primary);
+  background-color: var(--input-bg);
   color: var(--text-primary);
+  font-size: var(--text-base);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  direction: inherit;
+}
+
+.input-control::placeholder {
+  color: var(--text-muted);
 }
 
 .input-control:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.25);
   outline: none;
 }
 
@@ -93,6 +157,7 @@
 .error-text {
   font-size: var(--text-xs);
   color: var(--color-danger-500);
+  margin-top: var(--space-1);
 }
 
 /* ─── Cards ─────────────────────────────────────────── */

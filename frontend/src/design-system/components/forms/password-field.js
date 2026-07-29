@@ -24,8 +24,8 @@ export class PasswordField extends FormField {
 
     this.element.innerHTML = `
       <label for="${id}" class="input-label">${label}${required ? ' *' : ''}</label>
-      <div style="position: relative;">
-          <i data-lucide="lock" class="absolute right-3 text-gray-400 w-5 h-5" style="top: 10px;"></i>
+      <div class="relative flex items-center">
+          <i data-lucide="lock" class="absolute right-3 text-gray-400 w-5 h-5 pointer-events-none"></i>
           <input 
             type="${inputType}" 
             id="${id}" 
@@ -36,7 +36,7 @@ export class PasswordField extends FormField {
             aria-invalid="${hasError ? 'true' : 'false'}"
             aria-describedby="${id}-error"
           />
-          <button type="button" class="absolute left-3 text-gray-400 hover:text-primary-color bg-transparent border-none cursor-pointer p-0" style="top: 10px;" aria-label="Toggle password visibility">
+          <button type="button" class="absolute left-3 text-gray-400 hover:text-primary-color bg-transparent border-none cursor-pointer p-0 flex items-center justify-center" aria-label="Toggle password visibility">
               <i data-lucide="${eyeIcon}" class="w-5 h-5"></i>
           </button>
       </div>
