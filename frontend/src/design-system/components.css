@@ -12,6 +12,7 @@
   font-weight: var(--font-medium);
   transition: all var(--transition-fast);
   white-space: nowrap;
+  direction: inherit;
 }
 
 .btn:disabled {
@@ -26,9 +27,12 @@
 .btn-primary {
   background-color: var(--color-primary-500);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
 }
 .btn-primary:hover:not(:disabled) {
   background-color: var(--color-primary-600);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4);
 }
 
 .btn-secondary {
@@ -38,6 +42,8 @@
 }
 .btn-secondary:hover:not(:disabled) {
   background-color: var(--gray-100);
+  border-color: var(--gray-300);
+  transform: translateY(-1px);
 }
 
 .btn-danger {
