@@ -87,7 +87,7 @@ export class FilterPanel extends BaseComponent {
       chipsHtml += `
         <span class="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-sm">
           ${def.label}: ${displayValue}
-          <button data-clear-id="${id}" class="hover:text-white transition-colors ml-1">
+          <button data-clear-id="${id}" class="hover:text-white transition-colors ms-1">
             <i data-lucide="x" class="w-3 h-3"></i>
           </button>
         </span>

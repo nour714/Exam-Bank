@@ -16,6 +16,8 @@ export default class ExamSessionPage extends BaseComponent {
     this.submitted = false;
     this.result = null;
     this.resuming = false;
+    this._navCleanups = [];
+    this._questionCleanups = [];
   }
 
   render() {
@@ -153,7 +155,16 @@ export default class ExamSessionPage extends BaseComponent {
     if (el) el.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }
 
+  /**
+   * Flush a local cleanup array, running each registered teardown function.
+   */
+  _clearCleanups(arr) {
+    arr.forEach(fn => fn());
+    arr.length = 0;
+  }
+
   _renderNav() {
+    this._clearCleanups(this._navCleanups);
     const nav = this.element.querySelector('#exam-nav');
     if (!nav) return;
     const questions = this._questions();
@@ -166,15 +177,18 @@ export default class ExamSessionPage extends BaseComponent {
     }).join('');
 
     nav.querySelectorAll('[data-index]').forEach(btn => {
-      this.addEventListener(btn, 'click', () => {
+      const handler = () => {
         this.currentIndex = Number(btn.dataset.index);
         this._renderNav();
         this._renderQuestion();
-      });
+      };
+      btn.addEventListener('click', handler);
+      this._navCleanups.push(() => btn.removeEventListener('click', handler));
     });
   }
 
   _renderQuestion() {
+    this._clearCleanups(this._questionCleanups);
     const body = this.element.querySelector('#exam-question-body');
     if (!body) return;
     const questions = this._questions();
@@ -231,27 +245,32 @@ export default class ExamSessionPage extends BaseComponent {
       <div id="question-input-area">${inputHtml}</div>
     `;
 
-    // Wire inputs
+    // Wire inputs — use local _questionCleanups to avoid memory leak on navigation
+    const _addQListener = (el, type, handler) => {
+      el.addEventListener(type, handler);
+      this._questionCleanups.push(() => el.removeEventListener(type, handler));
+    };
+
     if (question.type === 'MULTIPLE_CHOICE' || question.type === 'TRUE_FALSE') {
       body.querySelectorAll(`input[name="q-${eq.questionId}"]`).forEach(input => {
-        this.addEventListener(input, 'change', () => this._saveAnswer(eq.questionId, input.value));
+        _addQListener(input, 'change', () => this._saveAnswer(eq.questionId, input.value));
       });
     } else if (question.type === 'MULTI_SELECT') {
       body.querySelectorAll(`input[name="q-${eq.questionId}"]`).forEach(input => {
-        this.addEventListener(input, 'change', () => {
+        _addQListener(input, 'change', () => {
           const checked = Array.from(body.querySelectorAll(`input[name="q-${eq.questionId}"]:checked`)).map(i => i.value);
           this._saveAnswer(eq.questionId, checked);
         });
       });
     } else if (question.type === 'ESSAY') {
       const textarea = body.querySelector('#essay-input');
-      this.addEventListener(textarea, 'blur', () => this._saveAnswer(eq.questionId, textarea.value));
+      _addQListener(textarea, 'blur', () => this._saveAnswer(eq.questionId, textarea.value));
     } else if (question.type === 'MATCHING' || question.type === 'ORDERING') {
       const textarea = body.querySelector('#text-input');
-      this.addEventListener(textarea, 'blur', () => this._saveAnswer(eq.questionId, textarea.value));
+      _addQListener(textarea, 'blur', () => this._saveAnswer(eq.questionId, textarea.value));
     } else {
       const input = body.querySelector('#text-input');
-      this.addEventListener(input, 'blur', () => this._saveAnswer(eq.questionId, input.value));
+      _addQListener(input, 'blur', () => this._saveAnswer(eq.questionId, input.value));
     }
   }
 
@@ -300,6 +319,11 @@ export default class ExamSessionPage extends BaseComponent {
       eventBus.emit('toast.show', { type: 'error', title: 'خطأ', message: 'تعذر تسليم الامتحان، حاول مرة أخرى.' });
       this.submitted = false;
     }
+  }
+
+  beforeUnmount() {
+    this._clearCleanups(this._questionCleanups);
+    this._clearCleanups(this._navCleanups);
   }
 
   _renderResult(auto) {

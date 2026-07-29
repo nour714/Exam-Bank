@@ -1,5 +1,6 @@
 const studyGroupRepository = require('./study-group.repository');
 const { eventBus } = require('../../shared/events');
+const { NotFoundError, ForbiddenError } = require('../../shared/errors');
 const crypto = require('crypto');
 
 class StudyGroupService {
@@ -19,9 +20,9 @@ class StudyGroupService {
   }
 
   async joinByInviteCode(tenantId, inviteCode, userId) {
+    // findByInviteCode already filters by tenantId — safe
     const group = await studyGroupRepository.findByInviteCode(inviteCode, tenantId);
     if (!group) {
-      const { NotFoundError } = require('../../shared/errors');
       throw new NotFoundError('Invalid invite code');
     }
     const member = await studyGroupRepository.joinGroup(group.id, userId);
@@ -29,12 +30,24 @@ class StudyGroupService {
     return { group, member };
   }
 
-  async getGroupDetails(groupId, userId) {
-    // In production, ensure the user is a member of the group before returning details
-    return studyGroupRepository.getGroupById(groupId);
+  async getGroupDetails(tenantId, groupId, userId) {
+    const group = await studyGroupRepository.getGroupById(groupId);
+    if (!group || group.tenantId !== tenantId) {
+      throw new NotFoundError('Study group not found');
+    }
+    const isMember = group.members.some(m => m.userId === userId);
+    if (group.isPrivate && !isMember) {
+      throw new ForbiddenError('Access denied to private group');
+    }
+    return group;
   }
 
   async joinGroup(tenantId, groupId, userId) {
+    // Verify the group exists and belongs to the same tenant before allowing join
+    const group = await studyGroupRepository.getGroupById(groupId);
+    if (!group || group.tenantId !== tenantId) {
+      throw new NotFoundError('Study group not found');
+    }
     const member = await studyGroupRepository.joinGroup(groupId, userId);
     eventBus.publish('study_group:member_joined', { groupId, userId, tenantId });
     return member;

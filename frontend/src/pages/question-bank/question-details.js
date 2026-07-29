@@ -69,23 +69,19 @@ export default class QuestionDetailsPage extends BaseComponent {
           
           <!-- Navigation & Actions Header -->
           <div class="flex items-center justify-between mb-8 sticky top-0 bg-gray-900/90 backdrop-blur-md z-10 py-4 border-b border-gray-800">
-            <button id="back-btn" class="btn border border-gray-700 hover:bg-gray-800 text-gray-300">
-              <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i> العودة للمتصفح
-            </button>
+            <a href="/questions" class="btn btn-secondary text-sm" id="btn-back">
+              <i data-lucide="arrow-right" class="w-4 h-4 ms-2"></i> العودة للمتصفح
+            </a>
             <div class="flex items-center gap-2">
-              <button id="print-btn" class="btn text-gray-400 hover:bg-gray-800" title="طباعة">
-                <i data-lucide="printer" class="w-4 h-4"></i>
+              <button id="btn-toggle-status" class="btn ${q.status === 'PUBLISHED' ? 'btn-secondary' : 'btn-primary'} text-sm">
+                ${q.status === 'PUBLISHED' ? 'أرشفة' : 'نشر'}
               </button>
-              <button id="share-btn" class="btn text-gray-400 hover:bg-gray-800" title="مشاركة">
-                <i data-lucide="share-2" class="w-4 h-4"></i>
+              <button id="btn-duplicate-qd" class="btn btn-secondary text-sm">
+                  <i data-lucide="copy" class="w-4 h-4 ms-2"></i> تكرار
               </button>
-              <div class="w-px h-6 bg-gray-700 mx-2"></div>
-              <button id="duplicate-btn" class="btn border border-gray-700 hover:bg-gray-800 text-gray-300">
-                <i data-lucide="copy" class="w-4 h-4 ml-2"></i> تكرار
-              </button>
-              <button id="edit-btn" class="btn btn-primary">
-                <i data-lucide="edit-2" class="w-4 h-4 ml-2"></i> تعديل السؤال
-              </button>
+              <a href="/questions/${q.id}/edit" class="btn btn-primary text-sm">
+                  <i data-lucide="edit-2" class="w-4 h-4 ms-2"></i> تعديل السؤال
+              </a>
             </div>
           </div>
 

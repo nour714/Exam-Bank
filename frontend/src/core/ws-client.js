@@ -19,6 +19,8 @@ class WSClient {
    * @param {string} url - e.g., 'ws://localhost:3000'
    */
   connect(url) {
+    this.maxReconnectAttempts = 10;
+    this.reconnectAttempts = 0;
     const user = store.get('user');
     const tenant = store.get('tenant');
 

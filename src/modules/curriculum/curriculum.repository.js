@@ -98,6 +98,13 @@ class CurriculumRepository {
   async createLesson(data) {
     return this.prisma.lesson.create({ data });
   }
+
+  async getLessonsByUnit(unitId) {
+    return this.prisma.lesson.findMany({
+      where: { unitId },
+      orderBy: { order: 'asc' },
+    });
+  }
 }
 
 module.exports = new CurriculumRepository();

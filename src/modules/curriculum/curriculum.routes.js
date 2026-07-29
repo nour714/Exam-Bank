@@ -25,6 +25,7 @@ router.get('/subjects/:subjectId/units', controller.listUnits);
 router.post('/units', authorize(ROLES.ADMIN, ROLES.SUPER_ADMIN, ROLES.TEACHER), controller.createUnit);
 
 // ─── Lessons ─────────────────────────────────────────────
+router.get('/units/:unitId/lessons', controller.listLessons);
 router.post('/lessons', authorize(ROLES.ADMIN, ROLES.SUPER_ADMIN, ROLES.TEACHER), controller.createLesson);
 
 module.exports = router;

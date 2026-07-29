@@ -50,6 +50,16 @@
 .mb-6 { margin-bottom: var(--space-6); }
 .mb-8 { margin-bottom: var(--space-8); }
 .mx-auto { margin-left: auto; margin-right: auto; }
+.ms-1 { margin-inline-start: var(--space-1); }
+.ms-2 { margin-inline-start: var(--space-2); }
+.ms-3 { margin-inline-start: var(--space-3); }
+.ms-4 { margin-inline-start: var(--space-4); }
+.me-1 { margin-inline-end: var(--space-1); }
+.me-2 { margin-inline-end: var(--space-2); }
+.me-3 { margin-inline-end: var(--space-3); }
+.me-4 { margin-inline-end: var(--space-4); }
+.-ms-1 { margin-inline-start: calc(var(--space-1) * -1); }
+.-me-1 { margin-inline-end: calc(var(--space-1) * -1); }
 
 /* Typography */
 .text-xs { font-size: var(--text-xs); }

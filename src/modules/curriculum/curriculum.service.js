@@ -48,6 +48,10 @@ class CurriculumService {
     return curriculumRepository.getUnitsBySubject(subjectId);
   }
 
+  async listLessons(unitId) {
+    return curriculumRepository.getLessonsByUnit(unitId);
+  }
+
   async createLesson(data, currentUserId) {
     const lesson = await curriculumRepository.createLesson(data);
     eventBus.publish('lesson:created', { id: lesson.id, unitId: lesson.unitId, createdBy: currentUserId });

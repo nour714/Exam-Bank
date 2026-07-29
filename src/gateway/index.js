@@ -22,8 +22,10 @@ function setupGateway(app) {
   // 3. Security headers - handled by security.js middleware (no duplicate helmet() here)
 
   // 4. CORS
+  // Note: The server serves both static frontend and API on the same port in normal operation.
+  // CORS is configured primarily for separate frontend development servers.
   app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
   }));
 

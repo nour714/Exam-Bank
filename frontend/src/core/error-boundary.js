@@ -80,7 +80,7 @@ export class ErrorBoundary extends BaseComponent {
       <h3 class="text-lg font-bold text-white mb-2">عذراً، حدث خطأ!</h3>
       <p class="text-gray-400 mb-4 text-sm">${msg}</p>
       <button class="btn btn-primary" id="boundary-retry">
-        <i data-lucide="refresh-cw" class="w-4 h-4 ml-2"></i>
+        <i data-lucide="refresh-cw" class="w-4 h-4 ms-2"></i>
         إعادة المحاولة
       </button>
     `;

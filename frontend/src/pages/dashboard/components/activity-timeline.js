@@ -136,7 +136,7 @@ export class ActivityTimeline extends BaseComponent {
 
       html += `
         <li class="flex items-start" role="listitem">
-          <div class="relative z-10 w-10 h-10 rounded-full flex items-center justify-center ${color} ml-4 shrink-0">
+          <div class="relative z-10 w-10 h-10 rounded-full flex items-center justify-center ${color} ms-4 shrink-0">
             <i data-lucide="${icon}" class="w-5 h-5"></i>
           </div>
           <div class="flex-1">
@@ -157,7 +157,7 @@ export class ActivityTimeline extends BaseComponent {
     for (let i = 0; i < 3; i++) {
       html += `
         <div class="flex items-start">
-          <div class="rounded-full bg-gray-700 h-10 w-10 ml-4 shrink-0"></div>
+          <div class="rounded-full bg-gray-700 h-10 w-10 ms-4 shrink-0"></div>
           <div class="flex-1 space-y-2">
             <div class="h-4 bg-gray-700 rounded w-3/4"></div>
             <div class="h-3 bg-gray-700 rounded w-1/2"></div>

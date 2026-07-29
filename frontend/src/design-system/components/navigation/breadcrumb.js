@@ -49,9 +49,9 @@ export class Breadcrumb extends BaseComponent {
       }
 
       if (isLast || !item.url) {
-        innerHtml += `<span class="text-white font-medium ml-1 md:ml-2">${item.label}</span>`;
+        innerHtml += `<span class="text-white font-medium ms-1 md:ms-2">${item.label}</span>`;
       } else {
-        innerHtml += `<a href="${item.url}" class="inline-flex items-center hover:text-white transition-colors cursor-pointer ml-1 md:ml-2">${item.label}</a>`;
+        innerHtml += `<a href="${item.url}" class="inline-flex items-center hover:text-white transition-colors cursor-pointer ms-1 md:ms-2">${item.label}</a>`;
       }
 
       li.innerHTML = innerHtml;

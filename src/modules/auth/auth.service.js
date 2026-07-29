@@ -21,6 +21,7 @@ const config = require('../../shared/config');
 const authRepository = require('./auth.repository');
 const userRepository = require('../users/user.repository');
 const authEvents = require('./auth.events');
+const { notificationService } = require('../../shared/platforms/notification');
 
 /**
  * AuthService encapsulates all authentication business logic:
@@ -175,6 +176,7 @@ class AuthService {
         'Token reuse detected — revoking entire family'
       );
       await authRepository.revokeTokenFamily(storedToken.family);
+      await authRepository.deactivateAllUserSessions(storedToken.userId);
 
       eventBus.publish(authEvents.TOKEN_REUSE_DETECTED, {
         userId: storedToken.userId,
@@ -369,6 +371,74 @@ class AuthService {
       refreshToken: refreshTokenValue,
       refreshTokenRecord,
     };
+  }
+
+  /**
+   * Request password reset token and send email notification.
+   * NOTE: EmailProvider (src/shared/platforms/notification/providers/email.provider.js) is currently a stub.
+   * Actual email delivery requires configuring SMTP credentials and enabling real nodemailer transport.
+   * @param {string} email
+   * @returns {Promise<void>}
+   */
+  async forgotPassword(email) {
+    const user = await userRepository.findByEmail(email);
+    if (!user) {
+      // Return gracefully to prevent email enumeration
+      return;
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const expiryMinutes = 15;
+    const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000);
+
+    await authRepository.createRefreshToken({
+      userId: user.id,
+      token: resetToken,
+      family: 'password_reset',
+      expiresAt,
+    });
+
+    const resetUrl = `${config.FRONTEND_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+
+    // Dispatch email notification through notification system
+    // NOTE: EmailProvider is a stub. Real email sending requires setting SMTP credentials.
+    await notificationService.send('email', { userId: user.id, email: user.email }, {
+      templateId: 'password_reset',
+      data: { resetUrl, expiryMinutes },
+    });
+  }
+
+  /**
+   * Reset password using a valid reset token.
+   * @param {string} token
+   * @param {string} newPassword
+   * @returns {Promise<void>}
+   */
+  async resetPassword(token, newPassword) {
+    const storedToken = await authRepository.findRefreshTokenByToken(token);
+
+    if (!storedToken || storedToken.family !== 'password_reset' || storedToken.revokedAt || storedToken.expiresAt < new Date()) {
+      throw new BadRequestError('Invalid or expired password reset token');
+    }
+
+    const newHash = await hashPassword(newPassword);
+    await userRepository.update(storedToken.userId, { passwordHash: newHash });
+
+    // Revoke reset token
+    await authRepository.revokeRefreshToken(storedToken.id);
+
+    // Revoke all user tokens and sessions for security
+    await authRepository.revokeAllUserTokens(storedToken.userId);
+    await authRepository.deactivateAllUserSessions(storedToken.userId);
+
+    await authRepository.createAuditLog({
+      userId: storedToken.userId,
+      action: AUDIT_ACTIONS.PASSWORD_CHANGE,
+      resource: 'user',
+      resourceId: storedToken.userId,
+    });
+
+    eventBus.publish(authEvents.USER_PASSWORD_CHANGED, { userId: storedToken.userId });
   }
 
   /**

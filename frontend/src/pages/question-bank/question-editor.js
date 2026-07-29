@@ -219,16 +219,16 @@ export default class QuestionEditorPage extends BaseComponent {
               ${this.isEditMode ? `
                 ${fd.deleted ? `
                   <button id="restore-btn" class="btn border border-gray-600 hover:bg-gray-700 text-white transition-colors">
-                    <i data-lucide="rotate-ccw" class="w-4 h-4 ml-2"></i> استعادة
+                    <i data-lucide="rotate-ccw" class="w-4 h-4 ms-2"></i> استعادة
                   </button>
                   ${this.canPermanentDelete ? `
                     <button id="permanent-delete-btn" class="btn text-danger hover:bg-red-500/10 transition-colors">
-                      <i data-lucide="trash-2" class="w-4 h-4 ml-2"></i> حذف نهائي
+                      <i data-lucide="trash-2" class="w-4 h-4 ms-2"></i> حذف نهائي
                     </button>
                   ` : ''}
                 ` : `
                   <button id="soft-delete-btn" class="btn text-danger hover:bg-red-500/10 transition-colors">
-                    <i data-lucide="trash" class="w-4 h-4 ml-2"></i> حذف
+                    <i data-lucide="trash" class="w-4 h-4 ms-2"></i> حذف
                   </button>
                 `}
               ` : ''}
@@ -237,7 +237,7 @@ export default class QuestionEditorPage extends BaseComponent {
                 حفظ كمسودة
               </button>
               <button id="save-btn" class="btn btn-primary" ${this.isSaving || fd.deleted ? 'disabled' : ''}>
-                ${this.isSaving ? '<i class="animate-spin" data-lucide="loader"></i> جاري الحفظ...' : '<i data-lucide="save" class="w-4 h-4 ml-2"></i> حفظ السؤال'}
+                ${this.isSaving ? '<i class="animate-spin" data-lucide="loader"></i> جاري الحفظ...' : '<i data-lucide="save" class="w-4 h-4 ms-2"></i> حفظ السؤال'}
               </button>
             </div>
           </div>

@@ -9,6 +9,8 @@ const router = Router();
 router.post('/register', catchAsync(controller.register));
 router.post('/login', catchAsync(controller.login));
 router.post('/refresh', catchAsync(controller.refresh));
+router.post('/forgot-password', catchAsync(controller.forgotPassword));
+router.post('/reset-password', catchAsync(controller.resetPassword));
 
 // ─── Protected Routes ──────────────────────────────────────
 router.post('/logout', authenticate, catchAsync(controller.logout));

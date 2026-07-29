@@ -70,6 +70,11 @@ class CurriculumController {
     const lesson = await curriculumService.createLesson(data, req.user.userId);
     res.status(201).json({ success: true, data: lesson });
   }
+
+  async listLessons(req, res) {
+    const result = await curriculumService.listLessons(req.params.unitId);
+    res.status(200).json({ success: true, data: result });
+  }
 }
 
 module.exports = new CurriculumController();

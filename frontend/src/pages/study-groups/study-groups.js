@@ -25,7 +25,7 @@ export default class StudyGroupsPage extends BaseComponent {
           <p class="text-gray-400">انضم لزملائك أو أنشئ مجموعة مذاكرة جديدة</p>
         </div>
         <button class="btn btn-primary" id="btn-create-group">
-          <i data-lucide="plus" class="w-4 h-4 ml-2"></i><span>إنشاء مجموعة</span>
+          <i data-lucide="plus" class="w-4 h-4 ms-2"></i><span>إنشاء مجموعة</span>
         </button>
       </div>
 

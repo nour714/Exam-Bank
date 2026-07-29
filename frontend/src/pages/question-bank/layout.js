@@ -70,10 +70,10 @@ export class QuestionBankLayout extends BaseComponent {
         
         <div class="flex items-center gap-4 w-full md:w-auto">
           <button id="browse-questions-btn" class="btn border border-gray-600 text-white hover:bg-gray-800 transition-colors whitespace-nowrap">
-            <i data-lucide="library" class="w-5 h-5 ml-2"></i> تصفح الأسئلة
+            <i data-lucide="library" class="w-5 h-5 ms-2"></i> تصفح الأسئلة
           </button>
           <button class="btn btn-primary whitespace-nowrap">
-            <i data-lucide="plus" class="w-5 h-5 ml-2"></i> إضافة
+            <i data-lucide="plus" class="w-5 h-5 ms-2"></i> إضافة
           </button>
         </div>
       </div>

@@ -23,6 +23,15 @@ export class ChartView extends BaseComponent {
     setTimeout(() => {
       if (!window.Chart) {
         console.error('[ChartView] Chart.js is not loaded.');
+        canvas.style.display = 'none';
+        const fallback = document.createElement('div');
+        fallback.className = 'chart-fallback-ui flex flex-col items-center justify-center p-6 text-center text-muted rounded-lg border border-gray-700 h-full';
+        fallback.style.minHeight = '180px';
+        fallback.innerHTML = `
+          <p class="text-sm font-medium">تعذر تحميل الرسوم البيانية</p>
+          <p class="text-xs text-gray-400 mt-1">فشل تحميل مكتبة Chart.js من CDN</p>
+        `;
+        this.element.appendChild(fallback);
         return;
       }
 

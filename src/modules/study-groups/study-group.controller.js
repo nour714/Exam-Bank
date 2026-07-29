@@ -36,7 +36,7 @@ class StudyGroupController {
 
   async getGroupDetails(req, res) {
     const groupId = z.string().uuid().parse(req.params.groupId);
-    const details = await studyGroupService.getGroupDetails(groupId, req.user.userId);
+    const details = await studyGroupService.getGroupDetails(req.tenantId, groupId, req.user.userId);
     res.status(200).json({ success: true, data: details });
   }
 

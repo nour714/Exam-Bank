@@ -4,6 +4,8 @@ const {
   loginSchema,
   refreshTokenSchema,
   changePasswordSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
 } = require('./auth.validator');
 
 /**
@@ -18,6 +20,8 @@ class AuthController {
     this.logout = this.logout.bind(this);
     this.logoutAll = this.logoutAll.bind(this);
     this.changePassword = this.changePassword.bind(this);
+    this.forgotPassword = this.forgotPassword.bind(this);
+    this.resetPassword = this.resetPassword.bind(this);
     this.getSessions = this.getSessions.bind(this);
     this.revokeSession = this.revokeSession.bind(this);
     this.getLoginHistory = this.getLoginHistory.bind(this);
@@ -150,6 +154,32 @@ class AuthController {
     res.status(200).json({
       success: true,
       message: req.t('auth.password_changed'),
+    });
+  }
+
+  /**
+   * POST /api/v1/auth/forgot-password
+   */
+  async forgotPassword(req, res) {
+    const { email } = forgotPasswordSchema.parse(req.body);
+    await authService.forgotPassword(email);
+
+    res.status(200).json({
+      success: true,
+      message: req.t ? req.t('auth.password_reset_sent') : 'Password reset link sent',
+    });
+  }
+
+  /**
+   * POST /api/v1/auth/reset-password
+   */
+  async resetPassword(req, res) {
+    const { token, newPassword } = resetPasswordSchema.parse(req.body);
+    await authService.resetPassword(token, newPassword);
+
+    res.status(200).json({
+      success: true,
+      message: req.t ? req.t('auth.password_changed') : 'Password successfully reset',
     });
   }
 

@@ -151,18 +151,18 @@ export class QuestionPreview extends BaseComponent {
 
         <!-- Footer Actions -->
         <div class="p-6 border-t border-gray-800 bg-gray-800/30 flex justify-between items-center">
-          <button id="view-details-btn" class="btn border border-gray-600 hover:bg-gray-700 transition-colors">
-            <i data-lucide="external-link" class="w-4 h-4 ml-2"></i> التفاصيل الكاملة
-          </button>
-          <button id="delete-btn" class="btn text-danger hover:bg-red-500/10 transition-colors ml-auto">
-            <i data-lucide="trash-2" class="w-4 h-4 ml-2"></i> حذف
-          </button>
-          <div class="flex gap-3">
-            <button id="duplicate-btn" class="btn border border-gray-600 hover:bg-gray-700 transition-colors">
-              <i data-lucide="copy" class="w-4 h-4 ml-2"></i> تكرار
+            <button id="view-details-btn" class="btn text-gray-300 hover:text-white hover:bg-gray-800 text-sm">
+              <i data-lucide="external-link" class="w-4 h-4 ms-2"></i> التفاصيل الكاملة
             </button>
-            <button id="edit-btn" class="btn btn-primary">
-              <i data-lucide="edit-2" class="w-4 h-4 ml-2"></i> تعديل
+            <button id="delete-btn" class="btn text-red-400 hover:text-red-300 hover:bg-red-500/10 text-sm">
+              <i data-lucide="trash-2" class="w-4 h-4 ms-2"></i> حذف
+            </button>
+            <div class="flex-1"></div>
+            <button id="duplicate-btn" class="btn text-gray-300 hover:text-white hover:bg-gray-800 text-sm">
+              <i data-lucide="copy" class="w-4 h-4 ms-2"></i> تكرار
+            </button>
+            <button id="edit-btn" class="btn btn-primary text-sm">
+              <i data-lucide="edit-2" class="w-4 h-4 ms-2"></i> تعديل
             </button>
           </div>
         </div>
