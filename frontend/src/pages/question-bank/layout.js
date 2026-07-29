@@ -57,7 +57,7 @@ export class QuestionBankLayout extends BaseComponent {
 
   render() {
     this.element = document.createElement('div');
-    this.element.className = 'container mx-auto px-4 py-8 max-w-7xl animate-fade-in';
+    this.element.className = 'question-bank-page container mx-auto px-4 py-8 max-w-7xl animate-fade-in';
 
     this.element.innerHTML = `
       <div id="breadcrumb-slot" class="mb-4"></div>

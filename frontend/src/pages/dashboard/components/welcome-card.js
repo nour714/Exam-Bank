@@ -20,7 +20,7 @@ export class WelcomeCard extends BaseComponent {
 
   render() {
     this.element = document.createElement('div');
-    this.element.className = 'card bg-gradient-to-r from-blue-600 to-indigo-600 text-white overflow-hidden relative';
+    this.element.className = 'welcome-card card text-white overflow-hidden relative';
     
     const userName = this.state.user?.name || 'طالب';
 

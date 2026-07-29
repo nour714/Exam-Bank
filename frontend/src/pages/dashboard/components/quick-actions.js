@@ -20,11 +20,11 @@ export class QuickActions extends BaseComponent {
     let html = '';
     actions.forEach(action => {
       html += `
-        <button id="${action.id}" class="card flex flex-col items-center justify-center p-6 transition-all cursor-pointer border border-transparent hover:border-gray-600">
-          <div class="w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-colors ${action.color}">
+        <button id="${action.id}" class="quick-action-card flex flex-col items-center justify-center cursor-pointer">
+          <div class="quick-action-icon ${action.color}">
             <i data-lucide="${action.icon}" class="w-6 h-6"></i>
           </div>
-          <span class="text-sm font-medium text-gray-300">${action.title}</span>
+          <span class="text-sm font-medium">${action.title}</span>
         </button>
       `;
     });

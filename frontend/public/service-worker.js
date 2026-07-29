@@ -1,4 +1,4 @@
-const CACHE_NAME = 'exambank-cache-v3';
+const CACHE_NAME = 'exambank-cache-v4';
 const OFFLINE_URL = '/index.html';
 
 const ASSETS_TO_CACHE = [
@@ -16,7 +16,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Pre-caching offline assets (v3)');
+      console.log('[Service Worker] Pre-caching offline assets (v4)');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );

@@ -13,7 +13,7 @@ export class Header extends BaseComponent {
     this.element.className = 'app-header';
     this.element.id = 'app-header';
 
-    this.onCleanup(store.subscribe('user', (user) => {
+    const renderHeader = (user) => {
       if (!user) {
         this.element.innerHTML = `
           <div class="header-right">
@@ -66,7 +66,10 @@ export class Header extends BaseComponent {
           document.body.classList.toggle('sidebar-open');
         });
       }
-    }));
+    };
+
+    this.onCleanup(store.subscribe('user', renderHeader));
+    renderHeader(store.get('user'));
 
     return this.element;
   }

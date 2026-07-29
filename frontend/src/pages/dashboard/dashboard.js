@@ -40,7 +40,7 @@ export default class DashboardPage extends BaseComponent {
   render() {
     return measure('DashboardPage', 'render', () => {
       this.element = document.createElement('div');
-      this.element.className = 'container mx-auto px-4 py-8 max-w-7xl';
+      this.element.className = 'dashboard-page container mx-auto px-4 py-8 max-w-7xl';
       this.element.style.animation = 'fadeIn 0.4s ease-out';
 
       this.element.innerHTML = `
@@ -77,4 +77,3 @@ export default class DashboardPage extends BaseComponent {
     this.widgetBoundaries.forEach(boundary => boundary.mount());
   }
 }
-
