@@ -18,8 +18,8 @@ export class StatisticCard extends BaseComponent {
       const trendIcon = isPositive ? 'trending-up' : 'trending-down';
       trendHtml = `
         <div class="mt-4 flex items-center text-sm">
-          <i data-lucide="${trendIcon}" class="${trendColor} w-4 h-4 ms-1"></i>
-          <span class="${trendColor} font-bold ms-2">${Math.abs(trend)}%</span>
+          <i data-lucide="${trendIcon}" class="${trendColor} w-4 h-4 me-1"></i>
+          <span class="${trendColor} font-bold me-2">${Math.abs(trend)}%</span>
           <span class="text-gray-400">${trendLabel || 'منذ الشهر الماضي'}</span>
         </div>
       `;

@@ -24,10 +24,10 @@ export default class HomePage extends BaseComponent {
           <p class="hero-subtitle">منصة مخصصة لطلاب المرحلة الثانوية. بنك أسئلة محدث لجميع الصفوف — نماذج نهائية، تحليل أداء، ومراجعات شاملة قبل يوم الامتحان.</p>
           <div class="hero-actions">
             <button class="btn btn-primary btn-lg" id="btn-start-study">
-              <i data-lucide="play" class="w-5 h-5 ms-2"></i><span>ابدأ المذاكرة</span>
+              <i data-lucide="play" class="w-5 h-5 me-2"></i><span>ابدأ المذاكرة</span>
             </button>
             <button class="btn btn-secondary btn-lg" id="btn-start-test">
-              <i data-lucide="edit-3" class="w-5 h-5 ms-2"></i><span>حل امتحان الآن</span>
+              <i data-lucide="edit-3" class="w-5 h-5 me-2"></i><span>حل امتحان الآن</span>
             </button>
           </div>
         </div>
@@ -69,7 +69,7 @@ export default class HomePage extends BaseComponent {
         <div class="flex justify-between items-center mb-6">
           <h2 class="section-title text-2xl font-bold text-gray-200">مواد ثالثة ثانوي</h2>
           <button class="btn btn-ghost text-primary-400 hover:text-primary-300" id="btn-view-all">
-            عرض الكل <i data-lucide="arrow-left" class="w-4 h-4 me-1"></i>
+            عرض الكل <i data-lucide="arrow-left" class="w-4 h-4 ms-1"></i>
           </button>
         </div>
         <div class="subjects-grid grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-4">

@@ -132,7 +132,7 @@ async function bootstrap() {
           <h2 class="text-2xl font-bold text-gray-400 mb-4">الصفحة غير موجودة</h2>
           <p class="text-gray-500 mb-8 max-w-md mx-auto">عذراً، لم نتمكن من العثور على الصفحة التي تبحث عنها. قد تكون حذفت أو نقلت.</p>
           <button id="btn-404-back" class="btn btn-primary px-8 py-3 shadow-lg shadow-primary/20">
-            <i data-lucide="arrow-right" class="w-5 h-5 ms-2"></i> العودة للصفحة السابقة
+            <i data-lucide="arrow-right" class="w-5 h-5 me-2"></i> العودة للصفحة السابقة
           </button>
         </div>
       `;

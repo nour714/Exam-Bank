@@ -103,7 +103,7 @@ export class HierarchyBrowser extends BaseComponent {
           <i data-lucide="alert-circle" class="w-16 h-16 mb-4"></i>
           <h3 class="text-xl mb-4 font-bold text-white">حدث خطأ أثناء تحميل البيانات</h3>
           <button class="btn btn-primary" id="retry-btn">
-            <i data-lucide="refresh-cw" class="w-4 h-4 ms-2"></i> إعـادة المحاولة
+            <i data-lucide="refresh-cw" class="w-4 h-4 me-2"></i> إعـادة المحاولة
           </button>
         </div>
       `;

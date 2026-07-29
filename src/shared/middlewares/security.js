@@ -10,12 +10,12 @@ const securityMiddleware = [
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdn.socket.io"], // unsafe-inline for SPA mounting, unpkg for Lucide icons, cdn.socket.io for WebSockets
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdn.jsdelivr.net", "https://cdn.socket.io"], // unsafe-inline for SPA mounting, unpkg/jsdelivr for CDN libraries, cdn.socket.io for WebSockets
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:"],
         manifestSrc: ["'self'", "https:"],
-        connectSrc: ["'self'", "ws:", "wss:", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://unpkg.com", "https://*.supabase.co", "https://*.supabase.com"],
+        connectSrc: ["'self'", "ws:", "wss:", "https://fonts.googleapis.com", "https://fonts.gstatic.com", "https://unpkg.com", "https://cdn.jsdelivr.net", "https://*.supabase.co", "https://*.supabase.com"],
         upgradeInsecureRequests: [],
       },
     },

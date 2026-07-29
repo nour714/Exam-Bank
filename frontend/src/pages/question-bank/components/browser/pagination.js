@@ -30,7 +30,7 @@ export class Pagination extends BaseComponent {
     if (this.isLoading) {
       this.element.innerHTML = `
         <button disabled class="btn btn-secondary opacity-70 cursor-wait">
-          <i data-lucide="loader" class="w-5 h-5 ms-2 animate-spin"></i> جاري التحميل...
+          <i data-lucide="loader" class="w-5 h-5 me-2 animate-spin"></i> جاري التحميل...
         </button>
       `;
     } else {

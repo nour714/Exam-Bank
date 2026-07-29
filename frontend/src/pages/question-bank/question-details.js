@@ -70,17 +70,17 @@ export default class QuestionDetailsPage extends BaseComponent {
           <!-- Navigation & Actions Header -->
           <div class="flex items-center justify-between mb-8 sticky top-0 bg-gray-900/90 backdrop-blur-md z-10 py-4 border-b border-gray-800">
             <a href="/questions" class="btn btn-secondary text-sm" id="btn-back">
-              <i data-lucide="arrow-right" class="w-4 h-4 ms-2"></i> العودة للمتصفح
+              <i data-lucide="arrow-right" class="w-4 h-4 me-2"></i> العودة للمتصفح
             </a>
             <div class="flex items-center gap-2">
               <button id="btn-toggle-status" class="btn ${q.status === 'PUBLISHED' ? 'btn-secondary' : 'btn-primary'} text-sm">
                 ${q.status === 'PUBLISHED' ? 'أرشفة' : 'نشر'}
               </button>
               <button id="btn-duplicate-qd" class="btn btn-secondary text-sm">
-                  <i data-lucide="copy" class="w-4 h-4 ms-2"></i> تكرار
+                  <i data-lucide="copy" class="w-4 h-4 me-2"></i> تكرار
               </button>
               <a href="/questions/${q.id}/edit" class="btn btn-primary text-sm">
-                  <i data-lucide="edit-2" class="w-4 h-4 ms-2"></i> تعديل السؤال
+                  <i data-lucide="edit-2" class="w-4 h-4 me-2"></i> تعديل السؤال
               </a>
             </div>
           </div>

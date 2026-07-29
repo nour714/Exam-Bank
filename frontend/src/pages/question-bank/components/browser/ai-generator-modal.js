@@ -263,7 +263,7 @@ export class AIGeneratorModal extends BaseComponent {
 
         <div class="mt-8 flex justify-end gap-3">
           <button id="ai-start-btn" class="btn bg-purple-600 hover:bg-purple-700 text-white w-full md:w-auto">
-            <i data-lucide="zap" class="w-4 h-4 ms-2"></i> بدء التوليد
+            <i data-lucide="zap" class="w-4 h-4 me-2"></i> بدء التوليد
           </button>
         </div>
       `;
@@ -327,7 +327,7 @@ export class AIGeneratorModal extends BaseComponent {
                       </button>
                     ` : `
                       <button data-idx="${idx}" class="ai-restore-btn btn btn-sm bg-gray-700 hover:bg-gray-600 text-white" title="تضمين مرة أخرى">
-                        <i data-lucide="rotate-ccw" class="w-4 h-4 ms-1"></i> تراجع
+                        <i data-lucide="rotate-ccw" class="w-4 h-4 me-1"></i> تراجع
                       </button>
                     `}
                   </div>
@@ -348,10 +348,10 @@ export class AIGeneratorModal extends BaseComponent {
 
           <div class="flex items-center justify-between pt-6 border-t border-gray-800">
             <button id="ai-regenerate-all-btn" class="btn border border-gray-700 hover:bg-gray-800 text-gray-300">
-              <i data-lucide="rotate-cw" class="w-4 h-4 ms-2"></i> إعادة توليد الدفعة
+              <i data-lucide="rotate-cw" class="w-4 h-4 me-2"></i> إعادة توليد الدفعة
             </button>
             <button id="ai-save-btn" class="btn bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-500/20">
-              <i data-lucide="check" class="w-4 h-4 ms-2"></i> حفظ الأسئلة المقبولة (${this.results.filter(r => r.accepted).length})
+              <i data-lucide="check" class="w-4 h-4 me-2"></i> حفظ الأسئلة المقبولة (${this.results.filter(r => r.accepted).length})
             </button>
           </div>
         </div>

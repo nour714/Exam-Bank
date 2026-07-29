@@ -28,7 +28,7 @@ export class Toolbar extends BaseComponent {
           <button class="hover:text-white transition-colors" title="إضافة للتقييم"><i data-lucide="plus-circle" class="w-5 h-5"></i></button>
           <button class="hover:text-white transition-colors" title="نقل"><i data-lucide="folder-output" class="w-5 h-5"></i></button>
           <button class="text-danger hover:text-red-400 transition-colors" title="حذف"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-          <button id="clear-selection-btn" class="hover:text-white transition-colors ms-2" title="إلغاء التحديد"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button id="clear-selection-btn" class="hover:text-white transition-colors me-2" title="إلغاء التحديد"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
       `;
     } else {
@@ -36,11 +36,11 @@ export class Toolbar extends BaseComponent {
         <div class="flex items-center gap-2">
           ${this.onGenerateAI ? `
             <button id="generate-ai-btn" class="btn bg-purple-600/20 text-purple-400 hover:bg-purple-600 hover:text-white border border-purple-500/30 transition-colors">
-              <i data-lucide="sparkles" class="w-4 h-4 ms-2"></i> توليد بالذكاء الاصطناعي
+              <i data-lucide="sparkles" class="w-4 h-4 me-2"></i> توليد بالذكاء الاصطناعي
             </button>
           ` : ''}
           <button id="add-btn" class="btn btn-primary">
-            <i data-lucide="plus" class="w-5 h-5 ms-2"></i> إضافة سؤال
+            <i data-lucide="plus" class="w-5 h-5 me-2"></i> إضافة سؤال
           </button>
         </div>
       `;

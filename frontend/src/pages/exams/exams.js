@@ -81,7 +81,7 @@ export default class ExamsPage extends BaseComponent {
             <p class="text-sm text-gray-400 mb-4">${exam.durationMins ? exam.durationMins + ' دقيقة' : 'بدون وقت محدد'} · ${exam.totalPoints} نقطة</p>
           </div>
           <button class="btn btn-primary w-full" data-exam-id="${exam.id}">
-            <i data-lucide="play" class="w-4 h-4 ms-2"></i><span>ابدأ الامتحان</span>
+            <i data-lucide="play" class="w-4 h-4 me-2"></i><span>ابدأ الامتحان</span>
           </button>
         </div>
       `;
