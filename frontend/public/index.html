@@ -27,8 +27,12 @@
                 document.documentElement.classList.add("dark-theme");
             }
         })();
-    </script>
-    <!-- Stylesheet -->
+    <!-- Design System Stylesheets (reset -> theme -> utilities -> components) -->
+    <link rel="stylesheet" href="/src/design-system/reset.css">
+    <link rel="stylesheet" href="/src/design-system/theme.css">
+    <link rel="stylesheet" href="/src/design-system/utilities.css">
+    <link rel="stylesheet" href="/src/design-system/components.css">
+    <!-- Legacy Stylesheet -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -1761,6 +1765,8 @@
             }
         });
     </script>
+    <!-- Main SPA Application Module -->
+    <script type="module" src="/src/app.js"></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 </body>
 </html>
