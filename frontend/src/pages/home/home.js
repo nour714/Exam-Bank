@@ -121,105 +121,116 @@ export default class HomePage extends BaseComponent {
 
   _getHeroSVG() {
     // Use unique prefix to avoid ID conflicts if SVG renders multiple times
+    // Composition: an "exam admission ticket" (بطاقة دخول الامتحان) as the
+    // central motif — a stub + a body of answer lines + an ink stamp —
+    // instead of a generic dashboard-on-a-laptop illustration.
     const p = 'home-';
     return `
       <svg viewBox="0 0 500 400" width="100%" height="100%" class="illustration-svg">
         <defs>
           <linearGradient id="${p}bgGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.15"/>
-            <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.05"/>
+            <stop offset="0%" stop-color="#2F5FA8" stop-opacity="0.16"/>
+            <stop offset="100%" stop-color="#B8862E" stop-opacity="0.06"/>
           </linearGradient>
-          <linearGradient id="${p}laptopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#1e293b"/>
-            <stop offset="100%" stop-color="#0f172a"/>
+          <linearGradient id="${p}ticketGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FDFCF8"/>
+            <stop offset="100%" stop-color="#F3F1E9"/>
           </linearGradient>
-          <linearGradient id="${p}screenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#0f2963"/>
-            <stop offset="100%" stop-color="#1e1b4b"/>
-          </linearGradient>
-          <linearGradient id="${p}accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#3b82f6"/>
-            <stop offset="100%" stop-color="#8b5cf6"/>
+          <linearGradient id="${p}stubGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#1C3862"/>
+            <stop offset="100%" stop-color="#101D36"/>
           </linearGradient>
           <linearGradient id="${p}glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
-            <stop offset="100%" stop-color="#f8fafc" stop-opacity="0.75"/>
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.97"/>
+            <stop offset="100%" stop-color="#f8fafc" stop-opacity="0.82"/>
           </linearGradient>
-          <filter id="${p}shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="15" stdDeviation="15" flood-color="#0f2963" flood-opacity="0.15"/>
-          </filter>
-          <filter id="${p}glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="6" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          <filter id="${p}shadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#101D36" flood-opacity="0.18"/>
           </filter>
         </defs>
 
         <!-- Glowing background orbs -->
-        <circle cx="250" cy="200" r="140" fill="url(#${p}bgGlow)" class="anim-pulse-slow"/>
-        <circle cx="350" cy="150" r="80" fill="#8b5cf6" fill-opacity="0.06" class="anim-pulse-fast"/>
-        <circle cx="150" cy="250" r="60" fill="#06b6d4" fill-opacity="0.08" class="anim-pulse-medium"/>
+        <circle cx="250" cy="200" r="150" fill="url(#${p}bgGlow)" class="anim-pulse-slow"/>
+        <circle cx="360" cy="130" r="70" fill="#B8862E" fill-opacity="0.06" class="anim-pulse-fast"/>
+        <circle cx="130" cy="270" r="60" fill="#2F5FA8" fill-opacity="0.07" class="anim-pulse-medium"/>
 
-        <!-- Central Laptop Base -->
-        <g transform="translate(130, 150)">
-          <path d="M20 140 h200 l20 30 H0 z" fill="#cbd5e1" />
-          <path d="M0 170 h240 v5 a10 10 0 0 1 -10 10 H10 a10 10 0 0 1 -10 -10 v-5" fill="#94a3b8" />
-          <rect x="90" y="140" width="60" height="5" fill="#e2e8f0" />
+        <!-- Central: Exam Admission Ticket -->
+        <g transform="translate(105, 95) rotate(-4)" filter="url(#${p}shadow)">
+          <!-- Ticket stub (left) -->
+          <path d="M0 10 a10 10 0 0 1 10 -10 h70 v200 h-70 a10 10 0 0 1 -10 -10 z" fill="url(#${p}stubGrad)"/>
+          <text x="45" y="60" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#FDFCF8" text-anchor="middle" transform="rotate(-90 45 60)">EXAM PASS</text>
+          <circle cx="45" cy="115" r="20" fill="none" stroke="#B8862E" stroke-width="2" stroke-dasharray="3 3"/>
+          <path d="M36 115 l6 7 l13 -15" fill="none" stroke="#B8862E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Perforation -->
+          <line x1="80" y1="4" x2="80" y2="196" stroke="#F3F1E9" stroke-width="2" stroke-dasharray="4 5"/>
+
+          <!-- Ticket body (right) -->
+          <path d="M80 0 h190 a10 10 0 0 1 10 10 v180 a10 10 0 0 1 -10 10 h-190 z" fill="url(#${p}ticketGrad)"/>
+          <rect x="100" y="24" width="130" height="10" rx="3" fill="#1C3862"/>
+          <rect x="100" y="42" width="80" height="6" rx="3" fill="#C9C6BB"/>
+
+          <rect x="100" y="72" width="150" height="1" fill="#E2DFD3"/>
+          <rect x="100" y="88" width="12" height="12" rx="3" fill="#2F5FA8" fill-opacity="0.12"/>
+          <rect x="120" y="91" width="110" height="6" rx="3" fill="#C9C6BB"/>
+          <rect x="100" y="110" width="12" height="12" rx="3" fill="#10B981" fill-opacity="0.15"/>
+          <path d="M103 116 l3 3 l6 -6" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="120" y="113" width="90" height="6" rx="3" fill="#C9C6BB"/>
+          <rect x="100" y="132" width="12" height="12" rx="3" fill="#2F5FA8" fill-opacity="0.12"/>
+          <rect x="120" y="135" width="100" height="6" rx="3" fill="#C9C6BB"/>
+
+          <!-- Barcode strip -->
+          <g transform="translate(100, 165)">
+            <rect x="0" y="0" width="2" height="18" fill="#232320"/>
+            <rect x="5" y="0" width="1" height="18" fill="#232320"/>
+            <rect x="9" y="0" width="3" height="18" fill="#232320"/>
+            <rect x="15" y="0" width="1" height="18" fill="#232320"/>
+            <rect x="19" y="0" width="2" height="18" fill="#232320"/>
+            <rect x="24" y="0" width="4" height="18" fill="#232320"/>
+            <rect x="31" y="0" width="1" height="18" fill="#232320"/>
+            <rect x="35" y="0" width="2" height="18" fill="#232320"/>
+            <rect x="40" y="0" width="3" height="18" fill="#232320"/>
+            <text x="0" y="30" font-family="'JetBrains Mono', monospace" font-size="9" fill="#7A7669">REF-2026-081</text>
+          </g>
         </g>
 
-        <!-- Laptop Screen -->
-        <g transform="translate(150, 60)">
-          <rect x="0" y="0" width="200" height="130" rx="8" fill="url(#${p}laptopGrad)" />
-          <rect x="5" y="5" width="190" height="115" rx="4" fill="url(#${p}screenGrad)" />
-          
-          <!-- Screen Content (Charts & Graphs) -->
-          <rect x="15" y="15" width="170" height="15" rx="4" fill="#ffffff" fill-opacity="0.1" />
-          <path d="M 20 100 L 50 60 L 90 80 L 140 30 L 180 50" fill="none" stroke="url(#${p}accentGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="anim-draw-line" />
-          <circle cx="140" cy="30" r="6" fill="#10b981" filter="url(#${p}glow)" class="anim-pop"/>
-          <circle cx="50" cy="60" r="4" fill="#8b5cf6" class="anim-pop-delay"/>
-          <rect x="20" y="80" width="15" height="30" rx="2" fill="#3b82f6" fill-opacity="0.8" class="anim-bar-1"/>
-          <rect x="45" y="50" width="15" height="60" rx="2" fill="#8b5cf6" fill-opacity="0.8" class="anim-bar-2"/>
-          <rect x="70" y="70" width="15" height="40" rx="2" fill="#06b6d4" fill-opacity="0.8" class="anim-bar-3"/>
-        </g>
-
-        <!-- Floating Element 1: Score Card (Top Right) -->
-        <g transform="translate(340, 40)">
+        <!-- Floating Element 1: Ink stamp grade (Top Right) -->
+        <g transform="translate(350, 35)">
           <g class="anim-float-slow" filter="url(#${p}shadow)">
-            <rect x="0" y="0" width="120" height="70" rx="12" fill="url(#${p}glassGrad)" />
-            <circle cx="30" cy="35" r="16" fill="#10b981" fill-opacity="0.15"/>
-            <path d="M24 35 l4 4 l8 -8" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <rect x="55" y="25" width="45" height="6" rx="3" fill="#cbd5e1" />
-            <rect x="55" y="40" width="30" height="6" rx="3" fill="#cbd5e1" />
-            <text x="95" y="18" font-family="Arial" font-size="14" font-weight="bold" fill="#f59e0b" transform="rotate(15 100 15)">A+</text>
+            <circle cx="45" cy="45" r="45" fill="url(#${p}glassGrad)"/>
+            <circle cx="45" cy="45" r="34" fill="none" stroke="#C63D2F" stroke-width="2.5" stroke-dasharray="4 4" transform="rotate(-8 45 45)"/>
+            <text x="45" y="53" font-family="'JetBrains Mono', monospace" font-size="26" font-weight="700" fill="#C63D2F" text-anchor="middle" transform="rotate(-8 45 45)">A+</text>
           </g>
         </g>
 
-        <!-- Floating Element 2: AI Brain (Bottom Left) -->
-        <g transform="translate(40, 200)">
+        <!-- Floating Element 2: AI analysis chip (Bottom Left) -->
+        <g transform="translate(30, 235)">
           <g class="anim-float-fast" filter="url(#${p}shadow)">
-            <rect x="0" y="0" width="110" height="80" rx="12" fill="url(#${p}glassGrad)" />
-            <circle cx="55" cy="30" r="18" fill="#4f46e5" fill-opacity="0.15"/>
-            <path d="M55 18 v4 M55 38 v4 M43 30 h4 M63 30 h4 M47 22 l3 3 M60 35 l3 3 M47 38 l3 -3 M60 22 l3 3" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round"/>
-            <circle cx="55" cy="30" r="5" fill="#4f46e5" />
-            <rect x="30" y="58" width="50" height="6" rx="3" fill="#94a3b8" />
+            <rect x="0" y="0" width="112" height="78" rx="14" fill="url(#${p}glassGrad)" />
+            <circle cx="30" cy="30" r="16" fill="#2F5FA8" fill-opacity="0.14"/>
+            <path d="M30 20 v4 M30 36 v4 M20 30 h4 M36 30 h4 M23 23 l3 3 M34 34 l3 3 M23 37 l3 -3 M34 26 l3 -3" fill="none" stroke="#2F5FA8" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="30" cy="30" r="4.5" fill="#2F5FA8" />
+            <rect x="56" y="20" width="45" height="6" rx="3" fill="#C9C6BB" />
+            <rect x="56" y="33" width="32" height="6" rx="3" fill="#C9C6BB" />
+            <rect x="14" y="56" width="84" height="7" rx="3.5" fill="#E9EFF8"/>
+            <rect x="14" y="56" width="54" height="7" rx="3.5" fill="#2F5FA8"/>
           </g>
         </g>
 
-        <!-- Floating Element 3: Exam Paper (Bottom Right) -->
-        <g transform="translate(330, 230)">
+        <!-- Floating Element 3: Countdown timer (Bottom Right) -->
+        <g transform="translate(345, 250)">
           <g class="anim-float-medium" filter="url(#${p}shadow)">
-            <rect x="0" y="0" width="90" height="100" rx="8" fill="#ffffff" transform="rotate(10)" />
-            <rect x="15" y="20" width="60" height="4" rx="2" fill="#e2e8f0" transform="rotate(10)" />
-            <rect x="15" y="35" width="40" height="4" rx="2" fill="#e2e8f0" transform="rotate(10)" />
-            <rect x="15" y="50" width="50" height="4" rx="2" fill="#e2e8f0" transform="rotate(10)" />
-            <circle cx="65" cy="75" r="12" fill="#ef4444" fill-opacity="0.1" transform="rotate(10)" />
-            <path d="M55 70 l15 15 M70 70 l-15 15" stroke="#ef4444" stroke-width="2" stroke-linecap="round" transform="rotate(10)" />
+            <rect x="0" y="0" width="96" height="60" rx="14" fill="url(#${p}glassGrad)" />
+            <circle cx="24" cy="30" r="13" fill="none" stroke="#B8862E" stroke-width="2.5"/>
+            <path d="M24 22 v8 l6 4" fill="none" stroke="#B8862E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="50" y="27" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#232320">02:45:00</text>
+            <text x="50" y="41" font-family="'Tajawal', sans-serif" font-size="9" fill="#7A7669">وقت الامتحان</text>
           </g>
         </g>
-        
-        <!-- Stars / Sparkles -->
-        <path d="M100 80 Q105 85 110 80 Q105 75 100 80" fill="#f59e0b" class="anim-pulse-fast"/>
-        <path d="M300 20 Q305 25 310 20 Q305 15 300 20" fill="#f59e0b" class="anim-pulse-medium"/>
-        <path d="M220 330 Q225 335 230 330 Q225 325 220 330" fill="#3b82f6" class="anim-pulse-slow"/>
+
+        <!-- Sparkles -->
+        <path d="M95 70 Q100 75 105 70 Q100 65 95 70" fill="#B8862E" class="anim-pulse-fast"/>
+        <path d="M300 15 Q305 20 310 15 Q305 10 300 15" fill="#B8862E" class="anim-pulse-medium"/>
+        <path d="M225 345 Q230 350 235 345 Q230 340 225 345" fill="#2F5FA8" class="anim-pulse-slow"/>
       </svg>
     `;
   }

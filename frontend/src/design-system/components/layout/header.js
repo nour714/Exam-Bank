@@ -18,7 +18,7 @@ export class Header extends BaseComponent {
         this.element.innerHTML = `
           <div class="header-right">
             <div class="mobile-header-logo" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <span style="color: #6366f1; display: flex; background: rgba(99, 102, 241, 0.1); padding: 6px; border-radius: 8px;"><i data-lucide="graduation-cap"></i></span>
+                <span style="color: var(--color-primary-500); display: flex; background: rgba(47, 95, 168, 0.1); padding: 6px; border-radius: 8px;"><i data-lucide="graduation-cap"></i></span>
                 <span style="font-weight: 800; font-size: 1.15rem;">Exam Bank</span>
             </div>
           </div>
@@ -42,7 +42,7 @@ export class Header extends BaseComponent {
                 <i data-lucide="menu"></i>
             </button>
             <div class="mobile-header-logo" id="mobile-header-logo" style="display: none; align-items: center; gap: 8px; margin-left: 10px; cursor: pointer;">
-                <span style="color: #6366f1; display: flex; background: rgba(99, 102, 241, 0.1); padding: 6px; border-radius: 8px;"><i data-lucide="graduation-cap"></i></span>
+                <span style="color: var(--color-primary-500); display: flex; background: rgba(47, 95, 168, 0.1); padding: 6px; border-radius: 8px;"><i data-lucide="graduation-cap"></i></span>
                 <span style="font-weight: 800; font-size: 1.15rem;">Exam Bank</span>
             </div>
             <div class="search-bar">

@@ -27,12 +27,12 @@
 .btn-primary {
   background-color: var(--color-primary-500);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 4px 12px rgba(47, 95, 168, 0.25);
 }
 .btn-primary:hover:not(:disabled) {
   background-color: var(--color-primary-600);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 6px 18px rgba(47, 95, 168, 0.4);
 }
 
 .btn-secondary {
@@ -84,7 +84,7 @@
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg), 0 0 40px rgba(99, 102, 241, 0.12);
+  box-shadow: var(--shadow-lg), 0 0 40px rgba(47, 95, 168, 0.12);
   text-align: center;
 }
 
@@ -110,7 +110,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 8px 20px rgba(47, 95, 168, 0.35);
 }
 
 /* ─── Inputs ────────────────────────────────────────── */
@@ -146,7 +146,7 @@
 
 .input-control:focus {
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.25);
+  box-shadow: 0 0 0 3px rgba(47, 95, 168, 0.25);
   outline: none;
 }
 
@@ -1661,8 +1661,8 @@ body.dark-theme .group-card:hover {
    ================================================================ */
 body {
   background:
-    radial-gradient(circle at 8% 0%, rgba(99, 102, 241, .10), transparent 26rem),
-    radial-gradient(circle at 90% 15%, rgba(6, 182, 212, .07), transparent 22rem),
+    radial-gradient(circle at 8% 0%, rgba(47, 95, 168, .08), transparent 26rem),
+    radial-gradient(circle at 90% 15%, rgba(184, 134, 46, .06), transparent 22rem),
     var(--bg-primary);
 }
 
@@ -1671,7 +1671,7 @@ body {
 .card {
   background: var(--surface-card);
   border: 1px solid var(--border-color);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, .05);
+  box-shadow: 0 10px 30px rgba(19, 19, 17, .05);
 }
 body.dark-theme .card { box-shadow: 0 12px 32px rgba(0, 0, 0, .18); }
 
@@ -1689,12 +1689,12 @@ body.dark-theme .card { box-shadow: 0 12px 32px rgba(0, 0, 0, .18); }
 }
 .app-container { width: calc(100% - 272px); margin-right: 272px; }
 .sidebar-brand { padding: 0 8px; }
-.brand-logo { width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(135deg, #818cf8, #4f46e5); }
+.brand-logo { width: 42px; height: 42px; border-radius: 14px; background: linear-gradient(135deg, var(--color-primary-400), var(--color-primary-700)); }
 .brand-name { color: var(--text-primary); font-size: 19px; }
 .user-profile-widget { background: color-mix(in srgb, var(--surface-hover) 70%, transparent); border-radius: 18px; padding: 16px 12px; }
 .menu-item { min-height: 46px; border-radius: 12px; color: var(--text-secondary); }
 .menu-item:hover { color: var(--color-primary-400); background: var(--surface-active); }
-.menu-item.active { background: linear-gradient(135deg, #6366f1, #4f46e5); box-shadow: 0 8px 18px rgba(79, 70, 229, .28); }
+.menu-item.active { background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700)); box-shadow: 0 8px 18px rgba(28, 56, 98, .28); }
 
 .stat-card {
   display: block;
@@ -1703,7 +1703,7 @@ body.dark-theme .card { box-shadow: 0 12px 32px rgba(0, 0, 0, .18); }
   border-radius: 20px;
   background: var(--surface-card);
 }
-.stat-card:hover { transform: translateY(-3px); border-color: rgba(129, 140, 248, .55); }
+.stat-card:hover { transform: translateY(-3px); border-color: rgba(76, 125, 194, .5); }
 .stat-card h3 { color: var(--text-primary) !important; font-size: 30px; letter-spacing: -.03em; }
 .stat-card p { color: var(--text-secondary) !important; }
 
@@ -1716,26 +1716,26 @@ body.dark-theme .card { box-shadow: 0 12px 32px rgba(0, 0, 0, .18); }
   border: 1px solid var(--border-color);
   transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
 }
-.quick-action-card:hover { transform: translateY(-3px); border-color: rgba(129, 140, 248, .55); background: var(--surface-hover); }
+.quick-action-card:hover { transform: translateY(-3px); border-color: rgba(76, 125, 194, .5); background: var(--surface-hover); }
 .quick-action-icon { width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center; margin-bottom: 12px; }
-.quick-action-icon--indigo { color: #a5b4fc; background: rgba(99, 102, 241, .15); }
-.quick-action-icon--cyan { color: #67e8f9; background: rgba(6, 182, 212, .14); }
+.quick-action-icon--indigo { color: var(--color-primary-300); background: rgba(47, 95, 168, .15); }
+.quick-action-icon--cyan { color: var(--color-secondary-300); background: rgba(184, 134, 46, .14); }
 .quick-action-icon--emerald { color: #6ee7b7; background: rgba(16, 185, 129, .14); }
 .quick-action-icon--amber { color: #fcd34d; background: rgba(245, 158, 11, .14); }
-.quick-action-icon { color: #a5b4fc; background: rgba(99, 102, 241, .15); }
+.quick-action-icon { color: var(--color-primary-300); background: rgba(47, 95, 168, .15); }
 
 .welcome-card {
   border: 0;
   min-height: 210px;
   background:
     radial-gradient(circle at 88% 18%, rgba(255,255,255,.18), transparent 22rem),
-    linear-gradient(125deg, #4f46e5 0%, #6366f1 48%, #0891b2 140%);
-  box-shadow: 0 18px 36px rgba(79, 70, 229, .24);
+    linear-gradient(125deg, var(--color-primary-700) 0%, var(--color-primary-500) 55%, var(--color-secondary-500) 140%);
+  box-shadow: 0 18px 36px rgba(28, 56, 98, .24);
 }
 .welcome-card .card-body { min-height: 210px; padding: 34px; }
 .welcome-card h2 { font-size: clamp(1.5rem, 2vw, 2rem); }
-.welcome-card .btn { background: #fff; color: #4338ca; border-radius: 12px; font-weight: var(--font-bold); }
-.welcome-card .btn:hover { background: #eef2ff; }
+.welcome-card .btn { background: #fff; color: var(--color-primary-700); border-radius: 12px; font-weight: var(--font-bold); }
+.welcome-card .btn:hover { background: var(--color-primary-50); }
 
 .dashboard-page { padding-block: 6px; }
 .dashboard-page > .flex { gap: 28px; }
@@ -1802,8 +1802,8 @@ body.dark-theme .card { box-shadow: 0 12px 32px rgba(0, 0, 0, .18); }
 .exams-page #exams-grid .card:hover,
 .study-groups-page #groups-grid .card:hover {
   transform: translateY(-4px);
-  border-color: rgba(129, 140, 248, .55) !important;
-  box-shadow: 0 18px 30px rgba(15, 23, 42, .12);
+  border-color: rgba(76, 125, 194, .5) !important;
+  box-shadow: 0 18px 30px rgba(19, 19, 17, .12);
 }
 .hierarchy-grid .card h3,
 .exams-page #exams-grid .card h3,
@@ -1813,7 +1813,7 @@ body.dark-theme .card { box-shadow: 0 12px 32px rgba(0, 0, 0, .18); }
   overflow: hidden;
   border: 0;
   border-radius: 24px;
-  box-shadow: 0 18px 34px rgba(79, 70, 229, .22);
+  box-shadow: 0 18px 34px rgba(28, 56, 98, .22);
 }
 .exams-page #exams-grid .card { gap: 20px; }
 .exams-page #exams-grid .btn { border-radius: 12px; }
@@ -1848,7 +1848,7 @@ body.dark-theme .card { box-shadow: 0 12px 32px rgba(0, 0, 0, .18); }
   border-color: var(--border-color) !important;
   border-radius: 16px;
 }
-.question-browser .rounded-xl.border:hover { border-color: rgba(129, 140, 248, .55) !important; }
+.question-browser .rounded-xl.border:hover { border-color: rgba(76, 125, 194, .5) !important; }
 
 @media (max-width: 767px) {
   .hierarchy-grid .card,
@@ -1858,3 +1858,170 @@ body.dark-theme .card { box-shadow: 0 12px 32px rgba(0, 0, 0, .18); }
   .question-bank-page > .flex > div:last-child { width: 100%; }
   .question-bank-page > .flex > div:last-child .btn { flex: 1; }
 }
+
+/* ================================================================
+   Signature motif — "Exam Ticket" (بطاقة الامتحان)
+   A recurring device carried across the redesign: a torn/perforated
+   stub edge + a circular ink-stamp badge. Used sparingly on the
+   pieces that represent an outcome — a score, a subject, a result —
+   never on plain containers.
+   ================================================================ */
+.ticket-edge {
+  position: relative;
+}
+.ticket-edge::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  top: 0;
+  height: 0;
+  border-top: 2px dashed var(--color-ticket-edge);
+}
+.ticket-edge::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: -7px;
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg-primary);
+  border: 1px solid var(--color-ticket-edge);
+  box-shadow: calc(100% + 14px) 0 0 var(--bg-primary), calc(100% + 14px) 0 0 1px var(--color-ticket-edge);
+}
+
+/* Circular "ink stamp" badge — for scores, grades, verified states */
+.stamp-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-weight: var(--font-bold);
+  color: var(--color-stamp-ink);
+  transform: rotate(-6deg);
+  letter-spacing: -0.02em;
+}
+
+/* Monospace treatment for ticket/serial numbers, timers, scores */
+.ticket-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* ================================================================
+   Component coverage extension
+   Real UI pieces referenced by the pages (buttons, form controls,
+   modal, data grid, notification badge, AI review actions) that
+   had no matching rule. Built on the new token palette.
+   ================================================================ */
+
+/* ─── Button variants ───────────────────────────────── */
+.btn-outline {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--surface-hover);
+  border-color: var(--gray-400);
+}
+.btn-outline-danger {
+  background-color: transparent;
+  color: var(--color-danger-500);
+  border: 1px solid rgba(198, 61, 47, 0.35);
+}
+.btn-outline-danger:hover:not(:disabled) {
+  background-color: rgba(198, 61, 47, 0.08);
+  border-color: var(--color-danger-500);
+}
+.btn-logout { width: 100%; }
+
+/* ─── Form controls ─────────────────────────────────── */
+.form-input, .form-select {
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(47, 95, 168, 0.18);
+}
+.form-input::placeholder { color: var(--text-muted); }
+.form-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary-500);
+  cursor: pointer;
+}
+
+/* ─── Answer-option state chip (question editor) ────── */
+.opt-correct-btn { transition: all var(--transition-fast); }
+.bg-green-500 { background-color: var(--color-success-500); }
+.bg-green-500\/10 { background-color: rgba(16, 185, 129, 0.1); }
+.bg-red-900\/10 { background-color: rgba(122, 33, 24, 0.1); }
+
+/* ─── Spinners ───────────────────────────────────────── */
+.spinner-md { width: 28px; height: 28px; border-width: 3px; }
+.spinner-lg { width: 48px; height: 48px; border-width: 4px; }
+
+/* ─── Data grid ──────────────────────────────────────── */
+.data-grid-container {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+.data-grid-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color var(--transition-fast);
+}
+.data-grid-table tbody tr:hover { background-color: var(--surface-hover); }
+.data-grid-table tbody td { padding: var(--space-3); color: var(--text-primary); }
+
+/* ─── Chart fallback state ──────────────────────────── */
+.chart-fallback-ui { background: var(--surface-hover); }
+
+/* ─── Modal (fallback in case inline styles are overridden) ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(11, 13, 16, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+}
+.modal-content { max-height: 90vh; overflow-y: auto; }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* ─── Notification bell badge ───────────────────────── */
+.bell-badge {
+  position: absolute;
+  top: -2px;
+  inset-inline-end: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-stamp-ink);
+  color: #fff;
+  font-size: 10px;
+  font-weight: var(--font-bold);
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg-sidebar);
+}
+
+/* ─── Exam session page shell ───────────────────────── */
+.exam-session-page { padding-block: 6px; }
