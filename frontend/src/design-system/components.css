@@ -1,6 +1,12 @@
 /* ═══════════════════════════════════════════════════════
    Design System Components CSS
    ═══════════════════════════════════════════════════════ */
+.view-content {
+    display: none !important;
+}
+.view-content.active {
+    display: block !important;
+}
 
 /* ─── Buttons ───────────────────────────────────────── */
 .btn {

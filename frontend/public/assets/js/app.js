@@ -41,19 +41,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function switchView(targetId) {
         if (!targetId) return;
 
-        // SPA Navigation if router exists
-        if (window.router && routeMap[targetId]) {
-            window.router.navigate(routeMap[targetId]);
-        }
-
-        // Legacy DOM view switching
+        // Hide all view-content elements, show target view
         const views = document.querySelectorAll('.view-content');
-        if (views.length > 0) {
-            views.forEach(v => v.classList.remove('active'));
-            const targetView = document.getElementById(targetId);
-            if (targetView) {
-                targetView.classList.add('active');
-            }
+        views.forEach(v => {
+            v.classList.remove('active');
+            v.style.display = 'none';
+        });
+
+        const targetView = document.getElementById(targetId);
+        if (targetView) {
+            targetView.classList.add('active');
+            targetView.style.display = 'block';
         }
 
         // Update active class on menu items
@@ -64,6 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.classList.remove('active');
             }
         });
+
+        // Push URL history state
+        if (routeMap[targetId] && window.location.pathname !== routeMap[targetId]) {
+            window.history.pushState(null, '', routeMap[targetId]);
+        }
 
         // Close mobile sidebar / dropdown if open
         document.body.classList.remove('sidebar-open');

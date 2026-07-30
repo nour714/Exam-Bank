@@ -1,6 +1,13 @@
 /* ==========================================
    Exam Bank - Style Guide & Theme Variables
    ========================================== */
+.view-content {
+    display: none !important;
+}
+.view-content.active {
+    display: block !important;
+}
+
 :root {
     /* Color Palette */
     --primary-color: #0f2963;
