@@ -175,6 +175,13 @@ async function bootstrap() {
   router.start();
   window.router = router;
 
+  // Remove initial skeleton loader
+  const loader = document.getElementById('app-skeleton-loader');
+  if (loader) {
+    loader.classList.add('hidden');
+    setTimeout(() => loader.remove(), 500);
+  }
+
   // 7. Register Service Worker for PWA with forced update & auto-refresh
   if ('serviceWorker' in navigator) {
     let refreshing = false;
