@@ -15,13 +15,16 @@ export class Sidebar extends BaseComponent {
     this.element.id = 'main-sidebar';
     
     this.element.classList.add('hidden');
+    document.body.classList.add('sidebar-hidden');
 
     this.onCleanup(store.subscribe('user', (user) => {
       if (!user) {
         this.element.classList.add('hidden');
+        document.body.classList.add('sidebar-hidden');
         return;
       }
       this.element.classList.remove('hidden');
+      document.body.classList.remove('sidebar-hidden');
       
       this.element.innerHTML = `
         <div class="sidebar-brand">

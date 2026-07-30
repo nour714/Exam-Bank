@@ -217,13 +217,13 @@ export default class HomePage extends BaseComponent {
         </g>
 
         <!-- Floating Element 3: Countdown timer (Bottom Right) -->
-        <g transform="translate(345, 250)">
+        <g transform="translate(335, 250)">
           <g class="anim-float-medium" filter="url(#${p}shadow)">
-            <rect x="0" y="0" width="96" height="60" rx="14" fill="url(#${p}glassGrad)" />
+            <rect x="0" y="0" width="115" height="60" rx="14" fill="url(#${p}glassGrad)" />
             <circle cx="24" cy="30" r="13" fill="none" stroke="#B8862E" stroke-width="2.5"/>
             <path d="M24 22 v8 l6 4" fill="none" stroke="#B8862E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <text x="50" y="27" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#232320">02:45:00</text>
-            <text x="50" y="41" font-family="'Tajawal', sans-serif" font-size="9" fill="#7A7669">وقت الامتحان</text>
+            <text x="68" y="27" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#232320" text-anchor="middle" direction="ltr">02:45:00</text>
+            <text x="68" y="43" font-family="'Tajawal', sans-serif" font-size="10" font-weight="600" fill="#7A7669" text-anchor="middle">وقت الامتحان</text>
           </g>
         </g>
 

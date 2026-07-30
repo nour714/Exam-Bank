@@ -1,4 +1,4 @@
-﻿/* App Container Layout */
+/* App Container Layout */
 .app-container {
     min-height: 100vh;
     position: relative;
@@ -6,6 +6,14 @@
     width: calc(100% - var(--sidebar-width));
     margin-right: var(--sidebar-width);
     transition: margin-right var(--transition-normal), width var(--transition-normal);
+}
+
+.sidebar.hidden ~ .app-container,
+.sidebar:empty ~ .app-container,
+body.sidebar-hidden .app-container,
+body.exam-mode-active .app-container {
+    width: 100% !important;
+    margin-right: 0 !important;
 }
 
 /* ==========================================
