@@ -15,6 +15,7 @@ export class QuestionPreview extends BaseComponent {
     this.onEdit = props.onEdit;
     this.onDuplicate = props.onDuplicate;
     this.onDelete = props.onDelete;
+    this.onRestore = props.onRestore;
     
     this.isOpen = false;
     this.isLoadingRich = false;
@@ -150,20 +151,28 @@ export class QuestionPreview extends BaseComponent {
         </div>
 
         <!-- Footer Actions -->
-        <div class="p-6 border-t border-gray-800 bg-gray-800/30 flex justify-between items-center">
+        <div class="p-6 border-t border-gray-800 bg-gray-800/30 flex justify-between items-center gap-2 flex-wrap">
             <button id="view-details-btn" class="btn text-gray-300 hover:text-white hover:bg-gray-800 text-sm">
               <i data-lucide="external-link" class="w-4 h-4 me-2"></i> التفاصيل الكاملة
             </button>
-            <button id="delete-btn" class="btn text-red-400 hover:text-red-300 hover:bg-red-500/10 text-sm">
-              <i data-lucide="trash-2" class="w-4 h-4 me-2"></i> حذف
-            </button>
+            ${(q.deleted || q.status === 'deleted') ? `
+              <button id="restore-btn" class="btn bg-green-500/20 text-green-400 hover:bg-green-500 hover:text-white border border-green-500/30 text-sm font-bold">
+                <i data-lucide="rotate-ccw" class="w-4 h-4 me-2"></i> استعادة (Restore / استرجاع)
+              </button>
+            ` : `
+              <button id="delete-btn" class="btn text-red-400 hover:text-red-300 hover:bg-red-500/10 text-sm">
+                <i data-lucide="trash-2" class="w-4 h-4 me-2"></i> حذف
+              </button>
+            `}
             <div class="flex-1"></div>
-            <button id="duplicate-btn" class="btn text-gray-300 hover:text-white hover:bg-gray-800 text-sm">
-              <i data-lucide="copy" class="w-4 h-4 me-2"></i> تكرار
-            </button>
-            <button id="edit-btn" class="btn btn-primary text-sm">
-              <i data-lucide="edit-2" class="w-4 h-4 me-2"></i> تعديل
-            </button>
+            ${(q.deleted || q.status === 'deleted') ? '' : `
+              <button id="duplicate-btn" class="btn text-gray-300 hover:text-white hover:bg-gray-800 text-sm">
+                <i data-lucide="copy" class="w-4 h-4 me-2"></i> تكرار
+              </button>
+              <button id="edit-btn" class="btn btn-primary text-sm">
+                <i data-lucide="edit-2" class="w-4 h-4 me-2"></i> تعديل
+              </button>
+            `}
           </div>
         </div>
       </div>
@@ -173,20 +182,22 @@ export class QuestionPreview extends BaseComponent {
     this.element.querySelector('#preview-backdrop').addEventListener('click', () => this.close());
     this.element.querySelector('#close-preview-btn').addEventListener('click', () => this.close());
     
-    this.element.querySelector('#view-details-btn').addEventListener('click', () => {
-      // Use router to navigate to details page
+    this.element.querySelector('#view-details-btn')?.addEventListener('click', () => {
       window.router.navigate(`/question-bank/questions/${q.id}`);
       this.close();
     });
 
-    this.element.querySelector('#edit-btn').addEventListener('click', () => {
+    this.element.querySelector('#edit-btn')?.addEventListener('click', () => {
       if (this.onEdit) this.onEdit(q);
     });
-    this.element.querySelector('#duplicate-btn').addEventListener('click', () => {
+    this.element.querySelector('#duplicate-btn')?.addEventListener('click', () => {
       if (this.onDuplicate) this.onDuplicate(q);
     });
-    this.element.querySelector('#delete-btn').addEventListener('click', () => {
+    this.element.querySelector('#delete-btn')?.addEventListener('click', () => {
       if (this.onDelete) this.onDelete(q);
+    });
+    this.element.querySelector('#restore-btn')?.addEventListener('click', () => {
+      if (this.onRestore) this.onRestore(q);
     });
 
     if (window.lucide) window.lucide.createIcons({ root: this.element });

@@ -171,9 +171,19 @@ async function bootstrap() {
     window.history.replaceState(null, '', target);
   }
 
-  // 6. Start router
-  router.start();
+  // 6. Start router & expose global authService for legacy/HTML controls
+  window.authService = authService;
   window.router = router;
+  router.start();
+
+  // Global click delegate for logout actions
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('#btn-logout, #btn-logout-mobile-menu, .btn-logout, #mobile-more-logout');
+    if (btn) {
+      e.preventDefault();
+      authService.logout();
+    }
+  });
 
   // Remove initial skeleton loader
   const loader = document.getElementById('app-skeleton-loader');

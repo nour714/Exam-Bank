@@ -63,7 +63,8 @@ class BrowserContent extends BaseComponent {
         { id: 'status', label: 'الحالة', type: 'select', group: 'meta', options: [
           { value: 'draft', label: 'مسودة' },
           { value: 'published', label: 'منشور' },
-          { value: 'archived', label: 'مؤرشف' }
+          { value: 'archived', label: 'مؤرشف' },
+          { value: 'deleted', label: 'المحذوفات (سلة المهملات - Deleted)' }
         ]},
         { id: 'dateRange', label: 'نطاق التاريخ', type: 'select', group: 'meta', options: [
           { value: 'today', label: 'اليوم' },
@@ -113,6 +114,9 @@ class BrowserContent extends BaseComponent {
       },
       onGenerateAI: () => {
         this.aiGeneratorModal.open();
+      },
+      onTrashClick: () => {
+        this.filterEngine.setFilter('status', 'deleted');
       }
     });
 
@@ -121,7 +125,15 @@ class BrowserContent extends BaseComponent {
     
     this.questionList = new QuestionList({ 
       selectionManager: this.selectionManager,
-      onItemClick: (item) => this._openPreview(item)
+      onItemClick: (item) => this._openPreview(item),
+      onRestore: async (q) => {
+        try {
+          await questionService.restore(q.id);
+          this.executeSearch(true);
+        } catch (e) {
+          console.error('Restore failed', e);
+        }
+      }
     });
 
     this.pagination = new Pagination({
@@ -157,6 +169,17 @@ class BrowserContent extends BaseComponent {
             this._closePreview();
           } catch (e) {
             console.error('Delete failed', e);
+          }
+        }
+      },
+      onRestore: async (q) => {
+        if (confirm('هل أنت متأكد من استعادة هذا السؤال المحذوف؟')) {
+          try {
+            await questionService.restore(q.id);
+            this.executeSearch(true);
+            this._closePreview();
+          } catch (e) {
+            console.error('Restore failed', e);
           }
         }
       }

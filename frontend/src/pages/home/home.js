@@ -111,10 +111,8 @@ export default class HomePage extends BaseComponent {
     const subjectCards = this.element.querySelectorAll('.subject-minimal-card');
     subjectCards.forEach(card => {
       this.addEventListener(card, 'click', () => {
-        const subject = card.dataset.subject;
-        if (subject) {
-          router.navigate('/question-bank');
-        }
+        const subject = card.dataset.subject || 'physics';
+        router.navigate(`/question-bank/subjects/${subject}/units`);
       });
     });
   }

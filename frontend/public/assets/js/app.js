@@ -113,7 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const subjectCard = e.target.closest('.subject-card, .subject-minimal-card');
         if (subjectCard) {
             e.preventDefault();
-            if (window.router) window.router.navigate('/question-bank');
+            const subjectId = subjectCard.dataset.subject || 'physics';
+            if (window.router) window.router.navigate(`/question-bank/subjects/${subjectId}/units`);
             else switchView('qbank-view');
             return;
         }
@@ -139,10 +140,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnLogout = e.target.closest('#btn-logout, #btn-logout-mobile-menu, .btn-logout');
         if (btnLogout) {
             e.preventDefault();
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            if (window.router) window.router.navigate('/login');
-            else window.location.href = 'login.html';
+            if (window.authService) {
+                window.authService.logout();
+            } else {
+                localStorage.clear();
+                if (window.router) window.router.navigate('/login');
+                else window.location.href = 'login.html';
+            }
             return;
         }
 

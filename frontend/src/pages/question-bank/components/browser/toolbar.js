@@ -11,6 +11,7 @@ export class Toolbar extends BaseComponent {
     this.selectionManager = props.selectionManager;
     this.onAdd = props.onAdd;
     this.onGenerateAI = props.onGenerateAI;
+    this.onTrashClick = props.onTrashClick;
   }
 
   render() {
@@ -33,12 +34,15 @@ export class Toolbar extends BaseComponent {
       `;
     } else {
       actionsHtml = `
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           ${this.onGenerateAI ? `
             <button id="generate-ai-btn" class="btn bg-purple-600/20 text-purple-400 hover:bg-purple-600 hover:text-white border border-purple-500/30 transition-colors">
               <i data-lucide="sparkles" class="w-4 h-4 me-2"></i> توليد بالذكاء الاصطناعي
             </button>
           ` : ''}
+          <button id="trash-btn" class="btn bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/30 transition-colors" title="الأسئلة المحذوفة (سلة المهملات)">
+            <i data-lucide="trash-2" class="w-4 h-4 me-2"></i> سلة المهملات (المحذوفات)
+          </button>
           <button id="add-btn" class="btn btn-primary">
             <i data-lucide="plus" class="w-5 h-5 me-2"></i> إضافة سؤال
           </button>
@@ -64,6 +68,11 @@ export class Toolbar extends BaseComponent {
       if (this.onGenerateAI) {
         this.element.querySelector('#generate-ai-btn')?.addEventListener('click', () => {
           this.onGenerateAI();
+        });
+      }
+      if (this.onTrashClick) {
+        this.element.querySelector('#trash-btn')?.addEventListener('click', () => {
+          this.onTrashClick();
         });
       }
     }

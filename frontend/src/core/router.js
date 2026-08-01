@@ -157,7 +157,7 @@ class Router {
    * @private
    */
   _mount(content) {
-    const container = document.getElementById('app-main');
+    const container = document.getElementById('app-main') || document.querySelector('.content-container') || document.querySelector('.main-layout') || document.body;
     if (!container) return;
 
     container.innerHTML = '';

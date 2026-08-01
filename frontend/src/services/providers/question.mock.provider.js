@@ -39,7 +39,8 @@ export const QuestionMockProvider = {
   async search(criteria) {
     return new Promise(resolve => {
       setTimeout(() => {
-        let results = MOCK_DB.filter(q => !q.deleted); // Exclude deleted by default unless filtering by deleted? Actually let's assume search excludes soft deleted
+        const isDeletedFilter = criteria.filters && criteria.filters.status === 'deleted';
+        let results = MOCK_DB.filter(q => isDeletedFilter ? q.deleted === true : !q.deleted);
 
         // Apply text search
         if (criteria.q) {

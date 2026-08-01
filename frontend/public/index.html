@@ -231,7 +231,7 @@
             </header>
 
             <!-- Content Views Container -->
-            <main class="content-container">
+            <main class="content-container" id="app-main">
                 
                 <!-- 1. HOME VIEW (الرئيسية) -->
                 <section class="content-view active" id="home-view">
@@ -1767,9 +1767,12 @@
             const btnLogoutMobile = document.getElementById('btn-logout-mobile-menu');
             if (btnLogoutMobile) {
                 btnLogoutMobile.addEventListener('click', () => {
-                    // Trigger the main logout logic if it exists, or clear token and redirect
-                    localStorage.removeItem('token');
-                    window.location.href = 'login.html';
+                    if (window.authService) {
+                        window.authService.logout();
+                    } else {
+                        localStorage.clear();
+                        window.location.href = '/login';
+                    }
                 });
             }
         });
