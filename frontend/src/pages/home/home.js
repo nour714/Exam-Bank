@@ -38,28 +38,28 @@ export default class HomePage extends BaseComponent {
 
       <!-- Platform Features -->
       <section class="features-section container mx-auto px-4 py-12 max-w-6xl">
-        <h2 class="section-title text-center text-2xl font-bold text-gray-200 mb-8">لماذا إيجزام بنك؟</h2>
-        <div class="features-grid grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="feature-card card p-6 text-center">
-            <div class="feature-icon w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 bg-orange-500/10 text-orange-500">
+        <h2 class="section-title text-center text-3xl font-extrabold mb-10" style="color: var(--text-primary); font-family: var(--font-family-display);">لماذا إيجزام بنك؟</h2>
+        <div class="features-grid grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="feature-card glass-card p-6 text-center">
+            <div class="feature-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-orange-500/10 text-orange-500">
               <i data-lucide="brain" class="w-7 h-7"></i>
             </div>
-            <h3 class="text-lg font-bold text-gray-200 mb-2">تحليل مستواك بالذكاء الاصطناعي</h3>
-            <p class="text-sm text-gray-400">تقارير تفصيلية تحدد نقاط ضعفك وقوتك وتطرح خطط دراسية مخصصة لرفع مستواك.</p>
+            <h3 class="text-lg font-bold mb-2" style="color: var(--text-primary); font-family: var(--font-family-display);">تحليل مستواك بالذكاء الاصطناعي</h3>
+            <p class="text-sm leading-relaxed" style="color: var(--text-secondary);">تقارير تفصيلية تحدد نقاط ضعفك وقوتك وتطرح خطط دراسية مخصصة لرفع مستواك.</p>
           </div>
-          <div class="feature-card card p-6 text-center">
-            <div class="feature-icon w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 bg-blue-500/10 text-blue-500">
+          <div class="feature-card glass-card p-6 text-center">
+            <div class="feature-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-blue-500/10 text-blue-500">
               <i data-lucide="help-circle" class="w-7 h-7"></i>
             </div>
-            <h3 class="text-lg font-bold text-gray-200 mb-2">امتحانات على النظام الجديد</h3>
-            <p class="text-sm text-gray-400">اختبارات تحاكي تماماً نظام الامتحانات النهائي لتدريبك على إدارة الوقت والتوتر.</p>
+            <h3 class="text-lg font-bold mb-2" style="color: var(--text-primary); font-family: var(--font-family-display);">امتحانات على النظام الجديد</h3>
+            <p class="text-sm leading-relaxed" style="color: var(--text-secondary);">اختبارات تحاكي تماماً نظام الامتحانات النهائي لتدريبك على إدارة الوقت والتوتر.</p>
           </div>
-          <div class="feature-card card p-6 text-center">
-            <div class="feature-icon w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 bg-purple-500/10 text-purple-500">
+          <div class="feature-card glass-card p-6 text-center">
+            <div class="feature-icon w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-purple-500/10 text-purple-500">
               <i data-lucide="book-open" class="w-7 h-7"></i>
             </div>
-            <h3 class="text-lg font-bold text-gray-200 mb-2">آلاف الأسئلة المجابة</h3>
-            <p class="text-sm text-gray-400">بنك أسئلة ضخم ومحدث لمنهج الثالث الثانوي — يغطي كل مواد الثانوية العامة بمستويات صعوبة متنوعة.</p>
+            <h3 class="text-lg font-bold mb-2" style="color: var(--text-primary); font-family: var(--font-family-display);">آلاف الأسئلة المجابة</h3>
+            <p class="text-sm leading-relaxed" style="color: var(--text-secondary);">بنك أسئلة ضخم ومحدث لمنهج الثالث الثانوي — يغطي كل مواد الثانوية العامة بمستويات صعوبة متنوعة.</p>
           </div>
         </div>
       </section>
@@ -67,12 +67,12 @@ export default class HomePage extends BaseComponent {
       <!-- Subjects Showcase -->
       <section class="subjects-section container mx-auto px-4 py-12 max-w-6xl">
         <div class="flex justify-between items-center mb-6">
-          <h2 class="section-title text-2xl font-bold text-gray-200">مواد ثالثة ثانوي</h2>
-          <button class="btn btn-ghost text-primary-400 hover:text-primary-300" id="btn-view-all">
+          <h2 class="section-title text-2xl font-bold" style="color: var(--text-primary); font-family: var(--font-family-display);">مواد ثالثة ثانوي</h2>
+          <button class="btn btn-ghost text-primary-500 hover:text-primary-600" id="btn-view-all">
             عرض الكل <i data-lucide="arrow-left" class="w-4 h-4 ms-1"></i>
           </button>
         </div>
-        <div class="subjects-grid grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-4">
+        <div class="subjects-grid grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-4">
           ${this._getSubjectCards()}
         </div>
       </section>

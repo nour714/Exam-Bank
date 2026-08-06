@@ -92,16 +92,16 @@ export class HierarchyBrowser extends BaseComponent {
       this.element.innerHTML = this._skeletonHtml();
     } else if (state === 'empty') {
       this.element.innerHTML = `
-        <div class="col-span-full flex flex-col items-center justify-center py-16 text-gray-500">
+        <div class="col-span-full flex flex-col items-center justify-center py-16" style="color: var(--text-muted);">
           <i data-lucide="folder-open" class="w-16 h-16 mb-4 opacity-50"></i>
-          <h3 class="text-xl mb-2 font-bold text-white">${this.emptyMessage}</h3>
+          <h3 class="text-xl mb-2 font-bold" style="color: var(--text-primary);">${this.emptyMessage}</h3>
         </div>
       `;
     } else if (state === 'error') {
       this.element.innerHTML = `
         <div class="col-span-full flex flex-col items-center justify-center py-16 text-danger">
           <i data-lucide="alert-circle" class="w-16 h-16 mb-4"></i>
-          <h3 class="text-xl mb-4 font-bold text-white">حدث خطأ أثناء تحميل البيانات</h3>
+          <h3 class="text-xl mb-4 font-bold" style="color: var(--text-primary);">حدث خطأ أثناء تحميل البيانات</h3>
           <button class="btn btn-primary" id="retry-btn">
             <i data-lucide="refresh-cw" class="w-4 h-4 me-2"></i> إعـادة المحاولة
           </button>
@@ -124,7 +124,8 @@ export class HierarchyBrowser extends BaseComponent {
       const questionCount = item.metadata?.questionCount;
       
       const card = document.createElement('div');
-      card.className = `card p-6 border border-gray-700 hover:border-${color}-500 transition-all cursor-pointer group`;
+      card.className = `card p-6 border transition-all cursor-pointer group`;
+      card.style.borderColor = 'var(--border-color)';
       card.setAttribute('role', 'button');
       card.setAttribute('tabindex', '0');
       
@@ -149,7 +150,7 @@ export class HierarchyBrowser extends BaseComponent {
 
       // Show chevron only if this entity has children (not a leaf node)
       const chevronHtml = item.childrenCount > 0 ? `
-        <div class="p-2 bg-gray-800 rounded-lg text-gray-400 group-hover:text-white transition-colors">
+        <div class="p-2 rounded-lg transition-colors" style="background: var(--surface-hover); color: var(--text-muted);">
           <i data-lucide="chevron-left" class="w-5 h-5"></i>
         </div>
       ` : '';
@@ -161,8 +162,8 @@ export class HierarchyBrowser extends BaseComponent {
           </div>
           ${chevronHtml}
         </div>
-        <h3 class="text-lg font-bold text-white mb-2">${item.name}</h3>
-        <div class="flex items-center gap-4 text-sm text-gray-400 mt-4">
+        <h3 class="text-lg font-bold mb-2" style="color: var(--text-primary);">${item.name}</h3>
+        <div class="flex items-center gap-4 text-sm mt-4" style="color: var(--text-muted);">
           ${statsHtml}
         </div>
       `;
@@ -192,11 +193,11 @@ export class HierarchyBrowser extends BaseComponent {
   _skeletonHtml() {
     return Array(8).fill(`
       <div class="card p-6 animate-pulse">
-        <div class="w-12 h-12 bg-gray-700 rounded-xl mb-6"></div>
-        <div class="h-6 bg-gray-700 rounded w-3/4 mb-4"></div>
+        <div class="w-12 h-12 rounded-xl mb-6" style="background: var(--border-color);"></div>
+        <div class="h-6 rounded w-3/4 mb-4" style="background: var(--border-color);"></div>
         <div class="flex gap-4">
-          <div class="h-4 bg-gray-700 rounded w-1/3"></div>
-          <div class="h-4 bg-gray-700 rounded w-1/4"></div>
+          <div class="h-4 rounded w-1/3" style="background: var(--border-color);"></div>
+          <div class="h-4 rounded w-1/4" style="background: var(--border-color);"></div>
         </div>
       </div>
     `).join('');

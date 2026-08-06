@@ -87,25 +87,26 @@ export class RecentExams extends BaseComponent {
       const progressColor = exam.score >= 85 ? 'bg-success' : exam.score >= 65 ? 'bg-warning' : 'bg-danger';
 
       const card = document.createElement('div');
-      card.className = 'card p-5 border border-gray-700 hover:border-gray-500 transition-colors cursor-pointer';
+      card.className = 'card p-5 border transition-all cursor-pointer hover:shadow-md';
+      card.style.borderColor = 'var(--border-color)';
       card.setAttribute('role', 'article');
       card.setAttribute('tabindex', '0');
       card.setAttribute('aria-label', `${exam.title} - النتيجة ${exam.score}%`);
 
       card.innerHTML = `
         <div class="flex justify-between items-start mb-4">
-          <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
+          <div class="p-2 bg-blue-500/10 text-blue-500 rounded-lg">
             <i data-lucide="book-open" class="w-5 h-5"></i>
           </div>
-          <span class="text-xs text-gray-400">${exam.date}</span>
+          <span class="text-xs" style="color: var(--text-muted);">${exam.date}</span>
         </div>
-        <h4 class="font-bold text-white mb-1 truncate" title="${exam.title}">${exam.title}</h4>
-        <p class="text-sm text-gray-400 mb-4">${exam.subject}</p>
+        <h4 class="font-bold mb-1 truncate" style="color: var(--text-primary);" title="${exam.title}">${exam.title}</h4>
+        <p class="text-sm mb-4" style="color: var(--text-secondary);">${exam.subject}</p>
         <div class="flex justify-between items-center text-sm mb-2">
-          <span class="text-gray-300">النتيجة</span>
-          <span class="font-bold text-white">${exam.score}%</span>
+          <span style="color: var(--text-secondary);">النتيجة</span>
+          <span class="font-bold" style="color: var(--text-primary);">${exam.score}%</span>
         </div>
-        <div class="w-full bg-gray-700 rounded-full h-1.5">
+        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5" style="background: var(--border-color);">
           <div class="${progressColor} h-1.5 rounded-full transition-all" style="width: ${exam.score}%"></div>
         </div>
       `;
@@ -139,12 +140,12 @@ export class RecentExams extends BaseComponent {
       html += `
         <div class="animate-pulse card p-5">
           <div class="flex justify-between mb-4">
-            <div class="h-8 w-8 bg-gray-700 rounded-lg"></div>
-            <div class="h-3 w-16 bg-gray-700 rounded"></div>
+            <div class="h-8 w-8 rounded-lg" style="background: var(--border-color);"></div>
+            <div class="h-3 w-16 rounded" style="background: var(--border-color);"></div>
           </div>
-          <div class="h-5 bg-gray-700 rounded w-3/4 mb-2"></div>
-          <div class="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
-          <div class="h-1.5 bg-gray-700 rounded-full"></div>
+          <div class="h-5 rounded w-3/4 mb-2" style="background: var(--border-color);"></div>
+          <div class="h-4 rounded w-1/2 mb-4" style="background: var(--border-color);"></div>
+          <div class="h-1.5 rounded-full" style="background: var(--border-color);"></div>
         </div>
       `;
     }

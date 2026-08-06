@@ -128,11 +128,11 @@ export class ActivityTimeline extends BaseComponent {
       'achievement': 'text-yellow-500 bg-yellow-500/10'
     };
 
-    let html = '<div class="absolute right-5 top-0 bottom-0 w-px bg-gray-700"></div><ul class="space-y-6 relative" role="list">';
+    let html = '<div class="absolute right-5 top-0 bottom-0 w-px" style="background: var(--border-color);"></div><ul class="space-y-6 relative" role="list">';
 
     activities.forEach(activity => {
       const icon = iconMap[activity.type] || 'circle';
-      const color = colorMap[activity.type] || 'text-gray-400 bg-gray-800';
+      const color = colorMap[activity.type] || 'text-gray-400 bg-gray-500/10';
 
       html += `
         <li class="flex items-start" role="listitem">
@@ -140,9 +140,9 @@ export class ActivityTimeline extends BaseComponent {
             <i data-lucide="${icon}" class="w-5 h-5"></i>
           </div>
           <div class="flex-1">
-            <p class="font-medium text-white text-sm">${activity.title}</p>
-            <p class="text-gray-400 text-xs mt-1">${activity.description}</p>
-            <span class="text-gray-500 text-xs mt-2 inline-block">${activity.time}</span>
+            <p class="font-medium text-sm" style="color: var(--text-primary);">${activity.title}</p>
+            <p class="text-xs mt-1" style="color: var(--text-secondary);">${activity.description}</p>
+            <span class="text-xs mt-2 inline-block" style="color: var(--text-muted);">${activity.time}</span>
           </div>
         </li>
       `;
@@ -157,10 +157,10 @@ export class ActivityTimeline extends BaseComponent {
     for (let i = 0; i < 3; i++) {
       html += `
         <div class="flex items-start">
-          <div class="rounded-full bg-gray-700 h-10 w-10 me-4 shrink-0"></div>
+          <div class="rounded-full h-10 w-10 me-4 shrink-0" style="background: var(--border-color);"></div>
           <div class="flex-1 space-y-2">
-            <div class="h-4 bg-gray-700 rounded w-3/4"></div>
-            <div class="h-3 bg-gray-700 rounded w-1/2"></div>
+            <div class="h-4 rounded w-3/4" style="background: var(--border-color);"></div>
+            <div class="h-3 rounded w-1/2" style="background: var(--border-color);"></div>
           </div>
         </div>
       `;

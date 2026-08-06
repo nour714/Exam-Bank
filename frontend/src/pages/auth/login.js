@@ -121,15 +121,16 @@ export class LoginPage extends BaseComponent {
     
     const divider = document.createElement('div');
     divider.className = 'flex items-center my-4 gap-3 text-sm';
-    divider.style.color = 'var(--gray-500)';
-    divider.innerHTML = '<div class="h-px flex-1" style="background: var(--gray-600);"></div><span>أو</span><div class="h-px flex-1" style="background: var(--gray-600);"></div>';
+    divider.style.color = 'var(--text-muted)';
+    divider.innerHTML = '<div class="h-px flex-1" style="background: var(--border-color);"></div><span>أو</span><div class="h-px flex-1" style="background: var(--border-color);"></div>';
     form.appendChild(divider);
     
     form.appendChild(googleBtn.render());
 
     const registerLink = document.createElement('p');
-    registerLink.className = 'text-center text-sm text-gray-400 mt-4';
-    registerLink.innerHTML = 'مستخدم جديد؟ <a href="/register" id="go-to-register" class="text-primary font-medium">أنشئ حساباً</a>';
+    registerLink.className = 'text-center text-sm mt-4';
+    registerLink.style.color = 'var(--text-muted)';
+    registerLink.innerHTML = 'مستخدم جديد؟ <a href="/register" id="go-to-register" class="text-primary font-medium" style="color: var(--color-primary-500);">أنشئ حساباً</a>';
     form.appendChild(registerLink);
 
     form.addEventListener('submit', (e) => this.handleSubmit(e));

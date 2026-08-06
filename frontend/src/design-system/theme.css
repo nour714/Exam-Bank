@@ -59,42 +59,42 @@
   --gray-900: #131311;
   --gray-950: #0B0D10;
 
-  /* ─── Semantic Tokens ───────────────────────────────── */
-  --bg-primary:    #F3F1E9; /* Paper */
-  --bg-secondary:  var(--gray-50);
-  --bg-tertiary:   var(--gray-100);
-  --bg-inverse:    var(--gray-900);
-  --bg-sidebar:    #FDFCF8;
+  /* ─── Semantic Tokens (Light Mode Defaults) ───────────── */
+  --bg-primary:    #F4F7FC; /* Crisp modern paper background */
+  --bg-secondary:  #FFFFFF;
+  --bg-tertiary:   #E2E8F0;
+  --bg-inverse:    #0F172A;
+  --bg-sidebar:    #FFFFFF;
 
-  --text-primary:   #191A16;
-  --text-secondary: #5C594E;
-  --text-muted:     var(--gray-500);
-  --text-inverse:   #FDFCF8;
+  --text-primary:   #0F172A; /* High-contrast navy slate */
+  --text-secondary: #475569; /* Clear subtext */
+  --text-muted:     #64748B;
+  --text-inverse:   #FFFFFF;
   --text-link:      var(--color-primary-500);
 
-  --border-color:   #E2DFD3;
+  --border-color:   #E2E8F0;
   --border-focus:   var(--color-primary-500);
 
-  --surface-card:   rgba(253, 252, 248, 0.85);
-  --surface-hover:  var(--gray-50);
-  --surface-active: #E9EFF8;
+  --surface-card:   #FFFFFF;
+  --surface-hover:  #F8FAFC;
+  --surface-active: #E0E7FF;
 
-  --input-bg:       #FBFAF6;
+  --input-bg:       #F8FAFC;
 
-  /* ─── Ticket / Stamp accent — signature motif ──────── */
-  --color-ticket-edge: var(--gray-300);
+  /* ─── Ticket / Stamp accent ────────────────────────── */
+  --color-ticket-edge: #CBD5E1;
   --color-stamp-ink:   var(--color-danger-500);
 
   /* Theme-specific Gradients */
-  --hero-grad: linear-gradient(135deg, #EAF1FB 0%, #F3F1E9 100%);
-  --accent-grad: linear-gradient(135deg, var(--color-primary-700) 0%, var(--color-primary-900) 100%);
+  --hero-grad: linear-gradient(135deg, #EEF5FF 0%, #F8FAFC 100%);
+  --accent-grad: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%);
 
   /* ─── Typography ───────────────────────────────────── */
-  /* Display face: Cairo (geometric, stamp-like weight for headings) */
+  /* Display face: Cairo (geometric heading face) */
   --font-family-display: 'Cairo', 'Tajawal', system-ui, sans-serif;
-  /* Body face: Tajawal (clean, readable long-form Arabic) */
-  --font-family: 'Tajawal', 'Segoe UI', Tahoma, Arial, system-ui, sans-serif;
-  /* Utility face: for scores, timers, ticket/serial numbers — set deliberately, not decoratively */
+  /* Body face: Tajawal (clean Arabic font) */
+  --font-family: 'Tajawal', 'Cairo', 'Segoe UI', system-ui, sans-serif;
+  /* Utility face */
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
   --text-xs:   0.75rem;   /* 12px */
@@ -139,14 +139,14 @@
   --radius-2xl:  1.5rem;
   --radius-full: 9999px;
 
-  /* ─── Shadows (ink-tinted, not violet) ──────────────── */
-  --shadow-xs:   0 1px 2px rgba(19, 19, 17, 0.05);
-  --shadow-sm:   0 1px 3px 0 rgba(19, 19, 17, 0.06), 0 1px 2px -1px rgba(19, 19, 17, 0.05);
-  --shadow-md:   0 4px 6px -1px rgba(19, 19, 17, 0.08), 0 2px 4px -2px rgba(19, 19, 17, 0.05);
-  --shadow-lg:   0 10px 15px -3px rgba(22, 41, 74, 0.10), 0 4px 6px -4px rgba(22, 41, 74, 0.04);
-  --shadow-xl:   0 20px 25px -5px rgba(19, 19, 17, 0.12), 0 10px 10px -5px rgba(19, 19, 17, 0.04);
-  --shadow-glow: 0 0 20px rgba(47, 95, 168, 0.18);
-  --shadow-inner: inset 0 2px 4px rgba(19, 19, 17, 0.06);
+  /* ─── Shadows ───────────────────────────────────────── */
+  --shadow-xs:   0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm:   0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-md:   0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+  --shadow-lg:   0 12px 24px -4px rgba(47, 95, 168, 0.12), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+  --shadow-xl:   0 20px 30px -8px rgba(15, 23, 42, 0.15);
+  --shadow-glow: 0 0 24px rgba(47, 95, 168, 0.22);
+  --shadow-inner: inset 0 2px 4px rgba(15, 23, 42, 0.06);
 
   /* ─── Z-Index Scale ────────────────────────────────── */
   --z-dropdown: 1000;
@@ -161,7 +161,7 @@
   --transition-normal: 0.3s ease;
   --transition-slow:   0.5s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base:   var(--transition-normal);
-  --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* ─── Layout ───────────────────────────────────────── */
   --sidebar-width:    250px;
@@ -169,7 +169,7 @@
   --header-height:    70px;
   --container-max:    1280px;
 
-  /* Compatibility aliases used by application components. */
+  /* Compatibility aliases used across components */
   --primary-color: var(--color-primary-500);
   --secondary-color: var(--color-primary-700);
   --primary-light: var(--surface-active);
@@ -178,43 +178,44 @@
   --text-color: var(--text-primary);
   --success-color: var(--color-success-500);
   --info-color: var(--color-info-500);
-
-  /* ─── Breakpoints (reference, CSS uses media queries) ─ */
-  /* sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px */
 }
 
-/* ─── Dark Mode — "Ledger at night": deep graphite-ink, not neon ── */
-[data-theme="dark"], body.dark-theme {
-  --bg-primary:    #0F1115;
-  --bg-secondary:  #171A20;
-  --bg-tertiary:   #1E222A;
-  --bg-inverse:    #FDFCF8;
-  --bg-sidebar:    #14161B;
+/* ─── Dark Mode Selector Alignment ────────────────── */
+[data-theme="dark"], body.dark-theme, html.dark-theme, html[data-theme="dark"], .dark-theme {
+  --bg-primary:    #0B0F19;
+  --bg-secondary:  #111827;
+  --bg-tertiary:   #1F2937;
+  --bg-inverse:    #F8FAFC;
+  --bg-sidebar:    #111827;
 
-  --text-primary:   #F2F1EC;
-  --text-secondary: #A7A499;
-  --text-muted:     #6B6A63;
-  --text-inverse:   #131311;
+  --text-primary:   #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted:     #64748B;
+  --text-inverse:   #0F172A;
   --text-link:      var(--color-primary-300);
 
-  --border-color:   rgba(242, 241, 236, 0.09);
+  --border-color:   rgba(255, 255, 255, 0.1);
   --border-focus:   var(--color-primary-400);
 
-  --surface-card:   rgba(23, 26, 32, 0.82);
-  --surface-hover:  #1C2027;
-  --surface-active: rgba(47, 95, 168, 0.18);
+  --surface-card:   rgba(17, 24, 39, 0.85);
+  --surface-hover:  #1F2937;
+  --surface-active: rgba(47, 95, 168, 0.25);
 
-  --input-bg:       #171A20;
+  --input-bg:       #111827;
 
-  --color-ticket-edge: rgba(242, 241, 236, 0.16);
+  --color-ticket-edge: rgba(248, 250, 252, 0.15);
 
-  --hero-grad:      linear-gradient(135deg, #171A20 0%, #0F1115 100%);
+  --hero-grad:      linear-gradient(135deg, #111827 0%, #0B0F19 100%);
   --accent-grad:    linear-gradient(135deg, var(--color-primary-400) 0%, var(--color-primary-700) 100%);
 
   --shadow-sm:      0 1px 3px 0 rgba(0, 0, 0, 0.45);
   --shadow-md:      0 4px 12px rgba(0, 0, 0, 0.55);
   --shadow-lg:      0 12px 24px -3px rgba(0, 0, 0, 0.65);
-  --shadow-glow:    0 0 24px rgba(75, 125, 194, 0.22);
+  --shadow-glow:    0 0 24px rgba(75, 125, 194, 0.35);
+
+  --bg-color:       var(--bg-primary);
+  --card-bg:        var(--surface-card);
+  --text-color:     var(--text-primary);
 }
 
 /* ─── High Contrast Mode ─────────────────────────────── */
@@ -225,4 +226,7 @@
   --border-focus:  #FFD700;
   --color-primary-500: #FFD700;
   --surface-card:  #1A1A1A;
+  --bg-color: #000000;
+  --text-color: #FFFFFF;
 }
+

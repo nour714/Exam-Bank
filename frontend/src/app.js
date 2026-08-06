@@ -28,43 +28,30 @@ async function bootstrap() {
   initToastSystem();
 
   // 0. Inject Providers
-  const { DashboardMockProvider } = await import('./services/providers/dashboard.mock.provider.js');
-  setDashboardProvider(DashboardMockProvider);
+  const { DashboardApiProvider } = await import('./services/providers/dashboard.api.provider.js');
+  setDashboardProvider(DashboardApiProvider);
 
-  const { CurriculumMockProvider } = await import('./services/providers/curriculum.mock.provider.js');
-  setCurriculumProvider(CurriculumMockProvider);
+  const { CurriculumApiProvider } = await import('./services/providers/curriculum.api.provider.js');
+  setCurriculumProvider(CurriculumApiProvider);
 
-  const { QuestionMockProvider } = await import('./services/providers/question.mock.provider.js');
-  setQuestionProvider(QuestionMockProvider);
+  const { QuestionApiProvider } = await import('./services/providers/question.api.provider.js');
+  setQuestionProvider(QuestionApiProvider);
 
   const { AiMockProvider } = await import('./services/providers/ai.mock.provider.js');
   const { setAiProvider } = await import('./services/ai.service.js');
   setAiProvider(AiMockProvider);
 
-  // NOTE: Real backend support added via new grade/pathway/emailNotifications/examReminders
-  // columns on User (prisma/schema.prisma) + PUT /auth/me. Swap to SettingsApiProvider
-  // (./services/providers/settings.api.provider.js) once `prisma db push` has been run
-  // against a live DB.
-  const { SettingsMockProvider } = await import('./services/providers/settings.mock.provider.js');
-  setSettingsProvider(SettingsMockProvider);
+  const { SettingsApiProvider } = await import('./services/providers/settings.api.provider.js');
+  setSettingsProvider(SettingsApiProvider);
 
-  // NOTE: Real backend exists at src/modules/study-groups (+ the discover/join-by-code
-  // endpoints added alongside this frontend work). Swap to StudyGroupsApiProvider
-  // (./services/providers/study-groups.api.provider.js) once a live DB is connected.
-  const { StudyGroupsMockProvider } = await import('./services/providers/study-groups.mock.provider.js');
-  setStudyGroupsProvider(StudyGroupsMockProvider);
+  const { StudyGroupsApiProvider } = await import('./services/providers/study-groups.api.provider.js');
+  setStudyGroupsProvider(StudyGroupsApiProvider);
 
-  // NOTE: Exams/Engine ship with a REAL backend implementation already
-  // (src/modules/exams, src/modules/engine) matching this exact contract.
-  // Once a live Postgres DB is connected, switch these two lines to:
-  //   import { ExamsApiProvider } from './services/providers/exams.api.provider.js';
-  //   import { EngineApiProvider } from './services/providers/engine.api.provider.js';
-  // and pass those instead of the mock providers below — no other code changes needed.
-  const { ExamsMockProvider } = await import('./services/providers/exams.mock.provider.js');
-  setExamsProvider(ExamsMockProvider);
+  const { ExamsApiProvider } = await import('./services/providers/exams.api.provider.js');
+  setExamsProvider(ExamsApiProvider);
 
-  const { EngineMockProvider } = await import('./services/providers/engine.mock.provider.js');
-  setEngineProvider(EngineMockProvider);
+  const { EngineApiProvider } = await import('./services/providers/engine.api.provider.js');
+  setEngineProvider(EngineApiProvider);
 
   // 1. Recover session
   const isAuthenticated = await authService.recoverSession();

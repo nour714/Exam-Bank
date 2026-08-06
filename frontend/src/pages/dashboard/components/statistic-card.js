@@ -20,7 +20,7 @@ export class StatisticCard extends BaseComponent {
         <div class="mt-4 flex items-center text-sm">
           <i data-lucide="${trendIcon}" class="${trendColor} w-4 h-4 me-1"></i>
           <span class="${trendColor} font-bold me-2">${Math.abs(trend)}%</span>
-          <span class="text-gray-400">${trendLabel || 'منذ الشهر الماضي'}</span>
+          <span style="color: var(--text-secondary);">${trendLabel || 'منذ الشهر الماضي'}</span>
         </div>
       `;
     }
@@ -28,8 +28,8 @@ export class StatisticCard extends BaseComponent {
     this.element.innerHTML = `
       <div class="flex items-start justify-between">
         <div>
-          <p class="text-gray-400 text-sm font-medium mb-1">${title}</p>
-          <h3 class="text-2xl font-bold text-white">${value}</h3>
+          <p class="text-sm font-medium mb-1" style="color: var(--text-secondary);">${title}</p>
+          <h3 class="text-2xl font-bold" style="color: var(--text-primary);">${value}</h3>
         </div>
         <div class="p-3 rounded-xl ${bgClass} ${colorClass}">
           <i data-lucide="${icon}" class="w-6 h-6"></i>

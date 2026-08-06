@@ -24,7 +24,7 @@ export class QuickActions extends BaseComponent {
           <div class="quick-action-icon ${action.color}">
             <i data-lucide="${action.icon}" class="w-6 h-6"></i>
           </div>
-          <span class="text-sm font-medium">${action.title}</span>
+          <span class="text-sm font-medium" style="color: var(--text-primary);">${action.title}</span>
         </button>
       `;
     });

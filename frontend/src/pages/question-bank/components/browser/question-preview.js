@@ -75,20 +75,20 @@ export class QuestionPreview extends BaseComponent {
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" id="preview-backdrop"></div>
       
       <!-- Drawer Panel -->
-      <div class="relative w-full max-w-2xl bg-gray-900 border-l border-gray-700 h-full shadow-2xl flex flex-col animate-slide-in-right transform transition-transform duration-300">
+      <div class="relative w-full max-w-2xl h-full shadow-2xl flex flex-col animate-slide-in-right transform transition-transform duration-300 border-l" style="background: var(--bg-secondary); border-color: var(--border-color);">
         
         <!-- Header -->
-        <div class="flex items-center justify-between p-6 border-b border-gray-800">
+        <div class="flex items-center justify-between p-6 border-b" style="border-color: var(--border-color);">
           <div class="flex items-center gap-3">
             <span class="px-2 py-1 rounded text-xs font-bold bg-${badgeColor}-500/10 text-${badgeColor}-500 border border-${badgeColor}-500/20">
               ${difficultyLabel}
             </span>
-            <span class="px-2 py-1 rounded text-xs font-bold bg-gray-700 text-gray-300">
+            <span class="px-2 py-1 rounded text-xs font-bold" style="background: var(--surface-hover); color: var(--text-secondary);">
               ${q.type === 'multiple-choice' ? 'اختيار من متعدد' : 'سؤال مقالي'}
             </span>
-            <span class="text-sm text-gray-400">ID: ${q.id}</span>
+            <span class="text-sm" style="color: var(--text-muted);">ID: ${q.id}</span>
           </div>
-          <button id="close-preview-btn" class="p-2 text-gray-400 hover:text-white transition-colors bg-gray-800 rounded-lg hover:bg-gray-700">
+          <button id="close-preview-btn" class="p-2 transition-colors rounded-lg" style="background: var(--surface-hover); color: var(--text-muted);">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
@@ -97,29 +97,29 @@ export class QuestionPreview extends BaseComponent {
         <div class="flex-1 overflow-y-auto p-6 scrollbar-thin">
           
           <!-- Basic Content (Instant) -->
-          <div class="prose prose-invert max-w-none mb-8">
-            <h3 class="text-xl font-bold text-white mb-4">نص السؤال</h3>
-            ${q.richContent || `<p class="text-lg text-gray-300">${q.content}</p>`}
+          <div class="prose max-w-none mb-8">
+            <h3 class="text-xl font-bold mb-4" style="color: var(--text-primary);">نص السؤال</h3>
+            ${q.richContent || `<p class="text-lg" style="color: var(--text-secondary);">${q.content}</p>`}
           </div>
 
           <!-- Progressive Loading State -->
           ${this.isLoadingRich ? `
-            <div class="animate-pulse space-y-4 pt-4 border-t border-gray-800">
-              <div class="h-4 bg-gray-800 rounded w-1/4"></div>
-              <div class="h-10 bg-gray-800 rounded w-full"></div>
-              <div class="h-10 bg-gray-800 rounded w-full"></div>
-              <div class="h-10 bg-gray-800 rounded w-full"></div>
+            <div class="animate-pulse space-y-4 pt-4 border-t" style="border-color: var(--border-color);">
+              <div class="h-4 rounded w-1/4" style="background: var(--border-color);"></div>
+              <div class="h-10 rounded w-full" style="background: var(--border-color);"></div>
+              <div class="h-10 rounded w-full" style="background: var(--border-color);"></div>
+              <div class="h-10 rounded w-full" style="background: var(--border-color);"></div>
             </div>
           ` : ''}
 
           <!-- Rich Data: Options (Multiple Choice) -->
           ${q.options && !this.isLoadingRich ? `
-            <div class="mb-8 pt-6 border-t border-gray-800">
-              <h4 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-wider">الخيارات</h4>
+            <div class="mb-8 pt-6 border-t" style="border-color: var(--border-color);">
+              <h4 class="text-sm font-bold mb-4 uppercase tracking-wider" style="color: var(--text-muted);">الخيارات</h4>
               <div class="space-y-3">
                 ${q.options.map(opt => `
-                  <div class="flex items-center gap-3 p-4 rounded-xl border ${opt.isCorrect ? 'bg-green-500/10 border-green-500/30 text-green-400' : 'bg-gray-800 border-gray-700 text-gray-300'}">
-                    <div class="w-6 h-6 rounded-full flex items-center justify-center border ${opt.isCorrect ? 'bg-green-500 text-white border-green-500' : 'bg-gray-700 border-gray-600'}">
+                  <div class="flex items-center gap-3 p-4 rounded-xl border ${opt.isCorrect ? 'bg-green-500/10 border-green-500/30 text-green-400' : ''}" style="${!opt.isCorrect ? 'background: var(--surface-hover); border-color: var(--border-color); color: var(--text-primary);' : ''}">
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center border ${opt.isCorrect ? 'bg-green-500 text-white border-green-500' : ''}" style="${!opt.isCorrect ? 'border-color: var(--border-color);' : ''}">
                       ${opt.isCorrect ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
                     </div>
                     <span class="flex-1 font-medium">${opt.text}</span>
@@ -131,9 +131,9 @@ export class QuestionPreview extends BaseComponent {
 
           <!-- Rich Data: Explanation -->
           ${q.explanation && !this.isLoadingRich ? `
-            <div class="mb-8 pt-6 border-t border-gray-800">
-              <h4 class="text-sm font-bold text-gray-400 mb-4 uppercase tracking-wider">الشرح والإجابة النموذجية</h4>
-              <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-200">
+            <div class="mb-8 pt-6 border-t" style="border-color: var(--border-color);">
+              <h4 class="text-sm font-bold mb-4 uppercase tracking-wider" style="color: var(--text-muted);">الشرح والإجابة النموذجية</h4>
+              <div class="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl" style="color: var(--text-primary);">
                 ${q.explanation}
               </div>
             </div>
@@ -141,9 +141,9 @@ export class QuestionPreview extends BaseComponent {
 
           <!-- Rich Data: Metadata Tags -->
           ${!this.isLoadingRich ? `
-            <div class="pt-6 border-t border-gray-800">
-              <div class="flex flex-wrap gap-2 text-sm text-gray-400">
-                ${(q.tags || []).map(tag => `<span class="px-2 py-1 bg-gray-800 rounded-md">#${tag}</span>`).join('')}
+            <div class="pt-6 border-t" style="border-color: var(--border-color);">
+              <div class="flex flex-wrap gap-2 text-sm" style="color: var(--text-muted);">
+                ${(q.tags || []).map(tag => `<span class="px-2 py-1 rounded-md" style="background: var(--surface-hover);">#${tag}</span>`).join('')}
               </div>
             </div>
           ` : ''}
@@ -151,8 +151,8 @@ export class QuestionPreview extends BaseComponent {
         </div>
 
         <!-- Footer Actions -->
-        <div class="p-6 border-t border-gray-800 bg-gray-800/30 flex justify-between items-center gap-2 flex-wrap">
-            <button id="view-details-btn" class="btn text-gray-300 hover:text-white hover:bg-gray-800 text-sm">
+        <div class="p-6 border-t flex justify-between items-center gap-2 flex-wrap" style="border-color: var(--border-color); background: var(--bg-tertiary);">
+            <button id="view-details-btn" class="btn text-sm" style="color: var(--text-secondary);">
               <i data-lucide="external-link" class="w-4 h-4 me-2"></i> التفاصيل الكاملة
             </button>
             ${(q.deleted || q.status === 'deleted') ? `
@@ -166,7 +166,7 @@ export class QuestionPreview extends BaseComponent {
             `}
             <div class="flex-1"></div>
             ${(q.deleted || q.status === 'deleted') ? '' : `
-              <button id="duplicate-btn" class="btn text-gray-300 hover:text-white hover:bg-gray-800 text-sm">
+              <button id="duplicate-btn" class="btn text-sm" style="color: var(--text-secondary);">
                 <i data-lucide="copy" class="w-4 h-4 me-2"></i> تكرار
               </button>
               <button id="edit-btn" class="btn btn-primary text-sm">

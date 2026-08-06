@@ -37,32 +37,32 @@ export class QuestionList extends BaseComponent {
       const isDeleted = item.deleted || item.status === 'deleted';
       
       const card = document.createElement('div');
-      card.className = `p-4 rounded-xl border transition-all cursor-pointer flex gap-4 ${isSelected ? 'bg-primary/5 border-primary' : 'bg-gray-800 border-gray-700 hover:border-gray-500'}`;
+      card.className = `p-4 rounded-xl border transition-all cursor-pointer flex gap-4 ${isSelected ? 'bg-primary/10 border-primary' : 'glass-card hover:border-primary-400'}`;
       
       let badgeColor = item.difficulty === 'hard' ? 'red' : (item.difficulty === 'medium' ? 'orange' : 'green');
       let difficultyLabel = item.difficulty === 'hard' ? 'صعب' : (item.difficulty === 'medium' ? 'متوسط' : 'سهل');
 
       card.innerHTML = `
         <div class="flex flex-col pt-1">
-          <input type="checkbox" class="form-checkbox text-primary bg-gray-900 border-gray-600 rounded" ${isSelected ? 'checked' : ''}>
+          <input type="checkbox" class="form-checkbox text-primary bg-input border-gray-400 rounded" ${isSelected ? 'checked' : ''}>
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 mb-2">
             <span class="px-2 py-0.5 rounded text-xs font-medium bg-${badgeColor}-500/10 text-${badgeColor}-500 border border-${badgeColor}-500/20">
               ${difficultyLabel}
             </span>
-            <span class="px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-gray-300">
+            <span class="px-2 py-0.5 rounded text-xs font-medium" style="background: var(--surface-hover); color: var(--text-secondary);">
               ${item.type === 'multiple-choice' ? 'اختيار من متعدد' : 'سؤال مقالي'}
             </span>
             ${isDeleted ? `
-              <span class="px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">
+              <span class="px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-500 border border-red-500/30">
                 محذوف (سلة المهملات - Deleted)
               </span>
             ` : ''}
           </div>
-          <p class="text-white text-lg line-clamp-2">${item.content}</p>
-          <div class="flex gap-2 mt-3 text-sm text-gray-400">
-            ${(item.tags || []).map(tag => `<span class="opacity-70">#${tag}</span>`).join('')}
+          <p class="text-lg line-clamp-2" style="color: var(--text-primary); font-weight: 500;">${item.content}</p>
+          <div class="flex gap-2 mt-3 text-sm" style="color: var(--text-muted);">
+            ${(item.tags || []).map(tag => `<span class="opacity-75">#${tag}</span>`).join('')}
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -71,7 +71,7 @@ export class QuestionList extends BaseComponent {
               <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> استعادة (Restore)
             </button>
           ` : `
-            <button class="p-2 text-gray-400 hover:text-white transition-colors">
+            <button class="p-2 transition-colors" style="color: var(--text-muted);">
               <i data-lucide="more-vertical" class="w-5 h-5"></i>
             </button>
           `}

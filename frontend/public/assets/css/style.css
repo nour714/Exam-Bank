@@ -59,16 +59,16 @@
 }
 
 /* Dark Mode Overrides */
-body.dark-theme {
-    --bg-color: #05070c;
-    --card-bg: rgba(13, 20, 35, 0.7);
+[data-theme="dark"], body.dark-theme, html.dark-theme, html[data-theme="dark"], .dark-theme {
+    --bg-color: #0b0f19;
+    --card-bg: rgba(17, 24, 39, 0.85);
     --text-color: #f8fafc;
     --text-muted: #94a3b8;
-    --border-color: rgba(59, 130, 246, 0.12);
-    --input-bg: #0f172a;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --input-bg: #111827;
     --primary-light: rgba(59, 130, 246, 0.15);
     
-    --hero-grad: linear-gradient(135deg, #0f172a 0%, #05070c 100%);
+    --hero-grad: linear-gradient(135deg, #111827 0%, #0b0f19 100%);
     --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
     --shadow-lg: 0 12px 24px -3px rgba(0, 0, 0, 0.8);

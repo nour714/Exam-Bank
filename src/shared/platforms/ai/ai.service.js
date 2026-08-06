@@ -173,7 +173,8 @@ const defaultAIProvider = configProvider.get('AI_DEFAULT_PROVIDER', 'openai');
 
 // Register providers based on available API keys
 const providerConfigs = [
-  { name: 'openai',     key: 'OPENAI_API_KEY',     Provider: OpenAIProvider },
+  { name: 'openai',     key: 'AI_API_KEY',          Provider: OpenAIProvider },
+  { name: 'openai_legacy', key: 'OPENAI_API_KEY',   Provider: OpenAIProvider },
   { name: 'gemini',     key: 'GEMINI_API_KEY',      Provider: GeminiProvider },
   { name: 'anthropic',  key: 'ANTHROPIC_API_KEY',   Provider: AnthropicProvider },
   { name: 'openrouter', key: 'OPENROUTER_API_KEY',  Provider: OpenRouterProvider },

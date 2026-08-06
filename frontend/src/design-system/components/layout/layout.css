@@ -394,3 +394,38 @@ body.dark-theme .search-bar input:focus {
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.notification-bell:hover {
+    background-color: var(--surface-hover);
+    transform: scale(1.05);
+}
+
+/* Theme Toggle Switch Button */
+.theme-toggle-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-xs);
+}
+
+.theme-toggle-btn:hover {
+    background-color: var(--surface-hover);
+    border-color: var(--border-focus);
+    transform: scale(1.06);
+    box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle-btn i {
+    width: 20px;
+    height: 20px;
+}

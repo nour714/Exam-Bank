@@ -99,7 +99,8 @@ export class StatsRow extends BaseComponent {
     this.element.innerHTML = '';
     for (let i = 0; i < 4; i++) {
       const skeleton = document.createElement('div');
-      skeleton.className = 'animate-pulse h-32 bg-gray-800 rounded-xl';
+      skeleton.className = 'animate-pulse h-32 rounded-xl';
+      skeleton.style.background = 'var(--surface-hover)';
       this.element.appendChild(skeleton);
     }
   }

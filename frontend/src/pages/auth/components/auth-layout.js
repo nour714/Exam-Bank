@@ -9,7 +9,7 @@ export class AuthLayout extends BaseComponent {
     this.element = document.createElement('div');
     this.element.id = 'login-screen';
     this.element.className = 'w-full min-h-screen flex items-center justify-center relative overflow-hidden';
-    this.element.style.cssText = 'background: #0F1115;';
+    this.element.style.cssText = 'background: var(--bg-primary);';
 
     this.element.innerHTML = `
       <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
